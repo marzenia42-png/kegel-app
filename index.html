@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#0d0c0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>Kegel Timer</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ====== RESET & BASE ====== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    :root {
+      --bg-base: #1A1208;
+      --accent: #C9A96E;
+      --accent-bright: #E0C28A;
+      --accent-dim: rgba(201, 169, 110, 0.18);
+      --text: #F4EBD4;
+      --muted: #8B7E5C;
+      --bg-overlay-top: rgba(0, 0, 0, 0.40);
+      --bg-overlay-bot: rgba(0, 0, 0, 0.55);
+      --custom-bg: none;
+    }
+
+    body {
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      color: var(--text);
+      background: var(--bg-base);
+      position: relative;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px 80px;
+    }
+
+    /* ====== TŁO ====== */
+    .bg-image {
+      position: fixed; inset: 0;
+      background-size: cover;
+      background-position: center;
+      filter: blur(8px) brightness(0.65) saturate(0.95);
+      transform: scale(1.05);
+      z-index: -2;
+      transition: background-image 0.6s ease, opacity 0.4s ease;
+    }
+    .bg-image.ocean  { background-image: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600'); }
+    .bg-image.gory   { background-image: url('https://images.unsplash.com/photo-1486365227551-f3f90034a57c?auto=format&fit=crop&w=1600'); }
+    .bg-image.las    { background-image: url('https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1600'); }
+    .bg-image.custom { background-image: var(--custom-bg); }
+
+    .bg-overlay {
+      position: fixed; inset: 0;
+      background: linear-gradient(180deg, var(--bg-overlay-top) 0%, var(--bg-overlay-bot) 100%);
+      z-index: -1;
+    }
+
+    /* ====== LAYOUT ====== */
+    main {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+
+    /* ====== HEADER ====== */
+    .header { text-align: center; }
+    .header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500;
+      font-size: clamp(2rem, 7vw, 2.75rem);
+      letter-spacing: 0.04em;
+      color: var(--text);
+      line-height: 1.1;
+    }
+    .header p {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      letter-spacing: 0.18em;
+      margin-top: 6px;
+      text-transform: lowercase;
+    }
+
+    /* ====== TABS ====== */
+    .tabs {
+      display: flex;
+      gap: 36px;
+      border-bottom: 1px solid var(--accent-dim);
+    }
+    .tab {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: 'Jost', sans-serif;
+      font-size: 0.9375rem;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      padding: 10px 4px 12px;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      cursor: pointer;
+      transition: color 0.3s ease, border-color 0.3s ease;
+      text-transform: uppercase;
+    }
+    .tab:hover { color: var(--accent); }
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* ====== TIMER RING ====== */
+    .timer-ring {
+      position: relative;
+      width: clamp(260px, 78vw, 320px);
+      aspect-ratio: 1;
+      margin: 12px 0;
+    }
+    .timer-ring svg {
+      width: 100%; height: 100%;
+      transform: rotate(-90deg);
+      overflow: visible;
+    }
+    .ring-bg {
+      fill: none;
+      stroke: var(--accent-dim);
+      stroke-width: 1.5;
+    }
+    .ring-progress {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 2;
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 8px rgba(201, 169, 110, 0.35));
+    }
+    .timer-content {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+    }
+    .timer-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: clamp(4rem, 18vw, 6rem);
+      line-height: 1;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    .timer-unit {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.25em;
+      text-transform: lowercase;
+      margin-top: 6px;
+    }
+
+    /* ====== PHASE MESSAGE ====== */
+    .phase-message { text-align: center; min-height: 60px; }
+    .phase-title {
+      font-family: 'Jost', sans-serif;
+      font-size: 1.375rem;
+      font-weight: 400;
+      letter-spacing: 0.3em;
+      color: var(--accent);
+      text-transform: uppercase;
+      transition: color 0.3s ease;
+    }
+    .phase-title.relax { color: var(--text); }
+    .phase-title.break { color: var(--muted); }
+    .phase-title.done  { color: var(--accent-bright); }
+    .phase-subtitle {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      margin-top: 10px;
+      letter-spacing: 0.08em;
+    }
+
+    /* ====== CONTROLS ====== */
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      align-items: center;
+    }
+    .btn {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: 'Jost', sans-serif;
+      font-weight: 400;
+      font-size: 0.8125rem;
+      letter-spacing: 0.18em;
+      padding: 13px 28px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .btn:hover, .btn:active { background: var(--accent); color: var(--bg-base); }
+    .btn-primary { background: var(--accent); color: var(--bg-base); }
+    .btn-primary:hover, .btn-primary:active { background: var(--accent-bright); }
+    .btn-icon {
+      padding: 13px 16px;
+      min-width: 46px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-icon svg { width: 18px; height: 18px; }
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* ====== FOOTER LINKS ====== */
+    .footer-links {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 36px;
+      font-size: 0.8125rem;
+      padding: 8px 16px;
+      backdrop-filter: blur(4px);
+      z-index: 50;
+    }
+    .footer-link {
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: color 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: 'Jost', sans-serif;
+      font-size: inherit;
+    }
+    .footer-link:hover { color: var(--accent); }
+    .footer-link svg { width: 16px; height: 16px; opacity: 0.7; }
+
+    /* ====== SETTINGS DRAWER ====== */
+    .drawer {
+      position: fixed;
+      top: 0; right: -100%;
+      width: 100%;
+      max-width: 380px;
+      height: 100vh;
+      height: 100dvh;
+      background: rgba(15, 10, 5, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-left: 1px solid var(--accent-dim);
+      transition: right 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+      z-index: 100;
+      overflow-y: auto;
+      padding: 28px 24px 32px;
+    }
+    .drawer.open { right: 0; }
+
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--accent-dim);
+      margin-bottom: 24px;
+    }
+    .drawer-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: 0.08em;
+    }
+    .drawer-close {
+      background: none;
+      border: 1px solid var(--accent-dim);
+      color: var(--muted);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    .drawer-close:hover { color: var(--accent); border-color: var(--accent); }
+
+    .section-title {
+      font-size: 0.75rem;
+      letter-spacing: 0.3em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin: 24px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--accent-dim);
+    }
+    .section-title:first-of-type { margin-top: 0; }
+
+    .field { margin-bottom: 18px; }
+    .field-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .field-label {
+      font-size: 0.875rem;
+      color: var(--text);
+      letter-spacing: 0.04em;
+      font-weight: 300;
+    }
+    .field-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.125rem;
+      color: var(--accent);
+      font-weight: 500;
+      min-width: 80px;
+      text-align: right;
+    }
+
+    /* Custom slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: var(--accent-dim);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px; height: 18px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: grab;
+      box-shadow: 0 0 12px rgba(201, 169, 110, 0.4);
+      transition: transform 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:active { transform: scale(1.2); cursor: grabbing; }
+    input[type="range"]::-moz-range-thumb {
+      width: 18px; height: 18px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: grab;
+      border: none;
+      box-shadow: 0 0 12px rgba(201, 169, 110, 0.4);
+    }
+
+    .bg-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .bg-option {
+      flex: 1 1 calc(50% - 5px);
+      padding: 10px 12px;
+      border: 1px solid var(--accent-dim);
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Jost', sans-serif;
+      font-size: 0.8125rem;
+      letter-spacing: 0.08em;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    .bg-option:hover { border-color: var(--accent); color: var(--accent); }
+    .bg-option.active {
+      border-color: var(--accent);
+      background: rgba(201, 169, 110, 0.12);
+      color: var(--accent);
+    }
+
+    .file-upload {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      border: 1px dashed var(--accent-dim);
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Jost', sans-serif;
+      font-size: 0.8125rem;
+      letter-spacing: 0.08em;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .file-upload:hover { border-color: var(--accent); color: var(--accent); }
+    .file-upload input { display: none; }
+
+    .drawer-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--accent-dim);
+    }
+    .drawer-actions .btn { flex: 1; padding: 12px 16px; font-size: 0.75rem; }
+
+    /* Backdrop */
+    .drawer-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 99;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    .drawer-backdrop.show { opacity: 1; pointer-events: auto; }
+
+    /* ====== STATS DRAWER (lewa strona) ====== */
+    .drawer-left {
+      position: fixed;
+      top: 0; left: -100%;
+      width: 100%;
+      max-width: 380px;
+      height: 100vh;
+      height: 100dvh;
+      background: rgba(15, 10, 5, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-right: 1px solid var(--accent-dim);
+      transition: left 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+      z-index: 100;
+      overflow-y: auto;
+      padding: 28px 24px 32px;
+    }
+    .drawer-left.open { left: 0; }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      background: rgba(26, 18, 8, 0.6);
+      border: 1px solid var(--accent-dim);
+      border-radius: 14px;
+      padding: 18px 14px;
+      text-align: center;
+      transition: border-color 0.3s ease;
+    }
+    .stat-card.full { grid-column: 1 / -1; }
+    .stat-card:hover { border-color: var(--accent); }
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500;
+      font-size: 2.5rem;
+      line-height: 1;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+    .stat-card .stat-extra {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    .streak-row {
+      display: flex;
+      gap: 6px;
+      justify-content: space-between;
+      margin-top: 14px;
+    }
+    .streak-day {
+      flex: 1;
+      aspect-ratio: 1;
+      max-width: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--accent-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+    .streak-day.done {
+      background: var(--accent);
+      color: var(--bg-base);
+      border-color: var(--accent);
+      font-weight: 500;
+    }
+    .streak-day.today {
+      box-shadow: 0 0 0 2px rgba(201, 169, 110, 0.4);
+    }
+
+    .stat-empty {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-style: italic;
+      padding: 20px 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-image ocean" id="bgImage"></div>
+  <div class="bg-overlay"></div>
+
+  <main>
+    <header class="header">
+      <h1>Kegel Timer</h1>
+      <p>ćwiczenia mięśni dna miednicy</p>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-mode="kegel" role="tab">Kegel</button>
+      <button class="tab" data-mode="stopstart" role="tab">Stop-Start</button>
+    </nav>
+
+    <div class="timer-ring" aria-label="Licznik czasu">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <circle class="ring-bg" cx="100" cy="100" r="92"/>
+        <circle class="ring-progress" id="ringProgress" cx="100" cy="100" r="92"
+                stroke-dasharray="578.05"
+                stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-content">
+        <div class="timer-number" id="timerNumber">5</div>
+        <div class="timer-unit" id="timerUnit">sekund</div>
+      </div>
+    </div>
+
+    <div class="phase-message">
+      <div class="phase-title" id="phaseTitle">Gotowy?</div>
+      <div class="phase-subtitle" id="phaseSubtitle">Naciśnij Start, by rozpocząć</div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-primary" id="btnStart">
+        <svg viewBox="0 0 16 16" width="10" height="10" style="display:inline-block;vertical-align:middle;margin-right:6px;fill:currentColor;" aria-hidden="true">
+          <polygon points="3,2 13,8 3,14"/>
+        </svg>
+        Start
+      </button>
+      <button class="btn" id="btnPause" disabled>Pauza</button>
+      <button class="btn btn-icon" id="btnReset" aria-label="Reset">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 12a9 9 0 1 0 3-6.7"/>
+          <polyline points="3 4 3 10 9 10"/>
+        </svg>
+      </button>
+    </div>
+  </main>
+
+  <nav class="footer-links">
+    <button class="footer-link" id="linkSettings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      Ustawienia
+    </button>
+    <button class="footer-link" id="linkStats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="20" x2="18" y2="10"/>
+        <line x1="12" y1="20" x2="12" y2="4"/>
+        <line x1="6" y1="20" x2="6" y2="14"/>
+      </svg>
+      Statystyki
+    </button>
+  </nav>
+
+  <!-- ====== SETTINGS DRAWER ====== -->
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <div class="drawer-title">Ustawienia</div>
+      <button class="drawer-close" id="drawerClose" aria-label="Zamknij">✕</button>
+    </div>
+
+    <div class="section-title">Kegel</div>
+
+    <div class="field">
+      <div class="field-row">
+        <label class="field-label" for="sKTense">Czas napięcia</label>
+        <span class="field-value"><span id="vKTense">5</span> sek</span>
+      </div>
+      <input type="range" id="sKTense" min="3" max="15" value="5" step="1">
+    </div>
+
+    <div class="field">
+      <div class="field-row">
+        <label class="field-label" for="sKRelax">Czas rozluźnienia</label>
+        <span class="field-value"><span id="vKRelax">5</span> sek</span>
+      </div>
+      <input type="range" id="sKRelax" min="3" max="15" value="5" step="1">
+    </div>
+
+    <div class="field">
+      <div class="field-row">
+        <label class="field-label" for="sKReps">Powtórzeń w serii</label>
+        <span class="field-value" id="vKReps">10</span>
+      </div>
+      <input type="range" id="sKReps" min="5" max="20" value="10" step="1">
+    </div>
+
+    <div class="field">
+      <div class="field-row">
+        <label class="field-label" for="sKSeries">Liczba serii</label>
+        <span class="field-value" id="vKSeries">3</span>
+      </div>
+      <input type="range" id="sKSeries" min="1" max="6" value="3" step="1">
+    </div>
+
+    <div class="field">
+      <div class="field-row">
+        <label class="field-label" for="sKBreak">Przerwa między seriami</label>
+        <span class="field-value"><span id="vKBreak">30</span> sek</span>
+      </div>
+      <input type="range" id="sKBreak" min="15" max="60" value="30" step="5">
+    </div>
+
+    <div class="section-title">Stop-Start</div>
+
+    <div class="field">
+      <div class="field-row">
+        <label class="field-label" for="sSTense">Czas napięcia</label>
+        <span class="field-value"><span id="vSTense">3</span> sek</span>
+      </div>
+      <input type="range" id="sSTense" min="2" max="10" value="3" step="1">
+    </div>
+
+    <div class="field">
+      <div class="field-row">
+        <label class="field-label" for="sSHold">Czas zatrzymania</label>
+        <span class="field-value"><span id="vSHold">2</span> sek</span>
+      </div>
+      <input type="range" id="sSHold" min="1" max="5" value="2" step="1">
+    </div>
+
+    <div class="field">
+      <div class="field-row">
+        <label class="field-label" for="sSRelax">Czas rozluźnienia</label>
+        <span class="field-value"><span id="vSRelax">5</span> sek</span>
+      </div>
+      <input type="range" id="sSRelax" min="3" max="10" value="5" step="1">
+    </div>
+
+    <div class="field">
+      <div class="field-row">
+        <label class="field-label" for="sSReps">Liczba powtórzeń</label>
+        <span class="field-value" id="vSReps">10</span>
+      </div>
+      <input type="range" id="sSReps" min="5" max="20" value="10" step="1">
+    </div>
+
+    <div class="section-title">Tło</div>
+
+    <div class="bg-options">
+      <button class="bg-option active" data-bg="ocean">Ocean</button>
+      <button class="bg-option" data-bg="gory">Góry</button>
+      <button class="bg-option" data-bg="las">Las</button>
+      <button class="bg-option" data-bg="custom" id="bgOptionCustom">Własne</button>
+    </div>
+
+    <label class="file-upload">
+      📁 Wgraj własne zdjęcie
+      <input type="file" id="bgUpload" accept="image/*">
+    </label>
+
+    <div class="drawer-actions">
+      <button class="btn btn-primary" id="btnSave">Zapisz</button>
+      <button class="btn" id="btnDefaults">Domyślne</button>
+    </div>
+  </aside>
+
+  <!-- ====== STATS DRAWER (lewa strona) ====== -->
+  <aside class="drawer-left" id="statsDrawer" aria-hidden="true">
+    <div class="drawer-header">
+      <div class="drawer-title">Statystyki</div>
+      <button class="drawer-close" id="statsDrawerClose" aria-label="Zamknij">✕</button>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-day">0</div>
+        <div class="stat-label">Dzisiaj serii</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-streak">0</div>
+        <div class="stat-label">Dni z rzędu 🔥</div>
+      </div>
+      <div class="stat-card full">
+        <div class="stat-num" id="stat-total">0</div>
+        <div class="stat-label">Łącznie ukończonych serii</div>
+        <div class="stat-extra" id="stat-since"></div>
+      </div>
+    </div>
+
+    <div class="section-title">Ostatnie 7 dni</div>
+    <div class="streak-row" id="streakRow"></div>
+    <div class="stat-empty" id="streakEmpty" style="display:none;">Brak danych — zacznij ćwiczyć żeby zobaczyć postęp.</div>
+
+    <div class="drawer-actions">
+      <button class="btn" id="btnResetStats">Resetuj statystyki</button>
+    </div>
+  </aside>
+
+  <script>
+    // =========================================================
+    // KEGEL TIMER — Faza 2: tła + ustawienia + logika Kegel
+    // =========================================================
+    (function () {
+      'use strict';
+
+      // ======== DEFAULT CONFIG ========
+      const DEFAULTS = {
+        kTense: 5, kRelax: 5, kReps: 10, kSeries: 3, kBreak: 30,
+        sTense: 3, sHold: 2, sRelax: 5, sReps: 10,
+        bg: 'ocean',
+        customBg: null
+      };
+
+      // ======== STATE ========
+      const state = {
+        config: loadConfig(),
+        stats: loadStats(),
+        mode: 'kegel',                              // 'kegel' | 'stopstart'
+        runState: 'idle',                           // 'idle' | 'running' | 'paused' | 'done'
+        phase: null,                                // 'tense' | 'relax' | 'break' | 'hold'
+        phaseTotal: 0,
+        timeLeft: 0,
+        currentRep: 0,
+        currentSeries: 0,
+        tickHandle: null,
+        audioCtx: null
+      };
+
+      // ======== DOM ========
+      const $ = id => document.getElementById(id);
+      const els = {
+        bgImage: $('bgImage'),
+        timerNumber: $('timerNumber'),
+        timerUnit: $('timerUnit'),
+        phaseTitle: $('phaseTitle'),
+        phaseSubtitle: $('phaseSubtitle'),
+        ringProgress: $('ringProgress'),
+        btnStart: $('btnStart'),
+        btnPause: $('btnPause'),
+        btnReset: $('btnReset'),
+        linkSettings: $('linkSettings'),
+        drawer: $('drawer'),
+        drawerBackdrop: $('drawerBackdrop'),
+        drawerClose: $('drawerClose'),
+        btnSave: $('btnSave'),
+        btnDefaults: $('btnDefaults'),
+        bgUpload: $('bgUpload'),
+        // stats
+        linkStats: $('linkStats'),
+        statsDrawer: $('statsDrawer'),
+        statsDrawerClose: $('statsDrawerClose'),
+        btnResetStats: $('btnResetStats'),
+        statDay: $('stat-day'),
+        statStreak: $('stat-streak'),
+        statTotal: $('stat-total'),
+        statSince: $('stat-since'),
+        streakRow: $('streakRow'),
+        streakEmpty: $('streakEmpty')
+      };
+
+      // SVG ring circumference: 2π × 92 = 578.05
+      const RING_C = 2 * Math.PI * 92;
+      els.ringProgress.setAttribute('stroke-dasharray', RING_C);
+      els.ringProgress.setAttribute('stroke-dashoffset', RING_C);
+
+      // ======== STATS (localStorage 'kegel_stats') ========
+      function todayISO() {
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      }
+      function dayDiff(aISO, bISO) {
+        const a = new Date(aISO + 'T00:00:00');
+        const b = new Date(bISO + 'T00:00:00');
+        return Math.round((a - b) / 86400000);
+      }
+      function loadStats() {
+        const fresh = { todayDate: null, todayCount: 0, streak: 0, total: 0, history: [], firstDate: null };
+        try {
+          const raw = localStorage.getItem('kegel_stats');
+          if (!raw) return fresh;
+          return { ...fresh, ...JSON.parse(raw) };
+        } catch { return fresh; }
+      }
+      function saveStats() {
+        try { localStorage.setItem('kegel_stats', JSON.stringify(state.stats)); } catch {}
+      }
+      function rolloverDay() {
+        const today = todayISO();
+        const s = state.stats;
+        if (s.todayDate !== today) {
+          // streak: jeśli wczoraj było >0 → kontynuuj, inaczej break
+          if (s.todayDate && dayDiff(today, s.todayDate) === 1 && s.todayCount > 0) {
+            // streak utrzymany — nic nie zmieniamy poza datą i licznikiem
+          } else if (s.todayDate && dayDiff(today, s.todayDate) > 1) {
+            s.streak = 0; // przerwa
+          }
+          s.todayDate = today;
+          s.todayCount = 0;
+          saveStats();
+        }
+      }
+      function addCompletedSeries() {
+        const today = todayISO();
+        const s = state.stats;
+        rolloverDay();
+        // jeśli to pierwsza seria dziś — sprawdź streak
+        if (s.todayCount === 0) {
+          if (s.history.length === 0) {
+            s.streak = 1;
+            s.firstDate = today;
+          } else {
+            const lastDay = s.history[s.history.length - 1];
+            if (dayDiff(today, lastDay) === 1) s.streak += 1;
+            else if (dayDiff(today, lastDay) === 0) {
+              // edge case — nie powinien się zdarzyć po rolloverDay
+            } else s.streak = 1;
+          }
+          if (!s.history.includes(today)) s.history.push(today);
+          if (s.history.length > 365) s.history = s.history.slice(-365);
+        }
+        s.todayCount += 1;
+        s.total += 1;
+        saveStats();
+        renderStats();
+      }
+      function resetStats() {
+        if (!confirm('Zresetować wszystkie statystyki? Tej operacji nie można cofnąć.')) return;
+        state.stats = { todayDate: null, todayCount: 0, streak: 0, total: 0, history: [], firstDate: null };
+        saveStats();
+        renderStats();
+      }
+      function renderStats() {
+        rolloverDay();
+        const s = state.stats;
+        els.statDay.textContent = s.todayCount;
+        els.statStreak.textContent = s.streak;
+        els.statTotal.textContent = s.total;
+        if (s.firstDate) {
+          const d = new Date(s.firstDate);
+          els.statSince.textContent = 'od ' + d.toLocaleDateString('pl-PL', { day: '2-digit', month: 'long', year: 'numeric' });
+        } else {
+          els.statSince.textContent = '';
+        }
+        // 7-day streak row
+        const today = todayISO();
+        const days = ['N', 'P', 'W', 'Ś', 'C', 'P', 'S'];
+        let html = '';
+        for (let i = 6; i >= 0; i--) {
+          const dt = new Date();
+          dt.setDate(dt.getDate() - i);
+          const iso = dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+          const isDone = s.history.includes(iso);
+          const isToday = iso === today;
+          const cls = 'streak-day' + (isDone ? ' done' : '') + (isToday ? ' today' : '');
+          const letter = days[dt.getDay()];
+          html += `<div class="${cls}">${letter}</div>`;
+        }
+        els.streakRow.innerHTML = html;
+        els.streakEmpty.style.display = s.history.length === 0 ? 'block' : 'none';
+      }
+      function openStats() {
+        renderStats();
+        els.statsDrawer.classList.add('open');
+        els.drawerBackdrop.classList.add('show');
+        els.statsDrawer.setAttribute('aria-hidden', 'false');
+      }
+      function closeStats() {
+        els.statsDrawer.classList.remove('open');
+        els.drawerBackdrop.classList.remove('show');
+        els.statsDrawer.setAttribute('aria-hidden', 'true');
+      }
+
+      // ======== CONFIG (localStorage) ========
+      function loadConfig() {
+        try {
+          const raw = localStorage.getItem('kegel_config');
+          if (!raw) return { ...DEFAULTS };
+          return { ...DEFAULTS, ...JSON.parse(raw) };
+        } catch { return { ...DEFAULTS }; }
+      }
+      function saveConfig() {
+        localStorage.setItem('kegel_config', JSON.stringify(state.config));
+      }
+
+      // ======== UI: TŁO ========
+      function applyBackground() {
+        const cfg = state.config;
+        if (cfg.bg === 'custom' && cfg.customBg) {
+          document.documentElement.style.setProperty('--custom-bg', `url('${cfg.customBg}')`);
+          els.bgImage.className = 'bg-image custom';
+        } else {
+          els.bgImage.className = 'bg-image ' + (cfg.bg || 'ocean');
+        }
+        // Update active state in drawer
+        document.querySelectorAll('.bg-option').forEach(b => {
+          b.classList.toggle('active', b.dataset.bg === cfg.bg);
+        });
+      }
+
+      // ======== UI: SETTINGS DRAWER ========
+      function openDrawer() {
+        syncDrawerInputs();
+        els.drawer.classList.add('open');
+        els.drawerBackdrop.classList.add('show');
+        els.drawer.setAttribute('aria-hidden', 'false');
+      }
+      function closeDrawer() {
+        els.drawer.classList.remove('open');
+        els.drawerBackdrop.classList.remove('show');
+        els.drawer.setAttribute('aria-hidden', 'true');
+      }
+      function syncDrawerInputs() {
+        const c = state.config;
+        $('sKTense').value = c.kTense;   $('vKTense').textContent = c.kTense;
+        $('sKRelax').value = c.kRelax;   $('vKRelax').textContent = c.kRelax;
+        $('sKReps').value = c.kReps;     $('vKReps').textContent = c.kReps;
+        $('sKSeries').value = c.kSeries; $('vKSeries').textContent = c.kSeries;
+        $('sKBreak').value = c.kBreak;   $('vKBreak').textContent = c.kBreak;
+        $('sSTense').value = c.sTense;   $('vSTense').textContent = c.sTense;
+        $('sSHold').value = c.sHold;     $('vSHold').textContent = c.sHold;
+        $('sSRelax').value = c.sRelax;   $('vSRelax').textContent = c.sRelax;
+        $('sSReps').value = c.sReps;     $('vSReps').textContent = c.sReps;
+      }
+
+      function bindSlider(sliderId, valueId, configKey) {
+        const slider = $(sliderId);
+        const value = $(valueId);
+        slider.addEventListener('input', () => {
+          value.textContent = slider.value;
+          state.config[configKey] = parseInt(slider.value, 10);
+        });
+      }
+
+      bindSlider('sKTense', 'vKTense', 'kTense');
+      bindSlider('sKRelax', 'vKRelax', 'kRelax');
+      bindSlider('sKReps',  'vKReps',  'kReps');
+      bindSlider('sKSeries','vKSeries','kSeries');
+      bindSlider('sKBreak', 'vKBreak', 'kBreak');
+      bindSlider('sSTense', 'vSTense', 'sTense');
+      bindSlider('sSHold',  'vSHold',  'sHold');
+      bindSlider('sSRelax', 'vSRelax', 'sRelax');
+      bindSlider('sSReps',  'vSReps',  'sReps');
+
+      // BG buttons
+      document.querySelectorAll('.bg-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const bg = btn.dataset.bg;
+          if (bg === 'custom' && !state.config.customBg) {
+            // Brak custom — pokaż prompt do uploadu
+            els.bgUpload.click();
+            return;
+          }
+          state.config.bg = bg;
+          applyBackground();
+        });
+      });
+
+      // Custom BG upload
+      els.bgUpload.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Plik za duży (max 5 MB).');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          state.config.customBg = ev.target.result;
+          state.config.bg = 'custom';
+          applyBackground();
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // Save / Defaults
+      els.btnSave.addEventListener('click', () => {
+        saveConfig();
+        closeDrawer();
+      });
+      els.btnDefaults.addEventListener('click', () => {
+        state.config = { ...DEFAULTS, customBg: state.config.customBg };
+        syncDrawerInputs();
+        applyBackground();
+      });
+
+      // Open / close drawer
+      els.linkSettings.addEventListener('click', openDrawer);
+      els.drawerClose.addEventListener('click', closeDrawer);
+      els.drawerBackdrop.addEventListener('click', closeDrawer);
+
+      // ======== TABS ========
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(t => {
+        t.addEventListener('click', () => {
+          if (state.runState === 'running') return; // nie przełączaj w trakcie
+          tabs.forEach(x => x.classList.remove('active'));
+          t.classList.add('active');
+          state.mode = t.dataset.mode;
+          resetTimer(); // reset stanu timera przy zmianie trybu
+        });
+      });
+
+      // ======== AUDIO (Web Audio API gong) ========
+      function ensureAudio() {
+        if (!state.audioCtx) {
+          try {
+            state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          } catch (e) { console.warn('AudioContext unavailable', e); }
+        }
+        if (state.audioCtx && state.audioCtx.state === 'suspended') {
+          state.audioCtx.resume();
+        }
+      }
+      function playGong(freq) {
+        if (!state.audioCtx) return;
+        const ctx = state.audioCtx;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const now = ctx.currentTime;
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.25, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.6);
+      }
+
+      // ======== TIMER ENGINE ========
+      function setPhase(phase, durationSec) {
+        state.phase = phase;
+        state.phaseTotal = durationSec;
+        state.timeLeft = durationSec;
+        renderPhase();
+        renderTime();
+
+        // Phase title color
+        els.phaseTitle.classList.remove('relax', 'break', 'done');
+        if (phase === 'relax') els.phaseTitle.classList.add('relax');
+        if (phase === 'break') els.phaseTitle.classList.add('break');
+        if (phase === 'done')  els.phaseTitle.classList.add('done');
+
+        // Gong frequency per phase
+        const freqMap = { tense: 523, relax: 392, break: 349, done: 659, hold: 587 };
+        playGong(freqMap[phase] || 440);
+      }
+
+      function renderPhase() {
+        const c = state.config;
+        const titleMap = {
+          tense: 'Napnij',
+          relax: 'Rozluźnij',
+          break: 'Przerwa',
+          hold:  'Zatrzymaj',
+          done:  'Gotowe'
+        };
+        els.phaseTitle.textContent = titleMap[state.phase] || 'Gotowy?';
+
+        if (state.phase === 'done') {
+          els.phaseSubtitle.textContent = 'Trening ukończony';
+          els.timerUnit.textContent = '';
+        } else if (state.phase === 'break') {
+          els.phaseSubtitle.textContent = `Seria ${state.currentSeries} / ${getSeriesCount()} ukończona`;
+          els.timerUnit.textContent = 'sekund';
+        } else {
+          const reps = state.mode === 'kegel' ? c.kReps : c.sReps;
+          const series = state.mode === 'kegel' ? c.kSeries : 1;
+          els.phaseSubtitle.textContent =
+            `Powtórzenie ${state.currentRep} / ${reps}` +
+            (state.mode === 'kegel' ? ` · Seria ${state.currentSeries} / ${series}` : '');
+          els.timerUnit.textContent = 'sekund';
+        }
+      }
+
+      function renderTime() {
+        const t = Math.max(0, state.timeLeft);
+        els.timerNumber.textContent = Math.ceil(t);
+
+        // Progress ring (animacja co tick — 100ms)
+        const frac = state.phaseTotal > 0 ? (t / state.phaseTotal) : 0;
+        els.ringProgress.setAttribute('stroke-dashoffset', RING_C * (1 - frac));
+      }
+
+      function getSeriesCount() {
+        return state.mode === 'kegel' ? state.config.kSeries : 1;
+      }
+
+      function nextPhase() {
+        const c = state.config;
+        const reps = state.mode === 'kegel' ? c.kReps : c.sReps;
+
+        if (state.mode === 'kegel') {
+          if (state.phase === 'tense') {
+            setPhase('relax', c.kRelax);
+          } else if (state.phase === 'relax') {
+            if (state.currentRep < reps) {
+              state.currentRep++;
+              setPhase('tense', c.kTense);
+            } else if (state.currentSeries < c.kSeries) {
+              addCompletedSeries(); // ukończono serię → zalicz
+              setPhase('break', c.kBreak);
+            } else {
+              addCompletedSeries(); // ostatnia seria
+              finish();
+            }
+          } else if (state.phase === 'break') {
+            state.currentSeries++;
+            state.currentRep = 1;
+            setPhase('tense', c.kTense);
+          }
+        } else {
+          // stop-start: tense -> hold -> relax -> next rep (lub done)
+          if (state.phase === 'tense') {
+            setPhase('hold', c.sHold);
+          } else if (state.phase === 'hold') {
+            setPhase('relax', c.sRelax);
+          } else if (state.phase === 'relax') {
+            if (state.currentRep < reps) {
+              state.currentRep++;
+              setPhase('tense', c.sTense);
+            } else {
+              addCompletedSeries(); // tryb stop-start = 1 seria całość
+              finish();
+            }
+          }
+        }
+      }
+
+      function tick() {
+        state.timeLeft -= 0.1;
+        if (state.timeLeft <= 0) {
+          nextPhase();
+        } else {
+          renderTime();
+        }
+      }
+
+      function startTimer() {
+        ensureAudio();
+        if (state.runState === 'idle' || state.runState === 'done') {
+          // Fresh start
+          state.currentSeries = 1;
+          state.currentRep = 1;
+          const c = state.config;
+          setPhase('tense', state.mode === 'kegel' ? c.kTense : c.sTense);
+        }
+        state.runState = 'running';
+        if (state.tickHandle) clearInterval(state.tickHandle);
+        state.tickHandle = setInterval(tick, 100);
+        els.btnStart.textContent = 'W trakcie';
+        els.btnStart.disabled = true;
+        els.btnPause.disabled = false;
+      }
+
+      function pauseTimer() {
+        if (state.runState !== 'running') return;
+        state.runState = 'paused';
+        clearInterval(state.tickHandle);
+        state.tickHandle = null;
+        els.btnStart.innerHTML = '<svg viewBox="0 0 16 16" width="10" height="10" style="display:inline-block;vertical-align:middle;margin-right:6px;fill:currentColor;"><polygon points="3,2 13,8 3,14"/></svg>Wznów';
+        els.btnStart.disabled = false;
+        els.btnPause.disabled = true;
+      }
+
+      function resumeTimer() {
+        if (state.runState !== 'paused') return;
+        state.runState = 'running';
+        state.tickHandle = setInterval(tick, 100);
+        els.btnStart.textContent = 'W trakcie';
+        els.btnStart.disabled = true;
+        els.btnPause.disabled = false;
+      }
+
+      function resetTimer() {
+        if (state.tickHandle) clearInterval(state.tickHandle);
+        state.tickHandle = null;
+        state.runState = 'idle';
+        state.phase = null;
+        state.timeLeft = 0;
+        state.phaseTotal = 0;
+        state.currentRep = 0;
+        state.currentSeries = 0;
+        els.timerNumber.textContent = '5';
+        els.timerUnit.textContent = 'sekund';
+        els.phaseTitle.textContent = 'Gotowy?';
+        els.phaseTitle.classList.remove('relax', 'break', 'done');
+        els.phaseSubtitle.textContent = 'Naciśnij Start, by rozpocząć';
+        els.ringProgress.setAttribute('stroke-dashoffset', RING_C);
+        els.btnStart.innerHTML = '<svg viewBox="0 0 16 16" width="10" height="10" style="display:inline-block;vertical-align:middle;margin-right:6px;fill:currentColor;"><polygon points="3,2 13,8 3,14"/></svg>Start';
+        els.btnStart.disabled = false;
+        els.btnPause.disabled = true;
+      }
+
+      function finish() {
+        if (state.tickHandle) clearInterval(state.tickHandle);
+        state.tickHandle = null;
+        state.runState = 'done';
+        setPhase('done', 0);
+        els.btnStart.innerHTML = '<svg viewBox="0 0 16 16" width="10" height="10" style="display:inline-block;vertical-align:middle;margin-right:6px;fill:currentColor;"><polygon points="3,2 13,8 3,14"/></svg>Start';
+        els.btnStart.disabled = false;
+        els.btnPause.disabled = true;
+      }
+
+      // Bind buttons
+      els.btnStart.addEventListener('click', () => {
+        if (state.runState === 'paused') resumeTimer();
+        else startTimer();
+      });
+      els.btnPause.addEventListener('click', pauseTimer);
+      els.btnReset.addEventListener('click', resetTimer);
+
+      // Stats — open / close / reset
+      els.linkStats.addEventListener('click', openStats);
+      els.statsDrawerClose.addEventListener('click', closeStats);
+      els.btnResetStats.addEventListener('click', resetStats);
+      // Backdrop zamyka oba drawery
+      els.drawerBackdrop.addEventListener('click', () => { closeDrawer(); closeStats(); });
+
+      // ======== INIT ========
+      applyBackground();
+      resetTimer();
+      rolloverDay();      // sprawdz przejscie dnia + reset todayCount jesli nowy dzien
+      renderStats();      // wstepne wyrenderowanie liczb (gdyby ktos otworzyl szybko)
+      console.log('Kegel Timer Faza 3 — gotowe. Tryb:', state.mode, 'Stats:', state.stats);
+    })();
+
+    // ======== SERVICE WORKER REGISTRATION (Faza 4 PWA) ========
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then((reg) => console.log('SW registered, scope:', reg.scope))
+          .catch((err) => console.warn('SW registration failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>

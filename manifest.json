@@ -1,0 +1,27 @@
+{
+  "name": "Kegel Timer",
+  "short_name": "Kegel",
+  "description": "Cwiczenia miesni dna miednicy — Kegel + Stop-Start. Cichy timer z dzwiekiem gongu.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0d0c0a",
+  "background_color": "#0d0c0a",
+  "lang": "pl",
+  "categories": ["health", "fitness", "lifestyle"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
