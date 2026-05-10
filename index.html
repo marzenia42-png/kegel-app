@@ -43,8 +43,8 @@
       --accent-dim: rgba(201, 169, 110, 0.18);
       --text: #F4EBD4;
       --muted: #8B7E5C;
-      --bg-overlay-top: rgba(0, 0, 0, 0.20);
-      --bg-overlay-bot: rgba(0, 0, 0, 0.45);
+      --bg-overlay-top: rgba(0, 0, 0, 0.10);
+      --bg-overlay-bot: rgba(0, 0, 0, 0.20);
       --card-bg: rgba(26, 18, 8, 0.6);
       --drawer-bg: rgba(15, 10, 5, 0.95);
       --custom-bg: none;
@@ -56,8 +56,8 @@
       --accent-dim: rgba(201, 169, 110, 0.30);
       --text: #1A1208;
       --muted: #6B5D40;
-      --bg-overlay-top: rgba(245, 240, 232, 0.20);
-      --bg-overlay-bot: rgba(245, 240, 232, 0.35);
+      --bg-overlay-top: rgba(245, 240, 232, 0.10);
+      --bg-overlay-bot: rgba(245, 240, 232, 0.20);
       --card-bg: #FFFFFF;
       --drawer-bg: rgba(255, 252, 246, 0.96);
     }
@@ -93,7 +93,15 @@
       z-index: -2;
       transition: background-image 0.6s ease, opacity 0.4s ease;
     }
-    .bg-image.lavender { background-image: url('bg-custom.png'); filter: blur(0) brightness(0.85) saturate(1.0); }
+    .bg-image.lavender {
+      background-image: url('bg-custom.png');
+      filter: blur(0) brightness(0.85) saturate(1.0) !important;
+      opacity: 1 !important;
+    }
+    :root[data-theme="light"] .bg-image.lavender {
+      filter: blur(0) brightness(1.0) saturate(1.0) !important;
+      opacity: 1 !important;
+    }
     .bg-image.ocean  { background-image: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600'); }
     .bg-image.gory   { background-image: url('https://images.unsplash.com/photo-1486365227551-f3f90034a57c?auto=format&fit=crop&w=1600'); }
     .bg-image.las    { background-image: url('https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1600'); }
@@ -796,6 +804,23 @@
         bg: 'lavender',
         customBg: null
       };
+
+      // ======== MIGRATION: force lavender bg dla starych userow (1x) ========
+      // Dla userow ktorzy mieli localStorage.kegel_config.bg = 'ocean'/'gory'/'las'
+      // z wczesniejszej wersji - jednorazowo nadpisz na 'lavender' (nowy default).
+      // Po nadpisaniu uzytkownik moze sam zmienic w Settings.
+      (function migrateBg() {
+        try {
+          const raw = localStorage.getItem('kegel_config');
+          if (!raw) return;
+          const c = JSON.parse(raw);
+          if (!c._lavender_v1_migration) {
+            c.bg = 'lavender';
+            c._lavender_v1_migration = true;
+            localStorage.setItem('kegel_config', JSON.stringify(c));
+          }
+        } catch {}
+      })();
 
       // ======== STATE ========
       const state = {
