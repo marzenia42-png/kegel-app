@@ -10,6 +10,15 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
   <title>Kegel Timer</title>
+  <!-- Theme preload (zanim DOM, zeby nie flashowalo) -->
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('kegel_theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      } catch(e) { document.documentElement.dataset.theme = 'dark'; }
+    })();
+  </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,7 +45,21 @@
       --muted: #8B7E5C;
       --bg-overlay-top: rgba(0, 0, 0, 0.40);
       --bg-overlay-bot: rgba(0, 0, 0, 0.55);
+      --card-bg: rgba(26, 18, 8, 0.6);
+      --drawer-bg: rgba(15, 10, 5, 0.95);
       --custom-bg: none;
+    }
+    :root[data-theme="light"] {
+      --bg-base: #F5F0E8;
+      --accent: #C9A96E;
+      --accent-bright: #B8985C;
+      --accent-dim: rgba(201, 169, 110, 0.30);
+      --text: #1A1208;
+      --muted: #6B5D40;
+      --bg-overlay-top: rgba(245, 240, 232, 0.20);
+      --bg-overlay-bot: rgba(245, 240, 232, 0.35);
+      --card-bg: #FFFFFF;
+      --drawer-bg: rgba(255, 252, 246, 0.96);
     }
 
     body {
@@ -52,7 +75,13 @@
       align-items: center;
       justify-content: center;
       padding: 24px 16px 80px;
+      transition: background 0.3s ease, color 0.3s ease;
     }
+    /* Dim BG image w light mode */
+    :root[data-theme="light"] .bg-image { filter: blur(8px) brightness(1.05) saturate(0.85); opacity: 0.55; }
+    /* Drawer backgrounds use var */
+    .drawer, .drawer-left { background: var(--drawer-bg) !important; }
+    .stat-card { background: var(--card-bg) !important; }
 
     /* ====== TŁO ====== */
     .bg-image {
@@ -621,17 +650,17 @@
     <div class="field">
       <div class="field-row">
         <label class="field-label" for="sKTense">Czas napięcia</label>
-        <span class="field-value"><span id="vKTense">5</span> sek</span>
+        <span class="field-value" id="vKTense">5s</span>
       </div>
-      <input type="range" id="sKTense" min="3" max="15" value="5" step="1">
+      <input type="range" id="sKTense" min="3" max="180" value="5" step="1">
     </div>
 
     <div class="field">
       <div class="field-row">
         <label class="field-label" for="sKRelax">Czas rozluźnienia</label>
-        <span class="field-value"><span id="vKRelax">5</span> sek</span>
+        <span class="field-value" id="vKRelax">5s</span>
       </div>
-      <input type="range" id="sKRelax" min="3" max="15" value="5" step="1">
+      <input type="range" id="sKRelax" min="3" max="180" value="5" step="1">
     </div>
 
     <div class="field">
@@ -653,7 +682,7 @@
     <div class="field">
       <div class="field-row">
         <label class="field-label" for="sKBreak">Przerwa między seriami</label>
-        <span class="field-value"><span id="vKBreak">30</span> sek</span>
+        <span class="field-value" id="vKBreak">30s</span>
       </div>
       <input type="range" id="sKBreak" min="15" max="60" value="30" step="5">
     </div>
@@ -663,25 +692,25 @@
     <div class="field">
       <div class="field-row">
         <label class="field-label" for="sSTense">Czas napięcia</label>
-        <span class="field-value"><span id="vSTense">3</span> sek</span>
+        <span class="field-value" id="vSTense">3s</span>
       </div>
-      <input type="range" id="sSTense" min="2" max="10" value="3" step="1">
+      <input type="range" id="sSTense" min="2" max="180" value="3" step="1">
     </div>
 
     <div class="field">
       <div class="field-row">
         <label class="field-label" for="sSHold">Czas zatrzymania</label>
-        <span class="field-value"><span id="vSHold">2</span> sek</span>
+        <span class="field-value" id="vSHold">2s</span>
       </div>
-      <input type="range" id="sSHold" min="1" max="5" value="2" step="1">
+      <input type="range" id="sSHold" min="1" max="10" value="2" step="1">
     </div>
 
     <div class="field">
       <div class="field-row">
         <label class="field-label" for="sSRelax">Czas rozluźnienia</label>
-        <span class="field-value"><span id="vSRelax">5</span> sek</span>
+        <span class="field-value" id="vSRelax">5s</span>
       </div>
-      <input type="range" id="sSRelax" min="3" max="10" value="5" step="1">
+      <input type="range" id="sSRelax" min="3" max="180" value="5" step="1">
     </div>
 
     <div class="field">
@@ -690,6 +719,13 @@
         <span class="field-value" id="vSReps">10</span>
       </div>
       <input type="range" id="sSReps" min="5" max="20" value="10" step="1">
+    </div>
+
+    <div class="section-title">Tryb wyglądu</div>
+
+    <div class="bg-options">
+      <button class="bg-option" data-theme="dark" id="themeOptDark">🌙 Ciemny</button>
+      <button class="bg-option" data-theme="light" id="themeOptLight">☀ Jasny</button>
     </div>
 
     <div class="section-title">Tło</div>
@@ -962,35 +998,66 @@
       }
       function syncDrawerInputs() {
         const c = state.config;
-        $('sKTense').value = c.kTense;   $('vKTense').textContent = c.kTense;
-        $('sKRelax').value = c.kRelax;   $('vKRelax').textContent = c.kRelax;
+        $('sKTense').value = c.kTense;   $('vKTense').textContent = formatSec(c.kTense);
+        $('sKRelax').value = c.kRelax;   $('vKRelax').textContent = formatSec(c.kRelax);
         $('sKReps').value = c.kReps;     $('vKReps').textContent = c.kReps;
         $('sKSeries').value = c.kSeries; $('vKSeries').textContent = c.kSeries;
-        $('sKBreak').value = c.kBreak;   $('vKBreak').textContent = c.kBreak;
-        $('sSTense').value = c.sTense;   $('vSTense').textContent = c.sTense;
-        $('sSHold').value = c.sHold;     $('vSHold').textContent = c.sHold;
-        $('sSRelax').value = c.sRelax;   $('vSRelax').textContent = c.sRelax;
+        $('sKBreak').value = c.kBreak;   $('vKBreak').textContent = formatSec(c.kBreak);
+        $('sSTense').value = c.sTense;   $('vSTense').textContent = formatSec(c.sTense);
+        $('sSHold').value = c.sHold;     $('vSHold').textContent = formatSec(c.sHold);
+        $('sSRelax').value = c.sRelax;   $('vSRelax').textContent = formatSec(c.sRelax);
         $('sSReps').value = c.sReps;     $('vSReps').textContent = c.sReps;
+        // Theme buttons
+        const cur = document.documentElement.dataset.theme || 'dark';
+        document.querySelectorAll('[data-theme]').forEach(b => {
+          b.classList.toggle('active', b.dataset.theme === cur);
+        });
       }
 
-      function bindSlider(sliderId, valueId, configKey) {
+      // ======== THEME (dark/light) ========
+      function applyTheme(theme) {
+        document.documentElement.dataset.theme = theme;
+        try { localStorage.setItem('kegel_theme', theme); } catch {}
+        document.querySelectorAll('[data-theme]').forEach(b => {
+          b.classList.toggle('active', b.dataset.theme === theme);
+        });
+      }
+      // Theme switch buttons (renderowane w drawer)
+      document.querySelectorAll('[data-theme]').forEach(btn => {
+        btn.addEventListener('click', () => applyTheme(btn.dataset.theme));
+      });
+
+      // Format sekund: ">=60s -> X min [Ys]", "<60 -> Xs"
+      function formatSec(s) {
+        s = parseInt(s, 10);
+        if (s >= 60) {
+          const m = Math.floor(s / 60);
+          const r = s - m * 60;
+          return r ? `${m} min ${r}s` : `${m} min`;
+        }
+        return `${s}s`;
+      }
+
+      function bindSlider(sliderId, valueId, configKey, useFormat) {
         const slider = $(sliderId);
         const value = $(valueId);
         slider.addEventListener('input', () => {
-          value.textContent = slider.value;
+          value.textContent = useFormat ? formatSec(slider.value) : slider.value;
           state.config[configKey] = parseInt(slider.value, 10);
         });
       }
 
-      bindSlider('sKTense', 'vKTense', 'kTense');
-      bindSlider('sKRelax', 'vKRelax', 'kRelax');
-      bindSlider('sKReps',  'vKReps',  'kReps');
-      bindSlider('sKSeries','vKSeries','kSeries');
-      bindSlider('sKBreak', 'vKBreak', 'kBreak');
-      bindSlider('sSTense', 'vSTense', 'sTense');
-      bindSlider('sSHold',  'vSHold',  'sHold');
-      bindSlider('sSRelax', 'vSRelax', 'sRelax');
-      bindSlider('sSReps',  'vSReps',  'sReps');
+      // Format-time slidery (sekundy)
+      bindSlider('sKTense', 'vKTense', 'kTense', true);
+      bindSlider('sKRelax', 'vKRelax', 'kRelax', true);
+      bindSlider('sKBreak', 'vKBreak', 'kBreak', true);
+      bindSlider('sSTense', 'vSTense', 'sTense', true);
+      bindSlider('sSHold',  'vSHold',  'sHold',  true);
+      bindSlider('sSRelax', 'vSRelax', 'sRelax', true);
+      // Liczby calkowite (bez format)
+      bindSlider('sKReps',  'vKReps',  'kReps',  false);
+      bindSlider('sKSeries','vKSeries','kSeries',false);
+      bindSlider('sSReps',  'vSReps',  'sReps',  false);
 
       // BG buttons
       document.querySelectorAll('.bg-option').forEach(btn => {
