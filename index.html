@@ -2,9 +2,10 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0d0c0a">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -74,12 +75,10 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px 16px 80px;
+      padding: 24px 16px 88px;
       transition: background 0.3s ease, color 0.3s ease;
     }
-    /* Dim BG image w light mode */
     :root[data-theme="light"] .bg-image { filter: blur(8px) brightness(1.05) saturate(0.85); opacity: 0.55; }
-    /* Drawer backgrounds use var */
     .drawer, .drawer-left { background: var(--drawer-bg) !important; }
     .stat-card { background: var(--card-bg) !important; }
 
@@ -94,7 +93,7 @@
       transition: background-image 0.6s ease, opacity 0.4s ease;
     }
     .bg-image.lavender {
-      background-image: url('bg-custom.png');
+      background-image: url('bg-custom.webp');
       filter: blur(0) brightness(0.85) saturate(1.0) !important;
       opacity: 1 !important;
     }
@@ -120,7 +119,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 28px;
+      gap: 22px;
     }
 
     /* ====== HEADER ====== */
@@ -133,28 +132,39 @@
       color: var(--text);
       line-height: 1.1;
     }
-    .header p {
+    .header p.subtitle {
       font-size: 0.8125rem;
       color: var(--muted);
       letter-spacing: 0.18em;
       margin-top: 6px;
       text-transform: lowercase;
     }
+    .daily-status {
+      font-size: 0.8125rem;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      margin-top: 10px;
+      min-height: 1.1em;
+    }
+    .daily-status .sep { color: var(--muted); margin: 0 7px; opacity: 0.6; }
+    .daily-status .dim { color: var(--muted); }
 
     /* ====== TABS ====== */
     .tabs {
       display: flex;
-      gap: 36px;
+      gap: 28px;
       border-bottom: 1px solid var(--accent-dim);
+      flex-wrap: wrap;
+      justify-content: center;
     }
     .tab {
       background: none;
       border: none;
       color: var(--muted);
       font-family: 'Jost', sans-serif;
-      font-size: 0.9375rem;
+      font-size: 0.875rem;
       font-weight: 400;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.16em;
       padding: 10px 4px 12px;
       border-bottom: 2px solid transparent;
       margin-bottom: -1px;
@@ -171,9 +181,9 @@
     /* ====== TIMER RING ====== */
     .timer-ring {
       position: relative;
-      width: clamp(260px, 78vw, 320px);
+      width: clamp(250px, 74vw, 310px);
       aspect-ratio: 1;
-      margin: 12px 0;
+      margin: 6px 0;
     }
     .timer-ring svg {
       width: 100%; height: 100%;
@@ -191,13 +201,17 @@
       stroke-width: 2;
       stroke-linecap: round;
       filter: drop-shadow(0 0 8px rgba(201, 169, 110, 0.35));
+      transition: stroke 0.3s ease;
     }
+    .ring-progress.relax { stroke: var(--text); }
+    .ring-progress.break { stroke: var(--muted); }
     .timer-content {
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
       pointer-events: none;
+      width: 80%;
     }
     .timer-number {
       font-family: 'Cormorant Garamond', serif;
@@ -216,7 +230,7 @@
     }
 
     /* ====== PHASE MESSAGE ====== */
-    .phase-message { text-align: center; min-height: 60px; }
+    .phase-message { text-align: center; min-height: 58px; }
     .phase-title {
       font-family: 'Jost', sans-serif;
       font-size: 1.375rem;
@@ -240,7 +254,7 @@
     .controls {
       display: flex;
       gap: 12px;
-      margin-top: 8px;
+      margin-top: 4px;
       align-items: center;
     }
     .btn {
@@ -269,19 +283,16 @@
       justify-content: center;
     }
     .btn-icon svg { width: 18px; height: 18px; }
-    .btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* ====== FOOTER LINKS ====== */
     .footer-links {
       position: fixed;
-      bottom: 20px;
+      bottom: 18px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
-      gap: 36px;
+      gap: 28px;
       font-size: 0.8125rem;
       padding: 8px 16px;
       backdrop-filter: blur(4px);
@@ -290,7 +301,7 @@
     .footer-link {
       color: var(--muted);
       text-decoration: none;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.08em;
       transition: color 0.3s ease;
       display: inline-flex;
       align-items: center;
@@ -304,7 +315,7 @@
     .footer-link:hover { color: var(--accent); }
     .footer-link svg { width: 16px; height: 16px; opacity: 0.7; }
 
-    /* ====== SETTINGS DRAWER ====== */
+    /* ====== DRAWERS ====== */
     .drawer {
       position: fixed;
       top: 0; right: -100%;
@@ -312,14 +323,13 @@
       max-width: 380px;
       height: 100vh;
       height: 100dvh;
-      background: rgba(15, 10, 5, 0.95);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-left: 1px solid var(--accent-dim);
       transition: right 0.4s cubic-bezier(0.32, 0.72, 0, 1);
       z-index: 100;
       overflow-y: auto;
-      padding: 28px 24px 32px;
+      padding: 28px 24px 40px;
     }
     .drawer.open { right: 0; }
 
@@ -359,11 +369,18 @@
       letter-spacing: 0.3em;
       color: var(--accent);
       text-transform: uppercase;
-      margin: 24px 0 12px;
+      margin: 26px 0 12px;
       padding-bottom: 6px;
       border-bottom: 1px solid var(--accent-dim);
     }
     .section-title:first-of-type { margin-top: 0; }
+    .section-hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin: -4px 0 14px;
+      line-height: 1.5;
+      font-style: italic;
+    }
 
     .field { margin-bottom: 18px; }
     .field-row {
@@ -387,7 +404,6 @@
       text-align: right;
     }
 
-    /* Custom slider */
     input[type="range"] {
       -webkit-appearance: none;
       appearance: none;
@@ -418,13 +434,14 @@
       box-shadow: 0 0 12px rgba(201, 169, 110, 0.4);
     }
 
-    .bg-options {
+    /* ====== PILL OPTIONS (level / cue / theme / bg / toggle) ====== */
+    .pill-row {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
       margin-bottom: 12px;
     }
-    .bg-option {
+    .pill {
       flex: 1 1 calc(50% - 5px);
       padding: 10px 12px;
       border: 1px solid var(--accent-dim);
@@ -432,14 +449,15 @@
       color: var(--muted);
       font-family: 'Jost', sans-serif;
       font-size: 0.8125rem;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.05em;
       border-radius: 6px;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.25s ease;
       text-align: center;
     }
-    .bg-option:hover { border-color: var(--accent); color: var(--accent); }
-    .bg-option.active {
+    .pill.third { flex: 1 1 calc(33.333% - 7px); }
+    .pill:hover { border-color: var(--accent); color: var(--accent); }
+    .pill.active {
       border-color: var(--accent);
       background: rgba(201, 169, 110, 0.12);
       color: var(--accent);
@@ -463,6 +481,20 @@
     .file-upload:hover { border-color: var(--accent); color: var(--accent); }
     .file-upload input { display: none; }
 
+    .time-input {
+      width: 100%;
+      padding: 11px 12px;
+      background: transparent;
+      border: 1px solid var(--accent-dim);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'Jost', sans-serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      margin-top: 6px;
+    }
+    .time-input:focus { outline: none; border-color: var(--accent); }
+
     .drawer-actions {
       display: flex;
       gap: 10px;
@@ -483,7 +515,7 @@
     }
     .drawer-backdrop.show { opacity: 1; pointer-events: auto; }
 
-    /* ====== STATS DRAWER (lewa strona) ====== */
+    /* ====== STATS DRAWER (lewa) ====== */
     .drawer-left {
       position: fixed;
       top: 0; left: -100%;
@@ -491,14 +523,13 @@
       max-width: 380px;
       height: 100vh;
       height: 100dvh;
-      background: rgba(15, 10, 5, 0.95);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-right: 1px solid var(--accent-dim);
       transition: left 0.4s cubic-bezier(0.32, 0.72, 0, 1);
       z-index: 100;
       overflow-y: auto;
-      padding: 28px 24px 32px;
+      padding: 28px 24px 40px;
     }
     .drawer-left.open { left: 0; }
 
@@ -506,10 +537,9 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 4px;
     }
     .stat-card {
-      background: rgba(26, 18, 8, 0.6);
       border: 1px solid var(--accent-dim);
       border-radius: 14px;
       padding: 18px 14px;
@@ -540,42 +570,161 @@
       font-style: italic;
     }
 
-    .streak-row {
+    /* Goal ring (mini) */
+    .goal-wrap { display: flex; align-items: center; gap: 16px; }
+    .goal-ring { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
+    .goal-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .goal-ring .gr-bg { fill: none; stroke: var(--accent-dim); stroke-width: 5; }
+    .goal-ring .gr-fg { fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
+    .goal-ring .gr-txt { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--accent); }
+    .goal-text { font-size: 0.85rem; color: var(--text); line-height: 1.5; }
+    .goal-text b { font-family: 'Cormorant Garamond', serif; color: var(--accent); font-weight: 600; }
+
+    /* Chart 14 dni */
+    .chart {
       display: flex;
-      gap: 6px;
-      justify-content: space-between;
-      margin-top: 14px;
+      align-items: flex-end;
+      gap: 4px;
+      height: 110px;
+      padding: 6px 2px 0;
     }
-    .streak-day {
-      flex: 1;
+    .chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; height: 100%; justify-content: flex-end; }
+    .chart-bar {
+      width: 100%;
+      max-width: 16px;
+      min-height: 3px;
+      background: var(--accent-dim);
+      border-radius: 3px 3px 0 0;
+      transition: height 0.4s ease;
+    }
+    .chart-bar.has { background: var(--accent); }
+    .chart-bar.today { box-shadow: 0 0 0 1.5px var(--accent-bright); }
+    .chart-lbl { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.02em; }
+
+    /* Achievements */
+    .ach-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .ach {
       aspect-ratio: 1;
-      max-width: 36px;
-      border-radius: 50%;
       border: 1px solid var(--accent-dim);
+      border-radius: 12px;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 0.65rem;
-      color: var(--muted);
-      letter-spacing: 0.05em;
+      gap: 4px;
+      text-align: center;
+      padding: 4px;
+      opacity: 0.35;
+      filter: grayscale(1);
+      transition: all 0.3s ease;
     }
-    .streak-day.done {
-      background: var(--accent);
-      color: var(--bg-base);
-      border-color: var(--accent);
-      font-weight: 500;
-    }
-    .streak-day.today {
-      box-shadow: 0 0 0 2px rgba(201, 169, 110, 0.4);
-    }
+    .ach.unlocked { opacity: 1; filter: none; border-color: var(--accent); background: rgba(201,169,110,0.08); }
+    .ach-icon { font-size: 1.5rem; line-height: 1; }
+    .ach-name { font-size: 0.55rem; color: var(--muted); letter-spacing: 0.02em; line-height: 1.1; }
+    .ach.unlocked .ach-name { color: var(--accent); }
 
     .stat-empty {
       text-align: center;
       color: var(--muted);
       font-size: 0.85rem;
       font-style: italic;
-      padding: 20px 8px;
+      padding: 16px 8px;
     }
+
+    /* ====== INFO / PORADNIK MODAL ====== */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 110;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .modal-backdrop.show { opacity: 1; pointer-events: auto; }
+    .modal {
+      background: var(--drawer-bg);
+      border: 1px solid var(--accent-dim);
+      border-radius: 18px;
+      max-width: 440px;
+      width: 100%;
+      max-height: 85vh;
+      max-height: 85dvh;
+      overflow-y: auto;
+      padding: 26px 24px;
+      transform: scale(0.96);
+      transition: transform 0.3s ease;
+    }
+    .modal-backdrop.show .modal { transform: scale(1); }
+    .modal h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .modal h3 {
+      font-size: 0.78rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 20px 0 8px;
+    }
+    .modal p, .modal li {
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: var(--text);
+      font-weight: 300;
+    }
+    .modal ul { padding-left: 18px; margin-top: 4px; }
+    .modal li { margin-bottom: 6px; }
+    .modal .disclaimer {
+      margin-top: 22px;
+      padding: 12px 14px;
+      border: 1px solid var(--accent-dim);
+      border-radius: 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-style: italic;
+      line-height: 1.5;
+    }
+    .modal-close-row { display: flex; justify-content: flex-end; margin-top: 20px; }
+
+    /* ====== TOAST (osiągnięcia) ====== */
+    .toast-wrap {
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 0px) + 16px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: calc(100% - 32px);
+      max-width: 360px;
+      pointer-events: none;
+    }
+    .toast {
+      background: var(--drawer-bg);
+      border: 1px solid var(--accent);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      transform: translateY(-20px);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.32,0.72,0,1);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-icon { font-size: 1.8rem; line-height: 1; }
+    .toast-txt b { color: var(--accent); font-size: 0.9rem; display: block; letter-spacing: 0.04em; }
+    .toast-txt span { color: var(--muted); font-size: 0.78rem; }
   </style>
 </head>
 <body>
@@ -585,7 +734,8 @@
   <main>
     <header class="header">
       <h1>Kegel Timer</h1>
-      <p>ćwiczenia mięśni dna miednicy</p>
+      <p class="subtitle">ćwiczenia mięśni dna miednicy</p>
+      <p class="daily-status" id="dailyStatus"></p>
     </header>
 
     <nav class="tabs" role="tablist">
@@ -597,8 +747,7 @@
       <svg viewBox="0 0 200 200" aria-hidden="true">
         <circle class="ring-bg" cx="100" cy="100" r="92"/>
         <circle class="ring-progress" id="ringProgress" cx="100" cy="100" r="92"
-                stroke-dasharray="578.05"
-                stroke-dashoffset="0"/>
+                stroke-dasharray="578.05" stroke-dashoffset="0"/>
       </svg>
       <div class="timer-content">
         <div class="timer-number" id="timerNumber">5</div>
@@ -607,7 +756,7 @@
     </div>
 
     <div class="phase-message">
-      <div class="phase-title" id="phaseTitle">Gotowy?</div>
+      <div class="phase-title" id="phaseTitle" aria-live="assertive">Gotowy?</div>
       <div class="phase-subtitle" id="phaseSubtitle">Naciśnij Start, by rozpocząć</div>
     </div>
 
@@ -629,20 +778,24 @@
   </main>
 
   <nav class="footer-links">
+    <button class="footer-link" id="linkStats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+      </svg>
+      Statystyki
+    </button>
+    <button class="footer-link" id="linkGuide">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+      Poradnik
+    </button>
     <button class="footer-link" id="linkSettings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="12" cy="12" r="3"/>
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
       </svg>
       Ustawienia
-    </button>
-    <button class="footer-link" id="linkStats">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <line x1="18" y1="20" x2="18" y2="10"/>
-        <line x1="12" y1="20" x2="12" y2="4"/>
-        <line x1="6" y1="20" x2="6" y2="14"/>
-      </svg>
-      Statystyki
     </button>
   </nav>
 
@@ -654,99 +807,109 @@
       <button class="drawer-close" id="drawerClose" aria-label="Zamknij">✕</button>
     </div>
 
+    <div class="section-title">Poziom (Kegel)</div>
+    <div class="section-hint">Wybierz gotowy poziom albo ustaw własne wartości suwakami poniżej.</div>
+    <div class="pill-row">
+      <button class="pill third" data-level="beginner">🌱 Początkujący</button>
+      <button class="pill third" data-level="intermediate">⚡ Średni</button>
+      <button class="pill third" data-level="advanced">🔥 Zaawansowany</button>
+    </div>
+
+    <div class="section-title">Sygnał faz</div>
+    <div class="section-hint">Wibracja działa dyskretnie, gdy telefon jest w kieszeni lub dźwięk wyciszony.</div>
+    <div class="pill-row">
+      <button class="pill" data-cue="both">🔔 Dźwięk + wibracja</button>
+      <button class="pill" data-cue="sound">🔊 Tylko dźwięk</button>
+      <button class="pill" data-cue="vibration">📳 Tylko wibracja</button>
+      <button class="pill" data-cue="none">🔕 Bez sygnału</button>
+    </div>
+
+    <div class="section-title">Cel dzienny</div>
+    <div class="field">
+      <div class="field-row">
+        <label class="field-label" for="sGoal">Serii dziennie</label>
+        <span class="field-value" id="vGoal">3</span>
+      </div>
+      <input type="range" id="sGoal" min="1" max="8" value="3" step="1">
+    </div>
+
     <div class="section-title">Kegel</div>
 
     <div class="field">
-      <div class="field-row">
-        <label class="field-label" for="sKTense">Czas napięcia</label>
-        <span class="field-value" id="vKTense">5s</span>
-      </div>
+      <div class="field-row"><label class="field-label" for="sKTense">Czas napięcia</label><span class="field-value" id="vKTense">5s</span></div>
       <input type="range" id="sKTense" min="3" max="180" value="5" step="1">
     </div>
-
     <div class="field">
-      <div class="field-row">
-        <label class="field-label" for="sKRelax">Czas rozluźnienia</label>
-        <span class="field-value" id="vKRelax">5s</span>
-      </div>
+      <div class="field-row"><label class="field-label" for="sKRelax">Czas rozluźnienia</label><span class="field-value" id="vKRelax">5s</span></div>
       <input type="range" id="sKRelax" min="3" max="180" value="5" step="1">
     </div>
-
     <div class="field">
-      <div class="field-row">
-        <label class="field-label" for="sKReps">Powtórzeń w serii</label>
-        <span class="field-value" id="vKReps">10</span>
-      </div>
+      <div class="field-row"><label class="field-label" for="sKReps">Powtórzeń w serii</label><span class="field-value" id="vKReps">10</span></div>
       <input type="range" id="sKReps" min="5" max="20" value="10" step="1">
     </div>
-
     <div class="field">
-      <div class="field-row">
-        <label class="field-label" for="sKSeries">Liczba serii</label>
-        <span class="field-value" id="vKSeries">3</span>
-      </div>
+      <div class="field-row"><label class="field-label" for="sKSeries">Liczba serii</label><span class="field-value" id="vKSeries">3</span></div>
       <input type="range" id="sKSeries" min="1" max="6" value="3" step="1">
     </div>
-
     <div class="field">
-      <div class="field-row">
-        <label class="field-label" for="sKBreak">Przerwa między seriami</label>
-        <span class="field-value" id="vKBreak">30s</span>
-      </div>
+      <div class="field-row"><label class="field-label" for="sKBreak">Przerwa między seriami</label><span class="field-value" id="vKBreak">30s</span></div>
       <input type="range" id="sKBreak" min="15" max="60" value="30" step="5">
     </div>
 
-    <div class="section-title">Stop-Start</div>
+    <div class="section-title">Rozgrzewka — szybkie skurcze</div>
+    <div class="section-hint">Krótkie, szybkie skurcze przed serią głównej. Trenują reakcję mięśni (np. przy kaszlu).</div>
+    <div class="pill-row">
+      <button class="pill" data-quick="on">Włączona</button>
+      <button class="pill" data-quick="off">Wyłączona</button>
+    </div>
+    <div class="field" id="quickRepsField">
+      <div class="field-row"><label class="field-label" for="sKQuickReps">Liczba szybkich skurczów</label><span class="field-value" id="vKQuickReps">10</span></div>
+      <input type="range" id="sKQuickReps" min="5" max="30" value="10" step="1">
+    </div>
 
+    <div class="section-title">Stop-Start</div>
     <div class="field">
-      <div class="field-row">
-        <label class="field-label" for="sSTense">Czas napięcia</label>
-        <span class="field-value" id="vSTense">3s</span>
-      </div>
+      <div class="field-row"><label class="field-label" for="sSTense">Czas napięcia</label><span class="field-value" id="vSTense">3s</span></div>
       <input type="range" id="sSTense" min="2" max="180" value="3" step="1">
     </div>
-
     <div class="field">
-      <div class="field-row">
-        <label class="field-label" for="sSHold">Czas zatrzymania</label>
-        <span class="field-value" id="vSHold">2s</span>
-      </div>
+      <div class="field-row"><label class="field-label" for="sSHold">Czas zatrzymania</label><span class="field-value" id="vSHold">2s</span></div>
       <input type="range" id="sSHold" min="1" max="10" value="2" step="1">
     </div>
-
     <div class="field">
-      <div class="field-row">
-        <label class="field-label" for="sSRelax">Czas rozluźnienia</label>
-        <span class="field-value" id="vSRelax">5s</span>
-      </div>
+      <div class="field-row"><label class="field-label" for="sSRelax">Czas rozluźnienia</label><span class="field-value" id="vSRelax">5s</span></div>
       <input type="range" id="sSRelax" min="3" max="180" value="5" step="1">
     </div>
-
     <div class="field">
-      <div class="field-row">
-        <label class="field-label" for="sSReps">Liczba powtórzeń</label>
-        <span class="field-value" id="vSReps">10</span>
-      </div>
+      <div class="field-row"><label class="field-label" for="sSReps">Liczba powtórzeń</label><span class="field-value" id="vSReps">10</span></div>
       <input type="range" id="sSReps" min="5" max="20" value="10" step="1">
     </div>
 
-    <div class="section-title">Tryb wyglądu</div>
+    <div class="section-title">Przypomnienie</div>
+    <div class="section-hint">Codzienne powiadomienie o porze ćwiczeń. Działa najlepiej z apką dodaną do ekranu głównego.</div>
+    <div class="pill-row">
+      <button class="pill" data-reminder="on">Włączone</button>
+      <button class="pill" data-reminder="off">Wyłączone</button>
+    </div>
+    <div class="field" id="reminderTimeField">
+      <div class="field-row"><label class="field-label" for="sReminderTime">Godzina</label></div>
+      <input type="time" id="sReminderTime" class="time-input" value="20:00">
+    </div>
 
-    <div class="bg-options">
-      <button class="bg-option" data-theme="dark" id="themeOptDark">🌙 Ciemny</button>
-      <button class="bg-option" data-theme="light" id="themeOptLight">☀ Jasny</button>
+    <div class="section-title">Tryb wyglądu</div>
+    <div class="pill-row">
+      <button class="pill" data-theme="dark">🌙 Ciemny</button>
+      <button class="pill" data-theme="light">☀ Jasny</button>
     </div>
 
     <div class="section-title">Tło</div>
-
-    <div class="bg-options">
-      <button class="bg-option active" data-bg="lavender">Lavender</button>
-      <button class="bg-option" data-bg="ocean">Ocean</button>
-      <button class="bg-option" data-bg="gory">Góry</button>
-      <button class="bg-option" data-bg="las">Las</button>
-      <button class="bg-option" data-bg="custom" id="bgOptionCustom">Własne</button>
+    <div class="pill-row">
+      <button class="pill active" data-bg="lavender">Lavender</button>
+      <button class="pill" data-bg="ocean">Ocean</button>
+      <button class="pill" data-bg="gory">Góry</button>
+      <button class="pill" data-bg="las">Las</button>
+      <button class="pill" data-bg="custom" id="bgOptionCustom">Własne</button>
     </div>
-
     <label class="file-upload">
       📁 Wgraj własne zdjęcie
       <input type="file" id="bgUpload" accept="image/*">
@@ -758,219 +921,329 @@
     </div>
   </aside>
 
-  <!-- ====== STATS DRAWER (lewa strona) ====== -->
+  <!-- ====== STATS DRAWER ====== -->
   <aside class="drawer-left" id="statsDrawer" aria-hidden="true">
     <div class="drawer-header">
       <div class="drawer-title">Statystyki</div>
       <button class="drawer-close" id="statsDrawerClose" aria-label="Zamknij">✕</button>
     </div>
 
-    <div class="stat-grid">
-      <div class="stat-card">
-        <div class="stat-num" id="stat-day">0</div>
-        <div class="stat-label">Dzisiaj serii</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="stat-streak">0</div>
-        <div class="stat-label">Dni z rzędu 🔥</div>
-      </div>
-      <div class="stat-card full">
-        <div class="stat-num" id="stat-total">0</div>
-        <div class="stat-label">Łącznie ukończonych serii</div>
-        <div class="stat-extra" id="stat-since"></div>
+    <div class="section-title">Cel dnia</div>
+    <div class="stat-card full" style="text-align:left;">
+      <div class="goal-wrap">
+        <div class="goal-ring">
+          <svg viewBox="0 0 64 64"><circle class="gr-bg" cx="32" cy="32" r="27"/><circle class="gr-fg" id="goalRingFg" cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6"/></svg>
+          <div class="gr-txt" id="goalRingTxt">0/3</div>
+        </div>
+        <div class="goal-text" id="goalText">Wykonaj <b>3 serie</b> dzisiaj.</div>
       </div>
     </div>
 
-    <div class="section-title">Ostatnie 7 dni</div>
-    <div class="streak-row" id="streakRow"></div>
-    <div class="stat-empty" id="streakEmpty" style="display:none;">Brak danych — zacznij ćwiczyć żeby zobaczyć postęp.</div>
+    <div class="section-title">Podsumowanie</div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num" id="stat-day">0</div><div class="stat-label">Dzisiaj serii</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-streak">0</div><div class="stat-label">Dni z rzędu 🔥</div></div>
+      <div class="stat-card full"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Łącznie ukończonych serii</div><div class="stat-extra" id="stat-since"></div></div>
+    </div>
+
+    <div class="section-title">Ostatnie 14 dni</div>
+    <div class="chart" id="chart"></div>
+    <div class="stat-empty" id="chartEmpty" style="display:none;">Brak danych — zacznij ćwiczyć żeby zobaczyć postęp.</div>
+
+    <div class="section-title">Osiągnięcia</div>
+    <div class="ach-grid" id="achGrid"></div>
 
     <div class="drawer-actions">
       <button class="btn" id="btnResetStats">Resetuj statystyki</button>
     </div>
   </aside>
 
+  <!-- ====== PORADNIK MODAL ====== -->
+  <div class="modal-backdrop" id="guideBackdrop">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Poradnik">
+      <h2>Jak ćwiczyć poprawnie</h2>
+
+      <h3>Znajdź właściwe mięśnie</h3>
+      <p>Napnij mięśnie tak, jakbyś chciał(a) zatrzymać strumień moczu lub powstrzymać gazy. To są mięśnie dna miednicy. <b>Nie napinaj</b> brzucha, pośladków ani ud — i oddychaj normalnie.</p>
+
+      <h3>Technika</h3>
+      <ul>
+        <li>Napnij mięśnie na zadany czas, a potem <b>w pełni rozluźnij</b> na tyle samo. Rozluźnienie jest równie ważne jak napięcie.</li>
+        <li>Oddychaj swobodnie przez cały czas — nie wstrzymuj oddechu.</li>
+        <li>Skup się na izolowaniu samego dna miednicy.</li>
+      </ul>
+
+      <h3>Dwa rodzaje skurczów</h3>
+      <ul>
+        <li><b>Długie przytrzymania</b> — budują siłę i wytrzymałość mięśni.</li>
+        <li><b>Szybkie skurcze</b> (rozgrzewka) — trenują szybką reakcję, potrzebną np. przy kaszlu, kichnięciu czy podnoszeniu.</li>
+      </ul>
+
+      <h3>Jak często</h3>
+      <p>Optymalnie <b>3 sesje dziennie, codziennie</b>. Pierwsze efekty zwykle po 4–6 tygodniach regularności. Lepszy krótki trening codziennie niż długi raz na jakiś czas.</p>
+
+      <h3>Częste błędy</h3>
+      <ul>
+        <li>Wstrzymywanie oddechu podczas napięcia.</li>
+        <li>Napinanie brzucha, pośladków lub ud zamiast dna miednicy.</li>
+        <li>Zbyt intensywny start — zacznij od poziomu „Początkujący".</li>
+        <li>Pomijanie fazy rozluźnienia.</li>
+      </ul>
+
+      <div class="disclaimer">
+        Aplikacja ma charakter wspomagający trening. W razie bólu, nietrzymania moczu, dolegliwości lub wątpliwości skonsultuj się z lekarzem lub fizjoterapeutą uroginekologicznym. To nie jest porada medyczna.
+      </div>
+
+      <div class="modal-close-row">
+        <button class="btn btn-primary" id="guideClose">Rozumiem</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TOASTS ====== -->
+  <div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
+
   <script>
     // =========================================================
-    // KEGEL TIMER — Faza 2: tła + ustawienia + logika Kegel
+    // KEGEL TIMER v2.0 — poziomy, szybkie skurcze, wibracja,
+    // wake lock, dokładny timer, wykres, osiągnięcia, cel, poradnik
     // =========================================================
     (function () {
       'use strict';
 
-      // ======== DEFAULT CONFIG ========
+      // ======== DEFAULTS ========
       const DEFAULTS = {
         kTense: 5, kRelax: 5, kReps: 10, kSeries: 3, kBreak: 30,
+        kQuickEnabled: true, kQuickReps: 10, kQuickTense: 1, kQuickRelax: 1,
         sTense: 3, sHold: 2, sRelax: 5, sReps: 10,
-        bg: 'lavender',
-        customBg: null
+        cue: 'both',
+        dailyGoal: 3,
+        reminderEnabled: false, reminderTime: '20:00',
+        bg: 'lavender', customBg: null
       };
 
-      // ======== MIGRATION: force lavender bg dla starych userow (1x) ========
-      // Dla userow ktorzy mieli localStorage.kegel_config.bg = 'ocean'/'gory'/'las'
-      // z wczesniejszej wersji - jednorazowo nadpisz na 'lavender' (nowy default).
-      // Po nadpisaniu uzytkownik moze sam zmienic w Settings.
-      (function migrateBg() {
-        try {
-          const raw = localStorage.getItem('kegel_config');
-          if (!raw) return;
-          const c = JSON.parse(raw);
-          if (!c._lavender_v1_migration) {
-            c.bg = 'lavender';
-            c._lavender_v1_migration = true;
-            localStorage.setItem('kegel_config', JSON.stringify(c));
-          }
-        } catch {}
-      })();
+      const LEVELS = {
+        beginner:     { kTense: 3, kRelax: 4, kReps: 8,  kSeries: 2, kBreak: 30, kQuickReps: 8 },
+        intermediate: { kTense: 5, kRelax: 5, kReps: 10, kSeries: 3, kBreak: 30, kQuickReps: 10 },
+        advanced:     { kTense: 8, kRelax: 4, kReps: 12, kSeries: 4, kBreak: 25, kQuickReps: 15 }
+      };
+
+      const ACHIEVEMENTS = [
+        { id: 'first', icon: '🌱', name: '1. seria',    test: (s) => s.total >= 1 },
+        { id: 'goal',  icon: '🎯', name: 'Cel dnia',    test: (s) => (s.daily[todayISO()] || 0) >= state.config.dailyGoal },
+        { id: 's3',    icon: '🔥', name: '3 dni',       test: (s) => streakOf(s) >= 3 },
+        { id: 's7',    icon: '⭐', name: '7 dni',       test: (s) => streakOf(s) >= 7 },
+        { id: 's30',   icon: '👑', name: '30 dni',      test: (s) => streakOf(s) >= 30 },
+        { id: 't50',   icon: '💪', name: '50 serii',    test: (s) => s.total >= 50 },
+        { id: 't100',  icon: '🏆', name: '100 serii',   test: (s) => s.total >= 100 },
+        { id: 't500',  icon: '💎', name: '500 serii',   test: (s) => s.total >= 500 }
+      ];
 
       // ======== STATE ========
       const state = {
         config: loadConfig(),
         stats: loadStats(),
-        mode: 'kegel',                              // 'kegel' | 'stopstart'
-        runState: 'idle',                           // 'idle' | 'running' | 'paused' | 'done'
-        phase: null,                                // 'tense' | 'relax' | 'break' | 'hold'
+        mode: 'kegel',
+        runState: 'idle',            // idle | running | paused | done
+        phase: null,                 // qtense|qrelax|tense|relax|break|hold|done
         phaseTotal: 0,
         timeLeft: 0,
+        phaseEndAt: 0,               // ms timestamp (timer oparty na zegarze)
+        remainingOnPause: 0,
+        inQuick: false,
+        currentQuick: 0,
         currentRep: 0,
         currentSeries: 0,
         tickHandle: null,
+        reminderHandle: null,
+        wakeLock: null,
         audioCtx: null
       };
 
       // ======== DOM ========
-      const $ = id => document.getElementById(id);
+      const $ = (id) => document.getElementById(id);
       const els = {
         bgImage: $('bgImage'),
-        timerNumber: $('timerNumber'),
-        timerUnit: $('timerUnit'),
-        phaseTitle: $('phaseTitle'),
-        phaseSubtitle: $('phaseSubtitle'),
+        timerNumber: $('timerNumber'), timerUnit: $('timerUnit'),
+        phaseTitle: $('phaseTitle'), phaseSubtitle: $('phaseSubtitle'),
         ringProgress: $('ringProgress'),
-        btnStart: $('btnStart'),
-        btnPause: $('btnPause'),
-        btnReset: $('btnReset'),
-        linkSettings: $('linkSettings'),
-        drawer: $('drawer'),
-        drawerBackdrop: $('drawerBackdrop'),
-        drawerClose: $('drawerClose'),
-        btnSave: $('btnSave'),
-        btnDefaults: $('btnDefaults'),
-        bgUpload: $('bgUpload'),
+        dailyStatus: $('dailyStatus'),
+        btnStart: $('btnStart'), btnPause: $('btnPause'), btnReset: $('btnReset'),
+        // settings
+        linkSettings: $('linkSettings'), drawer: $('drawer'),
+        drawerBackdrop: $('drawerBackdrop'), drawerClose: $('drawerClose'),
+        btnSave: $('btnSave'), btnDefaults: $('btnDefaults'), bgUpload: $('bgUpload'),
+        quickRepsField: $('quickRepsField'), reminderTimeField: $('reminderTimeField'),
+        sReminderTime: $('sReminderTime'),
         // stats
-        linkStats: $('linkStats'),
-        statsDrawer: $('statsDrawer'),
-        statsDrawerClose: $('statsDrawerClose'),
-        btnResetStats: $('btnResetStats'),
-        statDay: $('stat-day'),
-        statStreak: $('stat-streak'),
-        statTotal: $('stat-total'),
-        statSince: $('stat-since'),
-        streakRow: $('streakRow'),
-        streakEmpty: $('streakEmpty')
+        linkStats: $('linkStats'), statsDrawer: $('statsDrawer'),
+        statsDrawerClose: $('statsDrawerClose'), btnResetStats: $('btnResetStats'),
+        statDay: $('stat-day'), statStreak: $('stat-streak'), statTotal: $('stat-total'),
+        statSince: $('stat-since'), chart: $('chart'), chartEmpty: $('chartEmpty'),
+        achGrid: $('achGrid'),
+        goalRingFg: $('goalRingFg'), goalRingTxt: $('goalRingTxt'), goalText: $('goalText'),
+        // guide
+        linkGuide: $('linkGuide'), guideBackdrop: $('guideBackdrop'), guideClose: $('guideClose'),
+        toastWrap: $('toastWrap')
       };
 
-      // SVG ring circumference: 2π × 92 = 578.05
       const RING_C = 2 * Math.PI * 92;
       els.ringProgress.setAttribute('stroke-dasharray', RING_C);
       els.ringProgress.setAttribute('stroke-dashoffset', RING_C);
+      const GOAL_C = 2 * Math.PI * 27;
+      els.goalRingFg.setAttribute('stroke-dasharray', GOAL_C);
 
-      // ======== STATS (localStorage 'kegel_stats') ========
-      function todayISO() {
-        const d = new Date();
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
+      // ======== DATY ========
+      function isoOf(d) {
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
       }
-      function dayDiff(aISO, bISO) {
-        const a = new Date(aISO + 'T00:00:00');
-        const b = new Date(bISO + 'T00:00:00');
-        return Math.round((a - b) / 86400000);
-      }
+      function todayISO() { return isoOf(new Date()); }
+
+      // ======== STATS (model: {daily:{date:count}, total, firstDate, unlocked}) ========
       function loadStats() {
-        const fresh = { todayDate: null, todayCount: 0, streak: 0, total: 0, history: [], firstDate: null };
+        const fresh = { daily: {}, total: 0, firstDate: null, unlocked: [] };
         try {
           const raw = localStorage.getItem('kegel_stats');
           if (!raw) return fresh;
-          return { ...fresh, ...JSON.parse(raw) };
+          const old = JSON.parse(raw);
+          if (old && old.daily) return { ...fresh, ...old };
+          // migracja ze starego modelu (history[] + total)
+          const migrated = { ...fresh };
+          if (typeof old.total === 'number') migrated.total = old.total;
+          if (old.firstDate) migrated.firstDate = old.firstDate;
+          if (Array.isArray(old.history)) {
+            old.history.forEach((d) => { migrated.daily[d] = (migrated.daily[d] || 0) + 1; });
+          }
+          if (old.todayDate && old.todayCount) migrated.daily[old.todayDate] = old.todayCount;
+          return migrated;
         } catch { return fresh; }
       }
       function saveStats() {
         try { localStorage.setItem('kegel_stats', JSON.stringify(state.stats)); } catch {}
       }
-      function rolloverDay() {
-        const today = todayISO();
-        const s = state.stats;
-        if (s.todayDate !== today) {
-          // streak: jeśli wczoraj było >0 → kontynuuj, inaczej break
-          if (s.todayDate && dayDiff(today, s.todayDate) === 1 && s.todayCount > 0) {
-            // streak utrzymany — nic nie zmieniamy poza datą i licznikiem
-          } else if (s.todayDate && dayDiff(today, s.todayDate) > 1) {
-            s.streak = 0; // przerwa
-          }
-          s.todayDate = today;
-          s.todayCount = 0;
-          saveStats();
+      function streakOf(s) {
+        let streak = 0;
+        const cursor = new Date();
+        // jeśli dziś brak aktywności, licz serię kończącą się wczoraj
+        if (!(s.daily[isoOf(cursor)] > 0)) cursor.setDate(cursor.getDate() - 1);
+        while (s.daily[isoOf(cursor)] > 0) {
+          streak++;
+          cursor.setDate(cursor.getDate() - 1);
         }
+        return streak;
       }
       function addCompletedSeries() {
-        const today = todayISO();
+        const t = todayISO();
         const s = state.stats;
-        rolloverDay();
-        // jeśli to pierwsza seria dziś — sprawdź streak
-        if (s.todayCount === 0) {
-          if (s.history.length === 0) {
-            s.streak = 1;
-            s.firstDate = today;
-          } else {
-            const lastDay = s.history[s.history.length - 1];
-            if (dayDiff(today, lastDay) === 1) s.streak += 1;
-            else if (dayDiff(today, lastDay) === 0) {
-              // edge case — nie powinien się zdarzyć po rolloverDay
-            } else s.streak = 1;
-          }
-          if (!s.history.includes(today)) s.history.push(today);
-          if (s.history.length > 365) s.history = s.history.slice(-365);
-        }
-        s.todayCount += 1;
+        s.daily[t] = (s.daily[t] || 0) + 1;
         s.total += 1;
+        if (!s.firstDate) s.firstDate = t;
+        // przytnij historię do ~400 dni
+        const keys = Object.keys(s.daily);
+        if (keys.length > 400) {
+          keys.sort();
+          keys.slice(0, keys.length - 400).forEach((k) => delete s.daily[k]);
+        }
         saveStats();
+        checkAchievements();
         renderStats();
+        renderDailyStatus();
       }
       function resetStats() {
-        if (!confirm('Zresetować wszystkie statystyki? Tej operacji nie można cofnąć.')) return;
-        state.stats = { todayDate: null, todayCount: 0, streak: 0, total: 0, history: [], firstDate: null };
+        if (!confirm('Zresetować wszystkie statystyki i osiągnięcia? Tej operacji nie można cofnąć.')) return;
+        state.stats = { daily: {}, total: 0, firstDate: null, unlocked: [] };
         saveStats();
         renderStats();
+        renderDailyStatus();
       }
-      function renderStats() {
-        rolloverDay();
+      function checkAchievements() {
         const s = state.stats;
-        els.statDay.textContent = s.todayCount;
-        els.statStreak.textContent = s.streak;
+        ACHIEVEMENTS.forEach((a) => {
+          if (!s.unlocked.includes(a.id) && a.test(s)) {
+            s.unlocked.push(a.id);
+            saveStats();
+            showToast(a.icon, 'Osiągnięcie odblokowane!', a.name);
+          }
+        });
+      }
+
+      // ======== TOAST ========
+      function showToast(icon, title, sub) {
+        const el = document.createElement('div');
+        el.className = 'toast';
+        el.innerHTML = '<div class="toast-icon">' + icon + '</div><div class="toast-txt"><b>' + title + '</b><span>' + sub + '</span></div>';
+        els.toastWrap.appendChild(el);
+        requestAnimationFrame(() => el.classList.add('show'));
+        setTimeout(() => {
+          el.classList.remove('show');
+          setTimeout(() => el.remove(), 450);
+        }, 3200);
+      }
+
+      // ======== RENDER STATS ========
+      function renderStats() {
+        const s = state.stats;
+        const today = todayISO();
+        const todayCount = s.daily[today] || 0;
+        els.statDay.textContent = todayCount;
+        els.statStreak.textContent = streakOf(s);
         els.statTotal.textContent = s.total;
         if (s.firstDate) {
-          const d = new Date(s.firstDate);
+          const d = new Date(s.firstDate + 'T00:00:00');
           els.statSince.textContent = 'od ' + d.toLocaleDateString('pl-PL', { day: '2-digit', month: 'long', year: 'numeric' });
+        } else els.statSince.textContent = '';
+
+        // Cel dnia ring
+        const goal = state.config.dailyGoal;
+        const frac = Math.min(1, todayCount / goal);
+        els.goalRingFg.setAttribute('stroke-dashoffset', GOAL_C * (1 - frac));
+        els.goalRingTxt.textContent = todayCount + '/' + goal;
+        if (todayCount >= goal) {
+          els.goalText.innerHTML = '<b>Cel osiągnięty!</b> Świetna robota dzisiaj. 🎉';
         } else {
-          els.statSince.textContent = '';
+          const left = goal - todayCount;
+          els.goalText.innerHTML = 'Zostało <b>' + left + ' ' + plural(left, 'seria', 'serie', 'serii') + '</b> do dziennego celu.';
         }
-        // 7-day streak row
-        const today = todayISO();
+
+        // Wykres 14 dni
         const days = ['N', 'P', 'W', 'Ś', 'C', 'P', 'S'];
-        let html = '';
-        for (let i = 6; i >= 0; i--) {
-          const dt = new Date();
-          dt.setDate(dt.getDate() - i);
-          const iso = dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
-          const isDone = s.history.includes(iso);
-          const isToday = iso === today;
-          const cls = 'streak-day' + (isDone ? ' done' : '') + (isToday ? ' today' : '');
-          const letter = days[dt.getDay()];
-          html += `<div class="${cls}">${letter}</div>`;
+        let max = 1;
+        const window = [];
+        for (let i = 13; i >= 0; i--) {
+          const dt = new Date(); dt.setDate(dt.getDate() - i);
+          const iso = isoOf(dt);
+          const c = s.daily[iso] || 0;
+          if (c > max) max = c;
+          window.push({ iso, c, lbl: days[dt.getDay()], isToday: iso === today });
         }
-        els.streakRow.innerHTML = html;
-        els.streakEmpty.style.display = s.history.length === 0 ? 'block' : 'none';
+        els.chart.innerHTML = window.map((d) => {
+          const h = d.c > 0 ? Math.max(8, Math.round((d.c / max) * 100)) : 0;
+          const cls = 'chart-bar' + (d.c > 0 ? ' has' : '') + (d.isToday ? ' today' : '');
+          return '<div class="chart-col"><div class="' + cls + '" style="height:' + h + '%" title="' + d.iso + ': ' + d.c + '"></div><div class="chart-lbl">' + d.lbl + '</div></div>';
+        }).join('');
+        els.chartEmpty.style.display = s.total === 0 ? 'block' : 'none';
+        els.chart.style.display = s.total === 0 ? 'none' : 'flex';
+
+        // Osiągnięcia
+        els.achGrid.innerHTML = ACHIEVEMENTS.map((a) => {
+          const on = s.unlocked.includes(a.id);
+          return '<div class="ach' + (on ? ' unlocked' : '') + '"><div class="ach-icon">' + a.icon + '</div><div class="ach-name">' + a.name + '</div></div>';
+        }).join('');
+      }
+      function plural(n, one, few, many) {
+        if (n === 1) return one;
+        const mod10 = n % 10, mod100 = n % 100;
+        if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return few;
+        return many;
+      }
+      function renderDailyStatus() {
+        const s = state.stats;
+        const todayCount = s.daily[todayISO()] || 0;
+        const goal = state.config.dailyGoal;
+        const streak = streakOf(s);
+        let html = '<span class="' + (todayCount >= goal ? '' : 'dim') + '">Dziś ' + todayCount + '/' + goal + ' serii</span>';
+        if (streak > 0) html += '<span class="sep">·</span>🔥 ' + streak + ' ' + plural(streak, 'dzień', 'dni', 'dni');
+        els.dailyStatus.innerHTML = html;
       }
       function openStats() {
         renderStats();
@@ -984,7 +1257,7 @@
         els.statsDrawer.setAttribute('aria-hidden', 'true');
       }
 
-      // ======== CONFIG (localStorage) ========
+      // ======== CONFIG ========
       function loadConfig() {
         try {
           const raw = localStorage.getItem('kegel_config');
@@ -993,25 +1266,45 @@
         } catch { return { ...DEFAULTS }; }
       }
       function saveConfig() {
-        localStorage.setItem('kegel_config', JSON.stringify(state.config));
+        try {
+          localStorage.setItem('kegel_config', JSON.stringify(state.config));
+          return true;
+        } catch (e) {
+          // najczęściej QuotaExceeded przy dużym custom tle (dataURL)
+          if (state.config.customBg) {
+            showToast('⚠️', 'Tło za duże do zapisania', 'Reszta ustawień zapisana.');
+            const noBg = { ...state.config, customBg: null };
+            if (state.config.bg === 'custom') noBg.bg = 'lavender';
+            try { localStorage.setItem('kegel_config', JSON.stringify(noBg)); state.config = noBg; applyBackground(); return true; } catch {}
+          }
+          showToast('⚠️', 'Nie udało się zapisać', 'Pamięć przeglądarki pełna.');
+          return false;
+        }
       }
 
-      // ======== UI: TŁO ========
+      // ======== TŁO ========
       function applyBackground() {
         const cfg = state.config;
         if (cfg.bg === 'custom' && cfg.customBg) {
-          document.documentElement.style.setProperty('--custom-bg', `url('${cfg.customBg}')`);
+          document.documentElement.style.setProperty('--custom-bg', "url('" + cfg.customBg + "')");
           els.bgImage.className = 'bg-image custom';
         } else {
           els.bgImage.className = 'bg-image ' + (cfg.bg || 'lavender');
         }
-        // Update active state in drawer
-        document.querySelectorAll('.bg-option').forEach(b => {
-          b.classList.toggle('active', b.dataset.bg === cfg.bg);
-        });
+        document.querySelectorAll('[data-bg]').forEach((b) => b.classList.toggle('active', b.dataset.bg === cfg.bg));
       }
 
-      // ======== UI: SETTINGS DRAWER ========
+      // ======== FORMAT ========
+      function formatSec(s) {
+        s = parseInt(s, 10);
+        if (s >= 60) {
+          const m = Math.floor(s / 60), r = s - m * 60;
+          return r ? m + ' min ' + r + 's' : m + ' min';
+        }
+        return s + 's';
+      }
+
+      // ======== SETTINGS DRAWER ========
       function openDrawer() {
         syncDrawerInputs();
         els.drawer.classList.add('open');
@@ -1030,265 +1323,275 @@
         $('sKReps').value = c.kReps;     $('vKReps').textContent = c.kReps;
         $('sKSeries').value = c.kSeries; $('vKSeries').textContent = c.kSeries;
         $('sKBreak').value = c.kBreak;   $('vKBreak').textContent = formatSec(c.kBreak);
+        $('sKQuickReps').value = c.kQuickReps; $('vKQuickReps').textContent = c.kQuickReps;
         $('sSTense').value = c.sTense;   $('vSTense').textContent = formatSec(c.sTense);
         $('sSHold').value = c.sHold;     $('vSHold').textContent = formatSec(c.sHold);
         $('sSRelax').value = c.sRelax;   $('vSRelax').textContent = formatSec(c.sRelax);
         $('sSReps').value = c.sReps;     $('vSReps').textContent = c.sReps;
-        // Theme buttons
-        const cur = document.documentElement.dataset.theme || 'dark';
-        document.querySelectorAll('[data-theme]').forEach(b => {
-          b.classList.toggle('active', b.dataset.theme === cur);
-        });
+        $('sGoal').value = c.dailyGoal;  $('vGoal').textContent = c.dailyGoal;
+        els.sReminderTime.value = c.reminderTime || '20:00';
+        // pills
+        const theme = document.documentElement.dataset.theme || 'dark';
+        document.querySelectorAll('[data-theme]').forEach((b) => b.classList.toggle('active', b.dataset.theme === theme));
+        document.querySelectorAll('[data-cue]').forEach((b) => b.classList.toggle('active', b.dataset.cue === c.cue));
+        document.querySelectorAll('[data-quick]').forEach((b) => b.classList.toggle('active', b.dataset.quick === (c.kQuickEnabled ? 'on' : 'off')));
+        document.querySelectorAll('[data-reminder]').forEach((b) => b.classList.toggle('active', b.dataset.reminder === (c.reminderEnabled ? 'on' : 'off')));
+        document.querySelectorAll('[data-bg]').forEach((b) => b.classList.toggle('active', b.dataset.bg === c.bg));
+        highlightLevel();
+        els.quickRepsField.style.display = c.kQuickEnabled ? '' : 'none';
+        els.reminderTimeField.style.display = c.reminderEnabled ? '' : 'none';
+      }
+      function highlightLevel() {
+        const c = state.config;
+        let match = null;
+        for (const [name, p] of Object.entries(LEVELS)) {
+          if (c.kTense === p.kTense && c.kRelax === p.kRelax && c.kReps === p.kReps &&
+              c.kSeries === p.kSeries && c.kBreak === p.kBreak && c.kQuickReps === p.kQuickReps) { match = name; break; }
+        }
+        document.querySelectorAll('[data-level]').forEach((b) => b.classList.toggle('active', b.dataset.level === match));
       }
 
-      // ======== THEME (dark/light) ========
+      // ======== THEME ========
       function applyTheme(theme) {
         document.documentElement.dataset.theme = theme;
         try { localStorage.setItem('kegel_theme', theme); } catch {}
-        document.querySelectorAll('[data-theme]').forEach(b => {
-          b.classList.toggle('active', b.dataset.theme === theme);
-        });
-      }
-      // Theme switch buttons (renderowane w drawer)
-      document.querySelectorAll('[data-theme]').forEach(btn => {
-        btn.addEventListener('click', () => applyTheme(btn.dataset.theme));
-      });
-
-      // Format sekund: ">=60s -> X min [Ys]", "<60 -> Xs"
-      function formatSec(s) {
-        s = parseInt(s, 10);
-        if (s >= 60) {
-          const m = Math.floor(s / 60);
-          const r = s - m * 60;
-          return r ? `${m} min ${r}s` : `${m} min`;
-        }
-        return `${s}s`;
+        document.querySelectorAll('[data-theme]').forEach((b) => b.classList.toggle('active', b.dataset.theme === theme));
       }
 
+      // ======== SLIDERY ========
       function bindSlider(sliderId, valueId, configKey, useFormat) {
-        const slider = $(sliderId);
-        const value = $(valueId);
+        const slider = $(sliderId), value = $(valueId);
         slider.addEventListener('input', () => {
           value.textContent = useFormat ? formatSec(slider.value) : slider.value;
           state.config[configKey] = parseInt(slider.value, 10);
+          if (['kTense','kRelax','kReps','kSeries','kBreak','kQuickReps'].includes(configKey)) highlightLevel();
+          if (configKey === 'dailyGoal') { renderDailyStatus(); }
         });
       }
-
-      // Format-time slidery (sekundy)
       bindSlider('sKTense', 'vKTense', 'kTense', true);
       bindSlider('sKRelax', 'vKRelax', 'kRelax', true);
       bindSlider('sKBreak', 'vKBreak', 'kBreak', true);
+      bindSlider('sKQuickReps', 'vKQuickReps', 'kQuickReps', false);
       bindSlider('sSTense', 'vSTense', 'sTense', true);
       bindSlider('sSHold',  'vSHold',  'sHold',  true);
       bindSlider('sSRelax', 'vSRelax', 'sRelax', true);
-      // Liczby calkowite (bez format)
       bindSlider('sKReps',  'vKReps',  'kReps',  false);
       bindSlider('sKSeries','vKSeries','kSeries',false);
       bindSlider('sSReps',  'vSReps',  'sReps',  false);
+      bindSlider('sGoal',   'vGoal',   'dailyGoal', false);
 
-      // BG buttons
-      document.querySelectorAll('.bg-option').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const bg = btn.dataset.bg;
-          if (bg === 'custom' && !state.config.customBg) {
-            // Brak custom — pokaż prompt do uploadu
-            els.bgUpload.click();
-            return;
-          }
-          state.config.bg = bg;
-          applyBackground();
-        });
-      });
+      // ======== PILLS ========
+      document.querySelectorAll('[data-level]').forEach((btn) => btn.addEventListener('click', () => {
+        const p = LEVELS[btn.dataset.level];
+        if (!p) return;
+        Object.assign(state.config, p);
+        syncDrawerInputs();
+      }));
+      document.querySelectorAll('[data-cue]').forEach((btn) => btn.addEventListener('click', () => {
+        state.config.cue = btn.dataset.cue;
+        document.querySelectorAll('[data-cue]').forEach((b) => b.classList.toggle('active', b === btn));
+        // mała próbka sygnału
+        if (state.config.cue === 'vibration' || state.config.cue === 'both') vibrate([60]);
+        if (state.config.cue === 'sound' || state.config.cue === 'both') { ensureAudio(); playGong(523); }
+      }));
+      document.querySelectorAll('[data-quick]').forEach((btn) => btn.addEventListener('click', () => {
+        state.config.kQuickEnabled = btn.dataset.quick === 'on';
+        document.querySelectorAll('[data-quick]').forEach((b) => b.classList.toggle('active', b === btn));
+        els.quickRepsField.style.display = state.config.kQuickEnabled ? '' : 'none';
+      }));
+      document.querySelectorAll('[data-reminder]').forEach((btn) => btn.addEventListener('click', async () => {
+        const on = btn.dataset.reminder === 'on';
+        if (on) {
+          const ok = await requestNotifyPermission();
+          if (!ok) { showToast('🔕', 'Brak zgody', 'Włącz powiadomienia w przeglądarce.'); return; }
+        }
+        state.config.reminderEnabled = on;
+        document.querySelectorAll('[data-reminder]').forEach((b) => b.classList.toggle('active', b === btn));
+        els.reminderTimeField.style.display = on ? '' : 'none';
+      }));
+      els.sReminderTime.addEventListener('change', () => { state.config.reminderTime = els.sReminderTime.value || '20:00'; });
+      document.querySelectorAll('[data-theme]').forEach((btn) => btn.addEventListener('click', () => applyTheme(btn.dataset.theme)));
 
-      // Custom BG upload
+      // BG pills
+      document.querySelectorAll('[data-bg]').forEach((btn) => btn.addEventListener('click', () => {
+        const bg = btn.dataset.bg;
+        if (bg === 'custom' && !state.config.customBg) { els.bgUpload.click(); return; }
+        state.config.bg = bg;
+        applyBackground();
+      }));
       els.bgUpload.addEventListener('change', (e) => {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
-        if (file.size > 5 * 1024 * 1024) {
-          alert('Plik za duży (max 5 MB).');
-          return;
-        }
+        if (file.size > 4 * 1024 * 1024) { alert('Plik za duży (max 4 MB).'); return; }
         const reader = new FileReader();
-        reader.onload = (ev) => {
-          state.config.customBg = ev.target.result;
-          state.config.bg = 'custom';
-          applyBackground();
-        };
+        reader.onload = (ev) => { state.config.customBg = ev.target.result; state.config.bg = 'custom'; applyBackground(); };
         reader.readAsDataURL(file);
       });
 
       // Save / Defaults
       els.btnSave.addEventListener('click', () => {
-        saveConfig();
-        closeDrawer();
+        if (saveConfig()) { scheduleReminder(); renderDailyStatus(); closeDrawer(); }
       });
       els.btnDefaults.addEventListener('click', () => {
         state.config = { ...DEFAULTS, customBg: state.config.customBg };
-        syncDrawerInputs();
-        applyBackground();
+        syncDrawerInputs(); applyBackground();
       });
-
-      // Open / close drawer
       els.linkSettings.addEventListener('click', openDrawer);
       els.drawerClose.addEventListener('click', closeDrawer);
-      els.drawerBackdrop.addEventListener('click', closeDrawer);
 
       // ======== TABS ========
       const tabs = document.querySelectorAll('.tab');
-      tabs.forEach(t => {
-        t.addEventListener('click', () => {
-          if (state.runState === 'running') return; // nie przełączaj w trakcie
-          tabs.forEach(x => x.classList.remove('active'));
-          t.classList.add('active');
-          state.mode = t.dataset.mode;
-          resetTimer(); // reset stanu timera przy zmianie trybu
-        });
-      });
+      tabs.forEach((t) => t.addEventListener('click', () => {
+        if (state.runState === 'running') return;
+        tabs.forEach((x) => { x.classList.remove('active'); x.setAttribute('aria-selected', 'false'); });
+        t.classList.add('active'); t.setAttribute('aria-selected', 'true');
+        state.mode = t.dataset.mode;
+        resetTimer();
+      }));
 
-      // ======== AUDIO (Web Audio API gong) ========
+      // ======== AUDIO ========
       function ensureAudio() {
         if (!state.audioCtx) {
-          try {
-            state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          } catch (e) { console.warn('AudioContext unavailable', e); }
+          try { state.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+          catch (e) { console.warn('AudioContext unavailable', e); }
         }
-        if (state.audioCtx && state.audioCtx.state === 'suspended') {
-          state.audioCtx.resume();
-        }
+        if (state.audioCtx && state.audioCtx.state === 'suspended') state.audioCtx.resume();
       }
       function playGong(freq) {
         if (!state.audioCtx) return;
         const ctx = state.audioCtx;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = freq;
+        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.type = 'sine'; osc.frequency.value = freq;
         const now = ctx.currentTime;
         gain.gain.setValueAtTime(0, now);
         gain.gain.linearRampToValueAtTime(0.25, now + 0.01);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
         osc.connect(gain).connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.6);
+        osc.start(now); osc.stop(now + 0.6);
+      }
+      function vibrate(pattern) {
+        try { if (navigator.vibrate) navigator.vibrate(pattern); } catch {}
+      }
+      function cue(phase) {
+        const c = state.config.cue;
+        const freqMap = { qtense: 660, qrelax: 440, tense: 523, relax: 392, break: 349, done: 659, hold: 587 };
+        const vibMap = {
+          qtense: [40], qrelax: [25], tense: [130], relax: [60],
+          break: [200, 90, 200], done: [300, 120, 300, 120, 400], hold: [90]
+        };
+        if (c === 'sound' || c === 'both') playGong(freqMap[phase] || 440);
+        if (c === 'vibration' || c === 'both') vibrate(vibMap[phase] || [80]);
       }
 
-      // ======== TIMER ENGINE ========
+      // ======== WAKE LOCK ========
+      async function requestWakeLock() {
+        try {
+          if ('wakeLock' in navigator) {
+            state.wakeLock = await navigator.wakeLock.request('screen');
+            state.wakeLock.addEventListener('release', () => {});
+          }
+        } catch (e) { /* nieobsługiwane / brak zgody */ }
+      }
+      function releaseWakeLock() {
+        try { if (state.wakeLock) { state.wakeLock.release(); state.wakeLock = null; } } catch {}
+      }
+
+      // ======== TIMER ENGINE (oparty na zegarze) ========
       function setPhase(phase, durationSec) {
         state.phase = phase;
         state.phaseTotal = durationSec;
         state.timeLeft = durationSec;
-        renderPhase();
-        renderTime();
+        state.phaseEndAt = Date.now() + durationSec * 1000;
+        renderPhase(); renderTime();
 
-        // Phase title color
         els.phaseTitle.classList.remove('relax', 'break', 'done');
-        if (phase === 'relax') els.phaseTitle.classList.add('relax');
-        if (phase === 'break') els.phaseTitle.classList.add('break');
-        if (phase === 'done')  els.phaseTitle.classList.add('done');
+        els.ringProgress.classList.remove('relax', 'break');
+        if (phase === 'relax' || phase === 'qrelax') { els.phaseTitle.classList.add('relax'); els.ringProgress.classList.add('relax'); }
+        if (phase === 'break') { els.phaseTitle.classList.add('break'); els.ringProgress.classList.add('break'); }
+        if (phase === 'done') els.phaseTitle.classList.add('done');
 
-        // Gong frequency per phase
-        const freqMap = { tense: 523, relax: 392, break: 349, done: 659, hold: 587 };
-        playGong(freqMap[phase] || 440);
+        cue(phase);
       }
-
       function renderPhase() {
         const c = state.config;
-        const titleMap = {
-          tense: 'Napnij',
-          relax: 'Rozluźnij',
-          break: 'Przerwa',
-          hold:  'Zatrzymaj',
-          done:  'Gotowe'
-        };
+        const titleMap = { qtense: 'Szybko napnij', qrelax: 'Puść', tense: 'Napnij', relax: 'Rozluźnij', break: 'Przerwa', hold: 'Zatrzymaj', done: 'Gotowe' };
         els.phaseTitle.textContent = titleMap[state.phase] || 'Gotowy?';
 
         if (state.phase === 'done') {
-          els.phaseSubtitle.textContent = 'Trening ukończony';
+          els.phaseSubtitle.textContent = 'Trening ukończony 🎉';
           els.timerUnit.textContent = '';
         } else if (state.phase === 'break') {
-          els.phaseSubtitle.textContent = `Seria ${state.currentSeries} / ${getSeriesCount()} ukończona`;
+          els.phaseSubtitle.textContent = 'Seria ' + state.currentSeries + ' / ' + getSeriesCount() + ' ukończona';
+          els.timerUnit.textContent = 'sekund';
+        } else if (state.phase === 'qtense' || state.phase === 'qrelax') {
+          els.phaseSubtitle.textContent = 'Rozgrzewka · szybki skurcz ' + state.currentQuick + ' / ' + c.kQuickReps;
           els.timerUnit.textContent = 'sekund';
         } else {
           const reps = state.mode === 'kegel' ? c.kReps : c.sReps;
           const series = state.mode === 'kegel' ? c.kSeries : 1;
-          els.phaseSubtitle.textContent =
-            `Powtórzenie ${state.currentRep} / ${reps}` +
-            (state.mode === 'kegel' ? ` · Seria ${state.currentSeries} / ${series}` : '');
+          els.phaseSubtitle.textContent = 'Powtórzenie ' + state.currentRep + ' / ' + reps +
+            (state.mode === 'kegel' ? ' · Seria ' + state.currentSeries + ' / ' + series : '');
           els.timerUnit.textContent = 'sekund';
         }
       }
-
       function renderTime() {
         const t = Math.max(0, state.timeLeft);
         els.timerNumber.textContent = Math.ceil(t);
-
-        // Progress ring (animacja co tick — 100ms)
         const frac = state.phaseTotal > 0 ? (t / state.phaseTotal) : 0;
         els.ringProgress.setAttribute('stroke-dashoffset', RING_C * (1 - frac));
       }
-
-      function getSeriesCount() {
-        return state.mode === 'kegel' ? state.config.kSeries : 1;
-      }
+      function getSeriesCount() { return state.mode === 'kegel' ? state.config.kSeries : 1; }
 
       function nextPhase() {
         const c = state.config;
-        const reps = state.mode === 'kegel' ? c.kReps : c.sReps;
-
         if (state.mode === 'kegel') {
-          if (state.phase === 'tense') {
-            setPhase('relax', c.kRelax);
-          } else if (state.phase === 'relax') {
-            if (state.currentRep < reps) {
-              state.currentRep++;
-              setPhase('tense', c.kTense);
-            } else if (state.currentSeries < c.kSeries) {
-              addCompletedSeries(); // ukończono serię → zalicz
-              setPhase('break', c.kBreak);
-            } else {
-              addCompletedSeries(); // ostatnia seria
-              finish();
+          if (state.inQuick) {
+            if (state.phase === 'qtense') { setPhase('qrelax', c.kQuickRelax); return; }
+            if (state.phase === 'qrelax') {
+              if (state.currentQuick < c.kQuickReps) { state.currentQuick++; setPhase('qtense', c.kQuickTense); }
+              else { state.inQuick = false; state.currentRep = 1; setPhase('tense', c.kTense); }
+              return;
             }
+          }
+          const reps = c.kReps;
+          if (state.phase === 'tense') { setPhase('relax', c.kRelax); }
+          else if (state.phase === 'relax') {
+            if (state.currentRep < reps) { state.currentRep++; setPhase('tense', c.kTense); }
+            else if (state.currentSeries < c.kSeries) { addCompletedSeries(); setPhase('break', c.kBreak); }
+            else { addCompletedSeries(); finish(); }
           } else if (state.phase === 'break') {
-            state.currentSeries++;
-            state.currentRep = 1;
-            setPhase('tense', c.kTense);
+            state.currentSeries++; state.currentRep = 1; setPhase('tense', c.kTense);
           }
         } else {
-          // stop-start: tense -> hold -> relax -> next rep (lub done)
-          if (state.phase === 'tense') {
-            setPhase('hold', c.sHold);
-          } else if (state.phase === 'hold') {
-            setPhase('relax', c.sRelax);
-          } else if (state.phase === 'relax') {
-            if (state.currentRep < reps) {
-              state.currentRep++;
-              setPhase('tense', c.sTense);
-            } else {
-              addCompletedSeries(); // tryb stop-start = 1 seria całość
-              finish();
-            }
+          const reps = c.sReps;
+          if (state.phase === 'tense') { setPhase('hold', c.sHold); }
+          else if (state.phase === 'hold') { setPhase('relax', c.sRelax); }
+          else if (state.phase === 'relax') {
+            if (state.currentRep < reps) { state.currentRep++; setPhase('tense', c.sTense); }
+            else { addCompletedSeries(); finish(); }
           }
         }
       }
 
       function tick() {
-        state.timeLeft -= 0.1;
-        if (state.timeLeft <= 0) {
-          nextPhase();
-        } else {
-          renderTime();
-        }
+        if (state.runState !== 'running') return;
+        state.timeLeft = (state.phaseEndAt - Date.now()) / 1000;
+        if (state.timeLeft <= 0) { nextPhase(); }
+        else renderTime();
       }
 
       function startTimer() {
         ensureAudio();
+        requestWakeLock();
         if (state.runState === 'idle' || state.runState === 'done') {
-          // Fresh start
-          state.currentSeries = 1;
-          state.currentRep = 1;
           const c = state.config;
-          setPhase('tense', state.mode === 'kegel' ? c.kTense : c.sTense);
+          state.currentSeries = 1; state.currentRep = 1;
+          if (state.mode === 'kegel' && c.kQuickEnabled && c.kQuickReps > 0) {
+            state.inQuick = true; state.currentQuick = 1; setPhase('qtense', c.kQuickTense);
+          } else {
+            state.inQuick = false;
+            setPhase('tense', state.mode === 'kegel' ? c.kTense : c.sTense);
+          }
         }
         state.runState = 'running';
         if (state.tickHandle) clearInterval(state.tickHandle);
@@ -1297,80 +1600,138 @@
         els.btnStart.disabled = true;
         els.btnPause.disabled = false;
       }
-
       function pauseTimer() {
         if (state.runState !== 'running') return;
         state.runState = 'paused';
-        clearInterval(state.tickHandle);
-        state.tickHandle = null;
-        els.btnStart.innerHTML = '<svg viewBox="0 0 16 16" width="10" height="10" style="display:inline-block;vertical-align:middle;margin-right:6px;fill:currentColor;"><polygon points="3,2 13,8 3,14"/></svg>Wznów';
+        state.remainingOnPause = state.phaseEndAt - Date.now();
+        clearInterval(state.tickHandle); state.tickHandle = null;
+        releaseWakeLock();
+        els.btnStart.innerHTML = playSvg() + 'Wznów';
         els.btnStart.disabled = false;
         els.btnPause.disabled = true;
       }
-
       function resumeTimer() {
         if (state.runState !== 'paused') return;
         state.runState = 'running';
+        state.phaseEndAt = Date.now() + state.remainingOnPause;
+        requestWakeLock();
         state.tickHandle = setInterval(tick, 100);
         els.btnStart.textContent = 'W trakcie';
         els.btnStart.disabled = true;
         els.btnPause.disabled = false;
       }
-
       function resetTimer() {
         if (state.tickHandle) clearInterval(state.tickHandle);
         state.tickHandle = null;
-        state.runState = 'idle';
-        state.phase = null;
-        state.timeLeft = 0;
-        state.phaseTotal = 0;
-        state.currentRep = 0;
-        state.currentSeries = 0;
-        els.timerNumber.textContent = '5';
+        releaseWakeLock();
+        state.runState = 'idle'; state.phase = null;
+        state.timeLeft = 0; state.phaseTotal = 0;
+        state.inQuick = false; state.currentQuick = 0;
+        state.currentRep = 0; state.currentSeries = 0;
+        const def = state.mode === 'kegel'
+          ? (state.config.kQuickEnabled ? state.config.kQuickTense : state.config.kTense)
+          : state.config.sTense;
+        els.timerNumber.textContent = def;
         els.timerUnit.textContent = 'sekund';
         els.phaseTitle.textContent = 'Gotowy?';
         els.phaseTitle.classList.remove('relax', 'break', 'done');
+        els.ringProgress.classList.remove('relax', 'break');
         els.phaseSubtitle.textContent = 'Naciśnij Start, by rozpocząć';
         els.ringProgress.setAttribute('stroke-dashoffset', RING_C);
-        els.btnStart.innerHTML = '<svg viewBox="0 0 16 16" width="10" height="10" style="display:inline-block;vertical-align:middle;margin-right:6px;fill:currentColor;"><polygon points="3,2 13,8 3,14"/></svg>Start';
+        els.btnStart.innerHTML = playSvg() + 'Start';
         els.btnStart.disabled = false;
         els.btnPause.disabled = true;
       }
-
       function finish() {
         if (state.tickHandle) clearInterval(state.tickHandle);
         state.tickHandle = null;
+        releaseWakeLock();
         state.runState = 'done';
         setPhase('done', 0);
-        els.btnStart.innerHTML = '<svg viewBox="0 0 16 16" width="10" height="10" style="display:inline-block;vertical-align:middle;margin-right:6px;fill:currentColor;"><polygon points="3,2 13,8 3,14"/></svg>Start';
+        els.btnStart.innerHTML = playSvg() + 'Start';
         els.btnStart.disabled = false;
         els.btnPause.disabled = true;
       }
+      function playSvg() {
+        return '<svg viewBox="0 0 16 16" width="10" height="10" style="display:inline-block;vertical-align:middle;margin-right:6px;fill:currentColor;"><polygon points="3,2 13,8 3,14"/></svg>';
+      }
 
-      // Bind buttons
+      // ======== BUTTONS ========
       els.btnStart.addEventListener('click', () => {
-        if (state.runState === 'paused') resumeTimer();
-        else startTimer();
+        if (state.runState === 'paused') resumeTimer(); else startTimer();
       });
       els.btnPause.addEventListener('click', pauseTimer);
       els.btnReset.addEventListener('click', resetTimer);
-
-      // Stats — open / close / reset
       els.linkStats.addEventListener('click', openStats);
       els.statsDrawerClose.addEventListener('click', closeStats);
       els.btnResetStats.addEventListener('click', resetStats);
-      // Backdrop zamyka oba drawery
       els.drawerBackdrop.addEventListener('click', () => { closeDrawer(); closeStats(); });
 
+      // Poradnik
+      function openGuide() { els.guideBackdrop.classList.add('show'); }
+      function closeGuide() { els.guideBackdrop.classList.remove('show'); }
+      els.linkGuide.addEventListener('click', openGuide);
+      els.guideClose.addEventListener('click', closeGuide);
+      els.guideBackdrop.addEventListener('click', (e) => { if (e.target === els.guideBackdrop) closeGuide(); });
+
+      // ESC zamyka panele; Spacja = Start/Pauza (gdy fokus poza polami)
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { closeDrawer(); closeStats(); closeGuide(); }
+        if (e.key === ' ') {
+          const tag = (document.activeElement && document.activeElement.tagName) || '';
+          if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+          e.preventDefault();
+          if (state.runState === 'running') pauseTimer();
+          else if (state.runState === 'paused') resumeTimer();
+          else startTimer();
+        }
+      });
+
+      // Wznowienie wake lock po powrocie do karty
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          if (state.runState === 'running') { requestWakeLock(); tick(); }
+        }
+      });
+
+      // ======== PRZYPOMNIENIA ========
+      async function requestNotifyPermission() {
+        if (!('Notification' in window)) return false;
+        if (Notification.permission === 'granted') return true;
+        if (Notification.permission === 'denied') return false;
+        try { const p = await Notification.requestPermission(); return p === 'granted'; } catch { return false; }
+      }
+      function scheduleReminder() {
+        if (state.reminderHandle) { clearTimeout(state.reminderHandle); state.reminderHandle = null; }
+        const c = state.config;
+        if (!c.reminderEnabled || !('Notification' in window) || Notification.permission !== 'granted') return;
+        const [hh, mm] = (c.reminderTime || '20:00').split(':').map(Number);
+        const now = new Date();
+        const next = new Date();
+        next.setHours(hh, mm, 0, 0);
+        if (next <= now) next.setDate(next.getDate() + 1);
+        const delay = Math.min(next - now, 24 * 3600 * 1000);
+        state.reminderHandle = setTimeout(() => {
+          const done = (state.stats.daily[todayISO()] || 0) >= c.dailyGoal;
+          if (!done) {
+            try { new Notification('Kegel Timer', { body: 'Czas na ćwiczenia dna miednicy 💪', icon: 'icon-192.png' }); } catch {}
+          }
+          scheduleReminder(); // zaplanuj kolejny dzień
+        }, delay);
+      }
+
       // ======== INIT ========
+      // ustaw aria-selected na zakładkach
+      tabs.forEach((t) => t.setAttribute('aria-selected', t.classList.contains('active') ? 'true' : 'false'));
       applyBackground();
       resetTimer();
-      rolloverDay();      // sprawdz przejscie dnia + reset todayCount jesli nowy dzien
-      renderStats();      // wstepne wyrenderowanie liczb (gdyby ktos otworzyl szybko)
-      console.log('Kegel Timer Faza 3 — gotowe. Tryb:', state.mode, 'Stats:', state.stats);
+      renderStats();
+      renderDailyStatus();
+      scheduleReminder();
+      console.log('Kegel Timer v2.0 gotowe. Tryb:', state.mode);
     })();
 
-    // ======== SERVICE WORKER REGISTRATION (Faza 4 PWA) ========
+    // ======== SERVICE WORKER ========
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('service-worker.js')

@@ -1,14 +1,14 @@
 // Kegel Timer — Service Worker (Faza 4 PWA)
 // Cache offline: index.html, manifest.json, ikony
 
-const CACHE_NAME = 'kegel-v3';
+const CACHE_NAME = 'kegel-v4';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  './bg-custom.png'
+  './bg-custom.webp'
 ];
 
 self.addEventListener('install', (event) => {
