@@ -760,6 +760,28 @@
     .week-row .wd { color: var(--muted); letter-spacing: .04em; }
     .week-row .wp { color: var(--text); }
 
+    /* ====== COACH ====== */
+    .coach-card {
+      width: 100%; border: 1px solid var(--accent); border-radius: 16px; padding: 16px 18px;
+      background: linear-gradient(135deg, rgba(201,169,110,0.16), var(--card-bg));
+      display: flex; flex-direction: column; gap: 5px; margin-bottom: 2px;
+    }
+    .coach-head { display: flex; align-items: center; gap: 8px; }
+    .coach-badge { font-size: 1.3rem; line-height: 1; }
+    .coach-title { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; color: var(--accent-bright); font-weight: 600; letter-spacing: .02em; }
+    .coach-greet { font-size: 0.86rem; color: var(--text); line-height: 1.5; }
+    .coach-lvl { font-size: 0.74rem; color: var(--muted); letter-spacing: .03em; }
+    .coach-rec { font-size: 0.9rem; color: var(--text); margin-top: 4px; line-height: 1.5; }
+    .coach-rec b { color: var(--accent); font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 1.05rem; }
+    .coach-btn {
+      margin-top: 11px; align-self: flex-start; background: var(--accent); color: var(--bg-base);
+      border: none; border-radius: 999px; padding: 11px 22px; font-family: 'Jost', sans-serif;
+      font-size: 0.8rem; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; transition: background .25s ease;
+    }
+    .coach-btn:hover, .coach-btn:active { background: var(--accent-bright); }
+    .prog-card.recommended { border-color: var(--accent); }
+    .prog-rec-tag { font-size: 0.58rem; letter-spacing: .1em; text-transform: uppercase; color: var(--bg-base); background: var(--accent); border-radius: 999px; padding: 2px 8px; margin-left: 8px; vertical-align: middle; white-space: nowrap; }
+
     /* ====== MODAL HELPERS (PE / poradnik) ====== */
     .modal h4 { font-size: 0.92rem; color: var(--accent-bright); margin: 14px 0 4px; font-weight: 500; font-family: 'Jost', sans-serif; letter-spacing: .02em; }
     .modal ol { padding-left: 18px; margin-top: 4px; }
@@ -1132,9 +1154,9 @@
 
   <script>
     // =========================================================
-    // KEGEL TIMER v3.0 — gotowe treningi (biblioteka sesji),
-    // reverse kegel, kontrola wytrysku (PE) holistycznie,
-    // poziomy, szybkie skurcze, wibracja, wake lock, wykres, cel
+    // KEGEL TIMER v3.1 — adaptacyjny Coach (rekomendacja sesji
+    // + auto-progresja przytrzymań), gotowe treningi, reverse
+    // kegel, kontrola wytrysku (PE), wibracja, wake lock, wykres
     // =========================================================
     (function () {
       'use strict';
@@ -1993,6 +2015,7 @@
         state.runState = 'idle';
         releaseWakeLock();
         showTimerView(false);
+        renderProgramList();
         $('programBack').style.display = 'none';
         $('programList').style.display = '';
       }
@@ -2011,11 +2034,52 @@
         $('programBack').style.display = '';
         resetTimer();
       }
+      // ======== COACH (adaptacyjny, offline) ========
+      // Poziom rośnie z liczbą ukończonych sesji; coach dorzuca sekundy do przytrzymań (cap 10s / stop-start 8s).
+      function coachLevel() {
+        const t = state.stats.total;
+        return t >= 70 ? 3 : t >= 35 ? 2 : t >= 14 ? 1 : 0;
+      }
+      function coachBonus() { return coachLevel(); }
+      // Efektywny czas napięcia z bonusem coacha + medyczny limit.
+      function effTense(b) {
+        const bonus = coachBonus();
+        if (b.type === 'hold') return Math.min(b.tense + bonus, 10);
+        if (b.type === 'stopstart') return Math.min(b.tense + bonus, 8);
+        return b.tense;
+      }
+      function recommendProgram() {
+        const todayCount = state.stats.daily[todayISO()] || 0;
+        const goal = state.config.dailyGoal;
+        const planByDow = { 1: 'fundament', 2: 'moc', 3: 'wytrzymalosc', 4: 'kontrola', 5: 'fundament', 6: 'kompletny', 0: 'reset' };
+        let id = planByDow[new Date().getDay()] || 'fundament';
+        // Cel dnia zrobiony → proponuj rozluźnienie (chyba że to już Reset).
+        if (todayCount >= goal && id !== 'reset') id = 'reset';
+        return PROGRAMS.find((p) => p.id === id) || PROGRAMS[0];
+      }
+      function coachGreeting() {
+        const s = state.stats;
+        const streak = streakOf(s);
+        const lvl = coachLevel();
+        const todayCount = s.daily[todayISO()] || 0;
+        const goal = state.config.dailyGoal;
+        let g;
+        if (todayCount >= goal) g = 'Cel na dziś zrobiony 🎉 Pora na rozluźnienie.';
+        else if (streak >= 7) g = 'Mocna passa: ' + streak + ' dni z rzędu! 🔥 Tak trzymaj.';
+        else if (streak >= 3) g = streak + ' dni z rzędu — świetna regularność.';
+        else if (s.total === 0) g = 'Cześć! Zacznij od sesji, którą polecam na dziś.';
+        else g = 'Dobrze Cię widzieć. Wracamy do treningu.';
+        const lvlLine = lvl === 0
+          ? 'Poziom startowy — budujemy bazę. Przy regularności sam podbiję trudność.'
+          : 'Poziom ' + lvl + ' — dorzucam +' + lvl + ' s do przytrzymań (max 10 s).';
+        return { g, lvlLine };
+      }
+
       function estimateDuration(p) {
         let t = 0;
         p.blocks.forEach((b) => {
           if (b.type === 'rest') { t += b.dur; return; }
-          t += b.reps * (b.tense + b.relax);
+          t += b.reps * (effTense(b) + b.relax);
         });
         return t;
       }
@@ -2026,13 +2090,24 @@
       }
       function renderProgramList() {
         const host = $('programList');
-        const intro = '<p class="program-intro">Gotowe sesje dla średniozaawansowanych. Wybierz cel — aplikacja poprowadzi Cię krok po kroku.</p>';
+        const rec = recommendProgram();
+        const cg = coachGreeting();
+        const coach = '<div class="coach-card">' +
+          '<div class="coach-head"><span class="coach-badge">🧭</span><span class="coach-title">Twój coach</span></div>' +
+          '<div class="coach-greet">' + cg.g + '</div>' +
+          '<div class="coach-lvl">' + cg.lvlLine + '</div>' +
+          '<div class="coach-rec">Na dziś polecam: <b>' + rec.icon + ' ' + rec.name + '</b> · ' + rec.focus.split('·')[0].trim() + '</div>' +
+          '<button class="coach-btn" id="coachStart">Trening na dziś →</button>' +
+          '</div>';
+        const intro = '<p class="program-intro">Albo wybierz sam — sesje dla średniozaawansowanych, aplikacja poprowadzi Cię krok po kroku.</p>';
         const cards = PROGRAMS.map((p) => {
+          const isRec = p.id === rec.id;
+          const recTag = isRec ? '<span class="prog-rec-tag">na dziś</span>' : '';
           const info = p.peInfo ? '<button class="prog-info-btn" data-peinfo="1">Jak to pomaga przy wytrysku? →</button>' : '';
-          return '<div class="prog-card" data-prog="' + p.id + '">' +
+          return '<div class="prog-card' + (isRec ? ' recommended' : '') + '" data-prog="' + p.id + '">' +
             '<div class="prog-ic">' + p.icon + '</div>' +
             '<div class="prog-body">' +
-              '<div class="prog-top"><span class="prog-name">' + p.name + '</span><span class="prog-meta">~' + durLabel(estimateDuration(p)) + '</span></div>' +
+              '<div class="prog-top"><span class="prog-name">' + p.name + recTag + '</span><span class="prog-meta">~' + durLabel(estimateDuration(p)) + '</span></div>' +
               '<div class="prog-focus">' + p.focus + '</div>' +
               '<div class="prog-desc">' + p.desc + '</div>' +
               '<div class="prog-badges">' + p.badges.map((b) => '<span class="prog-badge">' + b + '</span>').join('') + '</div>' +
@@ -2042,7 +2117,9 @@
         const week = '<div class="week-plan"><h4>Sugerowany tydzień (średni)</h4>' +
           WEEK_PLAN.map((w) => '<div class="week-row"><span class="wd">' + w.d + '</span><span class="wp">' + w.p + '</span></div>').join('') +
           '</div>';
-        host.innerHTML = intro + cards + week;
+        host.innerHTML = coach + intro + cards + week;
+        const cs = $('coachStart');
+        if (cs) cs.addEventListener('click', () => selectProgram(rec.id));
         host.querySelectorAll('[data-prog]').forEach((card) => card.addEventListener('click', (e) => {
           if (e.target.closest('[data-peinfo]')) { openPE(); return; }
           selectProgram(card.dataset.prog);
@@ -2062,10 +2139,10 @@
               steps.push({ kind: 'qtense', tone: '', cue: 'qtense', dur: b.tense, title: 'Szybko napnij', subtitle: tag });
               steps.push({ kind: 'qrelax', tone: 'relax', cue: 'qrelax', dur: b.relax, title: 'Puść', subtitle: tag });
             } else if (b.type === 'hold') {
-              steps.push({ kind: 'tense', tone: '', cue: 'tense', dur: b.tense, title: 'Trzymaj', subtitle: tag });
+              steps.push({ kind: 'tense', tone: '', cue: 'tense', dur: effTense(b), title: 'Trzymaj', subtitle: tag });
               steps.push({ kind: 'relax', tone: 'relax', cue: 'relax', dur: b.relax, title: 'Rozluźnij', subtitle: tag });
             } else if (b.type === 'stopstart') {
-              steps.push({ kind: 'tense', tone: '', cue: 'tense', dur: b.tense, title: 'Ściśnij i trzymaj', subtitle: tag });
+              steps.push({ kind: 'tense', tone: '', cue: 'tense', dur: effTense(b), title: 'Ściśnij i trzymaj', subtitle: tag });
               steps.push({ kind: 'relax', tone: 'relax', cue: 'relax', dur: b.relax, title: 'Pełny relaks', subtitle: tag });
             } else if (b.type === 'reverse') {
               steps.push({ kind: 'tense', tone: 'relax', cue: 'relax', dur: b.tense, title: 'Delikatnie wypchnij', subtitle: tag });
@@ -2124,7 +2201,7 @@
       renderStats();
       renderDailyStatus();
       scheduleReminder();
-      console.log('Kegel Timer v3.0 gotowe. Tryb:', state.mode);
+      console.log('Kegel Timer v3.1 gotowe. Tryb:', state.mode);
     })();
 
     // ======== SERVICE WORKER ========
