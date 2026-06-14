@@ -725,6 +725,49 @@
     .toast-icon { font-size: 1.8rem; line-height: 1; }
     .toast-txt b { color: var(--accent); font-size: 0.9rem; display: block; letter-spacing: 0.04em; }
     .toast-txt span { color: var(--muted); font-size: 0.78rem; }
+
+    /* ====== PROGRAM LIST (Trening) ====== */
+    .program-intro { text-align: center; font-size: 0.8rem; color: var(--muted); line-height: 1.6; margin: -4px auto 2px; max-width: 420px; }
+    .program-list { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+    .prog-card {
+      border: 1px solid var(--accent-dim); border-radius: 16px; padding: 16px;
+      background: var(--card-bg); cursor: pointer;
+      transition: border-color .25s ease, transform .12s ease;
+      display: flex; gap: 14px; align-items: flex-start; text-align: left;
+    }
+    .prog-card:hover { border-color: var(--accent); }
+    .prog-card:active { transform: scale(0.99); border-color: var(--accent); }
+    .prog-ic { font-size: 1.7rem; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+    .prog-body { flex: 1; min-width: 0; }
+    .prog-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .prog-name { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; font-weight: 600; color: var(--text); letter-spacing: .02em; }
+    .prog-meta { font-size: 0.72rem; color: var(--accent); letter-spacing: .05em; white-space: nowrap; }
+    .prog-focus { font-size: 0.78rem; color: var(--muted); margin-top: 2px; letter-spacing: .03em; }
+    .prog-desc { font-size: 0.8rem; color: var(--text); opacity: .82; margin-top: 8px; line-height: 1.5; font-weight: 300; }
+    .prog-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .prog-badge { font-size: 0.62rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--accent-dim); border-radius: 999px; padding: 3px 9px; }
+    .prog-info-btn { background: none; border: none; color: var(--accent); font-family: 'Jost', sans-serif; font-size: 0.74rem; letter-spacing: .04em; cursor: pointer; margin-top: 10px; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+    .program-back {
+      align-self: flex-start; background: none; border: none; color: var(--muted);
+      font-family: 'Jost', sans-serif; font-size: 0.8rem; letter-spacing: .08em; cursor: pointer;
+      padding: 2px 0; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .program-back:hover { color: var(--accent); }
+    .week-plan { width: 100%; border: 1px solid var(--accent-dim); border-radius: 14px; padding: 14px 16px; background: var(--card-bg); margin-top: 2px; }
+    .week-plan h4 { font-size: 0.7rem; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; font-weight: 400; }
+    .week-row { display: flex; justify-content: space-between; font-size: 0.8rem; padding: 5px 0; border-bottom: 1px solid var(--accent-dim); }
+    .week-row:last-child { border-bottom: none; }
+    .week-row .wd { color: var(--muted); letter-spacing: .04em; }
+    .week-row .wp { color: var(--text); }
+
+    /* ====== MODAL HELPERS (PE / poradnik) ====== */
+    .modal h4 { font-size: 0.92rem; color: var(--accent-bright); margin: 14px 0 4px; font-weight: 500; font-family: 'Jost', sans-serif; letter-spacing: .02em; }
+    .modal ol { padding-left: 18px; margin-top: 4px; }
+    .modal .tag-evi { display: inline-block; font-size: 0.6rem; letter-spacing: .05em; text-transform: uppercase; border-radius: 999px; padding: 2px 8px; margin-left: 6px; vertical-align: middle; white-space: nowrap; }
+    .tag-evi.good { color: #7fb069; border: 1px solid rgba(127,176,105,.5); }
+    .tag-evi.weak { color: var(--accent); border: 1px solid var(--accent-dim); }
+    .tag-evi.med  { color: #6ea8c9; border: 1px solid rgba(110,168,201,.5); }
+    .modal .pe-cta { display: block; width: 100%; text-align: center; margin-top: 12px; }
   </style>
 </head>
 <body>
@@ -739,9 +782,13 @@
     </header>
 
     <nav class="tabs" role="tablist">
-      <button class="tab active" data-mode="kegel" role="tab">Kegel</button>
+      <button class="tab active" data-mode="program" role="tab">Trening</button>
+      <button class="tab" data-mode="kegel" role="tab">Kegel</button>
       <button class="tab" data-mode="stopstart" role="tab">Stop-Start</button>
     </nav>
+
+    <button class="program-back" id="programBack" style="display:none;">‹ Wszystkie treningi</button>
+    <div class="program-list" id="programList" style="display:none;"></div>
 
     <div class="timer-ring" aria-label="Licznik czasu">
       <svg viewBox="0 0 200 200" aria-hidden="true">
@@ -990,6 +1037,21 @@
         <li>Pomijanie fazy rozluźnienia.</li>
       </ul>
 
+      <h3>Reverse Kegel — rozluźnianie</h3>
+      <p>To odwrotność Kegla: zamiast napinać, <b>delikatnie wydłużasz i rozluźniasz</b> dno miednicy (jak przy spokojnym wydechu lub bardzo lekkim parciu — bez wysiłku). Pomaga, gdy mięśnie są nadmiernie napięte, i wspiera kontrolę wytrysku. Masz to w programie <b>🌀 Reset</b>.</p>
+
+      <h3>Progresja w czasie</h3>
+      <ul>
+        <li><b>Tydzień 1–2:</b> nauka izolacji mięśni, przytrzymania 3–5 s.</li>
+        <li><b>Tydzień 3–6:</b> wydłużaj przytrzymania do 8–10 s, dodaj szybkie skurcze.</li>
+        <li><b>Tydzień 6+:</b> 3 sesje dziennie, mieszaj programy wg planu tygodniowego.</li>
+      </ul>
+      <p>Pierwsze efekty zwykle po <b>4–6 tygodniach</b>, wyraźna kontrola po <b>8–12</b>.</p>
+
+      <h3>Przedwczesny wytrysk</h3>
+      <p>Masz osobny, holistyczny poradnik — ćwiczenia, techniki behawioralne, suplementy i styl życia.</p>
+      <button class="btn btn-primary pe-cta" id="guidePeBtn">🎯 Kontrola wytrysku — otwórz poradnik</button>
+
       <div class="disclaimer">
         Aplikacja ma charakter wspomagający trening. W razie bólu, nietrzymania moczu, dolegliwości lub wątpliwości skonsultuj się z lekarzem lub fizjoterapeutą uroginekologicznym. To nie jest porada medyczna.
       </div>
@@ -1000,13 +1062,79 @@
     </div>
   </div>
 
+  <!-- ====== KONTROLA WYTRYSKU (PE) MODAL ====== -->
+  <div class="modal-backdrop" id="peBackdrop">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Kontrola wytrysku">
+      <h2>Kontrola wytrysku</h2>
+      <p style="font-size:0.85rem;color:var(--muted);margin-top:2px;">Podejście holistyczne — ciało, technika, głowa i styl życia działają razem. Żadna metoda osobno nie zdziała tyle, co wszystkie naraz.</p>
+
+      <h3>1 · Trening dna miednicy</h3>
+      <p>Najlepiej udokumentowana metoda naturalna. W badaniu mężczyzn z przedwczesnym wytryskiem czas do wytrysku wzrósł średnio z ~40 s do ~146 s po treningu dna miednicy.<span class="tag-evi good">dobre dowody</span></p>
+      <ul>
+        <li>Używaj programu <b>🎯 Kontrola</b> — łączy szybkie skurcze ze stop-start.</li>
+        <li>Dorzuć <b>🌀 Reset (reverse kegel)</b> — rozluźnienie napiętego dna często poprawia kontrolę.</li>
+        <li>Efekty: pierwsze po 4–6 tyg., wyraźna kontrola po 8–12.</li>
+      </ul>
+
+      <h3>2 · Techniki behawioralne</h3>
+      <h4>Stop-Start (Semans)</h4>
+      <p>Stymuluj się aż do uczucia bliskości wytrysku, potem <b>przerwij</b>, aż pobudzenie opadnie. Powtórz 3–4× zanim pozwolisz na wytrysk. Uczy rozpoznawać „punkt bez powrotu".<span class="tag-evi good">dobre dowody</span></p>
+      <h4>Ściskanie (Masters &amp; Johnson)</h4>
+      <p>Tuż przed wytryskiem uciśnij żołądź lub podstawę penisa na kilka sekund, by zbić pobudzenie.<span class="tag-evi med">umiarkowane</span></p>
+      <h4>Edging</h4>
+      <p>Świadome utrzymywanie się tuż poniżej progu wytrysku — trening wrażliwości i progu pobudzenia.</p>
+
+      <h3>3 · Głowa i relaks</h3>
+      <ul>
+        <li><b>Lęk przed wydajnością</b> to najczęstsza przyczyna — im mniej presji, tym lepsza kontrola.</li>
+        <li><b>Oddech przeponowy</b> i mindfulness obniżają pobudzenie układu współczulnego.</li>
+        <li><b>Rozmowa z partnerką</b> zdejmuje presję i pozwala trenować techniki razem.</li>
+      </ul>
+
+      <h3>4 · Styl życia</h3>
+      <ul>
+        <li>Sen 7–8 h i redukcja stresu — przewlekły stres skraca kontrolę.</li>
+        <li>Regularne kardio — lepsze krążenie i wydolność.</li>
+        <li>Ogranicz alkohol i nikotynę.</li>
+        <li>Dieta bogata w cynk, magnez i omega-3.</li>
+      </ul>
+
+      <h3>5 · Suplementy — uczciwie</h3>
+      <p style="font-size:0.82rem;color:var(--muted);">Dowody są słabe — traktuj jako wsparcie, nie lek. Zawsze sprawdź interakcje z lekami.</p>
+      <ul>
+        <li><b>Cynk</b> — pomaga głównie przy niedoborze (wpływ na testosteron).<span class="tag-evi weak">słabe</span></li>
+        <li><b>Magnez</b> — relaks mięśni i redukcja stresu.<span class="tag-evi weak">słabe</span></li>
+        <li><b>Ashwagandha</b> — obniża kortyzol i lęk, więc pośrednio może pomóc.<span class="tag-evi weak">słabe</span></li>
+        <li><b>Omega-3</b> — wspiera krążenie.<span class="tag-evi weak">słabe</span></li>
+      </ul>
+      <p style="font-size:0.82rem;">Mocniejsze dowody mają metody <b>od lekarza</b>: kremy/spraye znieczulające (lidokaina/prylokaina) oraz leki SSRI (np. dapoksetyna). To decyzja z lekarzem, nie suplement z półki.<span class="tag-evi good">dobre dowody</span></p>
+
+      <h3>Plan na start</h3>
+      <ol>
+        <li>Program <b>🎯 Kontrola</b> + <b>🌀 Reset</b> — 5–6× w tygodniu.</li>
+        <li>Technika stop-start podczas współżycia lub masturbacji.</li>
+        <li>Oddech przeponowy i mniej presji w głowie.</li>
+        <li>Sen, kardio, mniej alkoholu.</li>
+        <li>Suplementy tylko świadomie, po sprawdzeniu niedoborów.</li>
+      </ol>
+
+      <div class="disclaimer">
+        Materiał edukacyjny, nie porada medyczna. Jeśli problem jest uporczywy, stresujący, pojawił się nagle albo towarzyszy mu zaburzenie erekcji — skonsultuj się z urologiem, seksuologiem lub fizjoterapeutą uroginekologicznym. Suplementów nie łącz z lekami bez konsultacji.
+      </div>
+      <div class="modal-close-row">
+        <button class="btn btn-primary" id="peClose">Rozumiem</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ====== TOASTS ====== -->
   <div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
 
   <script>
     // =========================================================
-    // KEGEL TIMER v2.0 — poziomy, szybkie skurcze, wibracja,
-    // wake lock, dokładny timer, wykres, osiągnięcia, cel, poradnik
+    // KEGEL TIMER v3.0 — gotowe treningi (biblioteka sesji),
+    // reverse kegel, kontrola wytrysku (PE) holistycznie,
+    // poziomy, szybkie skurcze, wibracja, wake lock, wykres, cel
     // =========================================================
     (function () {
       'use strict';
@@ -1028,6 +1156,118 @@
         advanced:     { kTense: 8, kRelax: 4, kReps: 12, kSeries: 4, kBreak: 25, kQuickReps: 15 }
       };
 
+      // ======== GOTOWE TRENINGI (oparte na zaleceniach treningu dna miednicy) ========
+      // Typy bloków: quick (szybkie skurcze, fast-twitch) | hold (przytrzymania, slow-twitch)
+      //   stopstart (kontrola wytrysku) | reverse (reverse kegel / rozluźnienie) | breathe (oddech) | rest (przerwa)
+      const BLOCK_NAMES = {
+        quick: 'Szybkie skurcze', hold: 'Przytrzymanie', stopstart: 'Stop-Start',
+        reverse: 'Reverse kegel', breathe: 'Oddech'
+      };
+      const PROGRAMS = [
+        {
+          id: 'fundament', icon: '🛡️', name: 'Fundament',
+          focus: 'Równowaga · codzienny fundament',
+          desc: 'Rozgrzewka szybkimi skurczami + dwie serie przytrzymań po 6 s. Złoty standard na każdy dzień — buduje siłę i wytrzymałość naraz.',
+          badges: ['Średni', 'Fast + Slow', 'Codziennie'],
+          blocks: [
+            { type: 'quick', reps: 10, tense: 2, relax: 2 },
+            { type: 'rest', dur: 20 },
+            { type: 'hold', reps: 10, tense: 6, relax: 6 },
+            { type: 'rest', dur: 30 },
+            { type: 'hold', reps: 10, tense: 6, relax: 6 }
+          ]
+        },
+        {
+          id: 'wytrzymalosc', icon: '⏳', name: 'Wytrzymałość',
+          focus: 'Długie przytrzymania · wytrzymałość',
+          desc: 'Stopniowo dłuższe napięcia, do 10 s. Trenuje włókna wolnokurczliwe — wytrzymałość mięśnia i kontrolę.',
+          badges: ['Średni +', 'Slow-twitch', 'Siła'],
+          blocks: [
+            { type: 'quick', reps: 8, tense: 2, relax: 2 },
+            { type: 'rest', dur: 20 },
+            { type: 'hold', reps: 10, tense: 8, relax: 8 },
+            { type: 'rest', dur: 30 },
+            { type: 'hold', reps: 10, tense: 8, relax: 8 },
+            { type: 'rest', dur: 30 },
+            { type: 'hold', reps: 8, tense: 10, relax: 10 }
+          ]
+        },
+        {
+          id: 'moc', icon: '⚡', name: 'Moc',
+          focus: 'Szybkie skurcze · moc i refleks',
+          desc: 'Eksplozywne skurcze trenujące szybką reakcję mięśni — przydatne przy nagłym parciu i w łóżku.',
+          badges: ['Średni', 'Fast-twitch', 'Refleks'],
+          blocks: [
+            { type: 'quick', reps: 20, tense: 2, relax: 2 },
+            { type: 'rest', dur: 25 },
+            { type: 'quick', reps: 20, tense: 2, relax: 2 },
+            { type: 'rest', dur: 25 },
+            { type: 'quick', reps: 15, tense: 2, relax: 2 }
+          ]
+        },
+        {
+          id: 'kontrola', icon: '🎯', name: 'Kontrola', peInfo: true,
+          focus: 'Opóźnianie wytrysku · kontrola',
+          desc: 'Szybkie skurcze + technika stop-start (ściśnij i w pełni rozluźnij). Trenuje świadome opóźnianie wytrysku.',
+          badges: ['Średni', 'Przedwczesny wytrysk', 'Stop-Start'],
+          blocks: [
+            { type: 'quick', reps: 10, tense: 2, relax: 2 },
+            { type: 'rest', dur: 20 },
+            { type: 'stopstart', reps: 12, tense: 5, relax: 10 }
+          ]
+        },
+        {
+          id: 'reset', icon: '🌀', name: 'Reset', peInfo: true,
+          focus: 'Rozluźnienie · reverse kegel',
+          desc: 'Odwrotność Kegla: delikatne rozluźnianie i wydłużanie dna miednicy + oddech. Na wieczór, po długim siedzeniu, przy nadmiernym napięciu.',
+          badges: ['Regeneracja', 'Reverse Kegel', 'Anty-napięcie'],
+          blocks: [
+            { type: 'reverse', reps: 8, tense: 5, relax: 5 },
+            { type: 'rest', dur: 12 },
+            { type: 'reverse', reps: 6, tense: 6, relax: 6 },
+            { type: 'rest', dur: 12 },
+            { type: 'breathe', reps: 6, tense: 4, relax: 6 }
+          ]
+        },
+        {
+          id: 'express', icon: '⏱️', name: 'Express',
+          focus: 'Krótka sesja · gdy brak czasu',
+          desc: 'Minimum, które działa: rozgrzewka + jedna seria przytrzymań. Zawsze lepsze niż pominięty trening.',
+          badges: ['Średni', 'Najkrótszy', 'Gdy mało czasu'],
+          blocks: [
+            { type: 'quick', reps: 10, tense: 2, relax: 2 },
+            { type: 'rest', dur: 15 },
+            { type: 'hold', reps: 8, tense: 5, relax: 5 }
+          ]
+        },
+        {
+          id: 'kompletny', icon: '🔥', name: 'Kompletny',
+          focus: 'Wszystko w jednym · maksymalny efekt',
+          desc: 'Szybkie skurcze + wytrzymałość + kontrola + cool-down reverse. Pełna sesja na maksymalizację efektów.',
+          badges: ['Zaawansowany', 'Pełna sesja', 'Maks efekt'],
+          blocks: [
+            { type: 'quick', reps: 15, tense: 2, relax: 2 },
+            { type: 'rest', dur: 25 },
+            { type: 'hold', reps: 10, tense: 8, relax: 8 },
+            { type: 'rest', dur: 30 },
+            { type: 'hold', reps: 10, tense: 8, relax: 8 },
+            { type: 'rest', dur: 30 },
+            { type: 'stopstart', reps: 10, tense: 5, relax: 10 },
+            { type: 'rest', dur: 25 },
+            { type: 'reverse', reps: 6, tense: 5, relax: 5 }
+          ]
+        }
+      ];
+      const WEEK_PLAN = [
+        { d: 'Poniedziałek', p: '🛡️ Fundament' },
+        { d: 'Wtorek',       p: '⚡ Moc' },
+        { d: 'Środa',        p: '⏳ Wytrzymałość' },
+        { d: 'Czwartek',     p: '🎯 Kontrola' },
+        { d: 'Piątek',       p: '🛡️ Fundament' },
+        { d: 'Sobota',       p: '🔥 Kompletny' },
+        { d: 'Niedziela',    p: '🌀 Reset / wolne' }
+      ];
+
       const ACHIEVEMENTS = [
         { id: 'first', icon: '🌱', name: '1. seria',    test: (s) => s.total >= 1 },
         { id: 'goal',  icon: '🎯', name: 'Cel dnia',    test: (s) => (s.daily[todayISO()] || 0) >= state.config.dailyGoal },
@@ -1043,7 +1283,10 @@
       const state = {
         config: loadConfig(),
         stats: loadStats(),
-        mode: 'kegel',
+        mode: 'program',             // program | kegel | stopstart
+        program: null,               // wybrany gotowy trening
+        programSteps: [],            // rozwinięta lista kroków
+        stepIdx: 0,
         runState: 'idle',            // idle | running | paused | done
         phase: null,                 // qtense|qrelax|tense|relax|break|hold|done
         phaseTotal: 0,
@@ -1446,7 +1689,9 @@
         tabs.forEach((x) => { x.classList.remove('active'); x.setAttribute('aria-selected', 'false'); });
         t.classList.add('active'); t.setAttribute('aria-selected', 'true');
         state.mode = t.dataset.mode;
-        resetTimer();
+        state.program = null;
+        if (state.mode === 'program') { showProgramList(); }
+        else { hideProgramList(); resetTimer(); }
       }));
 
       // ======== AUDIO ========
@@ -1576,21 +1821,26 @@
       function tick() {
         if (state.runState !== 'running') return;
         state.timeLeft = (state.phaseEndAt - Date.now()) / 1000;
-        if (state.timeLeft <= 0) { nextPhase(); }
+        if (state.timeLeft <= 0) { state.program ? programAdvance() : nextPhase(); }
         else renderTime();
       }
 
       function startTimer() {
+        if (state.mode === 'program' && !state.program) return;
         ensureAudio();
         requestWakeLock();
         if (state.runState === 'idle' || state.runState === 'done') {
-          const c = state.config;
-          state.currentSeries = 1; state.currentRep = 1;
-          if (state.mode === 'kegel' && c.kQuickEnabled && c.kQuickReps > 0) {
-            state.inQuick = true; state.currentQuick = 1; setPhase('qtense', c.kQuickTense);
+          if (state.mode === 'program' && state.program) {
+            programStart();
           } else {
-            state.inQuick = false;
-            setPhase('tense', state.mode === 'kegel' ? c.kTense : c.sTense);
+            const c = state.config;
+            state.currentSeries = 1; state.currentRep = 1;
+            if (state.mode === 'kegel' && c.kQuickEnabled && c.kQuickReps > 0) {
+              state.inQuick = true; state.currentQuick = 1; setPhase('qtense', c.kQuickTense);
+            } else {
+              state.inQuick = false;
+              setPhase('tense', state.mode === 'kegel' ? c.kTense : c.sTense);
+            }
           }
         }
         state.runState = 'running';
@@ -1628,19 +1878,27 @@
         state.timeLeft = 0; state.phaseTotal = 0;
         state.inQuick = false; state.currentQuick = 0;
         state.currentRep = 0; state.currentSeries = 0;
+        state.programSteps = []; state.stepIdx = 0;
+        els.phaseTitle.classList.remove('relax', 'break', 'done');
+        els.ringProgress.classList.remove('relax', 'break');
+        els.ringProgress.setAttribute('stroke-dashoffset', RING_C);
+        els.btnStart.innerHTML = playSvg() + 'Start';
+        els.btnStart.disabled = false;
+        els.btnPause.disabled = true;
+        if (state.mode === 'program' && state.program) {
+          els.timerNumber.textContent = state.program.icon;
+          els.timerUnit.textContent = '';
+          els.phaseTitle.textContent = state.program.name;
+          els.phaseSubtitle.textContent = state.program.focus + ' · naciśnij Start';
+          return;
+        }
         const def = state.mode === 'kegel'
           ? (state.config.kQuickEnabled ? state.config.kQuickTense : state.config.kTense)
           : state.config.sTense;
         els.timerNumber.textContent = def;
         els.timerUnit.textContent = 'sekund';
         els.phaseTitle.textContent = 'Gotowy?';
-        els.phaseTitle.classList.remove('relax', 'break', 'done');
-        els.ringProgress.classList.remove('relax', 'break');
         els.phaseSubtitle.textContent = 'Naciśnij Start, by rozpocząć';
-        els.ringProgress.setAttribute('stroke-dashoffset', RING_C);
-        els.btnStart.innerHTML = playSvg() + 'Start';
-        els.btnStart.disabled = false;
-        els.btnPause.disabled = true;
       }
       function finish() {
         if (state.tickHandle) clearInterval(state.tickHandle);
@@ -1676,7 +1934,7 @@
 
       // ESC zamyka panele; Spacja = Start/Pauza (gdy fokus poza polami)
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') { closeDrawer(); closeStats(); closeGuide(); }
+        if (e.key === 'Escape') { closeDrawer(); closeStats(); closeGuide(); closePE(); }
         if (e.key === ' ') {
           const tag = (document.activeElement && document.activeElement.tagName) || '';
           if (tag === 'INPUT' || tag === 'TEXTAREA') return;
@@ -1720,15 +1978,153 @@
         }, delay);
       }
 
+      // ======== PROGRAMY: WIDOK / RUNNER ========
+      const timerViewEls = [
+        document.querySelector('.timer-ring'),
+        document.querySelector('.phase-message'),
+        document.querySelector('.controls')
+      ];
+      function showTimerView(show) {
+        timerViewEls.forEach((e) => { if (e) e.style.display = show ? '' : 'none'; });
+      }
+      function showProgramList() {
+        state.program = null;
+        if (state.tickHandle) { clearInterval(state.tickHandle); state.tickHandle = null; }
+        state.runState = 'idle';
+        releaseWakeLock();
+        showTimerView(false);
+        $('programBack').style.display = 'none';
+        $('programList').style.display = '';
+      }
+      function hideProgramList() {
+        $('programList').style.display = 'none';
+        $('programBack').style.display = 'none';
+        showTimerView(true);
+      }
+      function selectProgram(id) {
+        const p = PROGRAMS.find((x) => x.id === id);
+        if (!p) return;
+        state.program = p;
+        state.mode = 'program';
+        $('programList').style.display = 'none';
+        showTimerView(true);
+        $('programBack').style.display = '';
+        resetTimer();
+      }
+      function estimateDuration(p) {
+        let t = 0;
+        p.blocks.forEach((b) => {
+          if (b.type === 'rest') { t += b.dur; return; }
+          t += b.reps * (b.tense + b.relax);
+        });
+        return t;
+      }
+      function durLabel(sec) {
+        if (sec < 60) return Math.round(sec) + ' s';
+        const m = sec / 60;
+        return (Math.round(m * 10) / 10).toString().replace('.', ',') + ' min';
+      }
+      function renderProgramList() {
+        const host = $('programList');
+        const intro = '<p class="program-intro">Gotowe sesje dla średniozaawansowanych. Wybierz cel — aplikacja poprowadzi Cię krok po kroku.</p>';
+        const cards = PROGRAMS.map((p) => {
+          const info = p.peInfo ? '<button class="prog-info-btn" data-peinfo="1">Jak to pomaga przy wytrysku? →</button>' : '';
+          return '<div class="prog-card" data-prog="' + p.id + '">' +
+            '<div class="prog-ic">' + p.icon + '</div>' +
+            '<div class="prog-body">' +
+              '<div class="prog-top"><span class="prog-name">' + p.name + '</span><span class="prog-meta">~' + durLabel(estimateDuration(p)) + '</span></div>' +
+              '<div class="prog-focus">' + p.focus + '</div>' +
+              '<div class="prog-desc">' + p.desc + '</div>' +
+              '<div class="prog-badges">' + p.badges.map((b) => '<span class="prog-badge">' + b + '</span>').join('') + '</div>' +
+              info +
+            '</div></div>';
+        }).join('');
+        const week = '<div class="week-plan"><h4>Sugerowany tydzień (średni)</h4>' +
+          WEEK_PLAN.map((w) => '<div class="week-row"><span class="wd">' + w.d + '</span><span class="wp">' + w.p + '</span></div>').join('') +
+          '</div>';
+        host.innerHTML = intro + cards + week;
+        host.querySelectorAll('[data-prog]').forEach((card) => card.addEventListener('click', (e) => {
+          if (e.target.closest('[data-peinfo]')) { openPE(); return; }
+          selectProgram(card.dataset.prog);
+        }));
+      }
+      function buildSteps(p) {
+        const steps = [];
+        p.blocks.forEach((b) => {
+          if (b.type === 'rest') {
+            steps.push({ kind: 'break', tone: 'break', cue: 'break', dur: b.dur, title: 'Przerwa', subtitle: 'Odpocznij' });
+            return;
+          }
+          const nm = BLOCK_NAMES[b.type] || '';
+          for (let i = 1; i <= b.reps; i++) {
+            const tag = nm + ' · ' + i + '/' + b.reps;
+            if (b.type === 'quick') {
+              steps.push({ kind: 'qtense', tone: '', cue: 'qtense', dur: b.tense, title: 'Szybko napnij', subtitle: tag });
+              steps.push({ kind: 'qrelax', tone: 'relax', cue: 'qrelax', dur: b.relax, title: 'Puść', subtitle: tag });
+            } else if (b.type === 'hold') {
+              steps.push({ kind: 'tense', tone: '', cue: 'tense', dur: b.tense, title: 'Trzymaj', subtitle: tag });
+              steps.push({ kind: 'relax', tone: 'relax', cue: 'relax', dur: b.relax, title: 'Rozluźnij', subtitle: tag });
+            } else if (b.type === 'stopstart') {
+              steps.push({ kind: 'tense', tone: '', cue: 'tense', dur: b.tense, title: 'Ściśnij i trzymaj', subtitle: tag });
+              steps.push({ kind: 'relax', tone: 'relax', cue: 'relax', dur: b.relax, title: 'Pełny relaks', subtitle: tag });
+            } else if (b.type === 'reverse') {
+              steps.push({ kind: 'tense', tone: 'relax', cue: 'relax', dur: b.tense, title: 'Delikatnie wypchnij', subtitle: tag });
+              steps.push({ kind: 'relax', tone: 'relax', cue: 'qrelax', dur: b.relax, title: 'Neutralnie', subtitle: tag });
+            } else if (b.type === 'breathe') {
+              steps.push({ kind: 'relax', tone: 'relax', cue: 'relax', dur: b.tense, title: 'Wdech nosem', subtitle: tag });
+              steps.push({ kind: 'relax', tone: 'relax', cue: 'qrelax', dur: b.relax, title: 'Wydech ustami', subtitle: tag });
+            }
+          }
+        });
+        steps.push({ kind: 'done', tone: 'done', cue: 'done', dur: 0, title: 'Gotowe', subtitle: 'Sesja ukończona 🎉' });
+        return steps;
+      }
+      function setStep(step) {
+        state.phase = step.kind;
+        state.phaseTotal = step.dur;
+        state.timeLeft = step.dur;
+        state.phaseEndAt = Date.now() + step.dur * 1000;
+        els.phaseTitle.classList.remove('relax', 'break', 'done');
+        els.ringProgress.classList.remove('relax', 'break');
+        if (step.tone === 'relax') { els.phaseTitle.classList.add('relax'); els.ringProgress.classList.add('relax'); }
+        else if (step.tone === 'break') { els.phaseTitle.classList.add('break'); els.ringProgress.classList.add('break'); }
+        else if (step.tone === 'done') { els.phaseTitle.classList.add('done'); }
+        els.phaseTitle.textContent = step.title;
+        els.phaseSubtitle.textContent = step.subtitle;
+        els.timerUnit.textContent = step.dur > 0 ? 'sekund' : '';
+        renderTime();
+        cue(step.cue || 'tense');
+      }
+      function programStart() {
+        state.programSteps = buildSteps(state.program);
+        state.stepIdx = 0;
+        setStep(state.programSteps[0]);
+      }
+      function programAdvance() {
+        state.stepIdx++;
+        const step = state.programSteps[state.stepIdx];
+        if (!step || step.kind === 'done') { addCompletedSeries(); finish(); return; }
+        setStep(step);
+      }
+      $('programBack').addEventListener('click', showProgramList);
+
+      // ======== PE MODAL ========
+      function openPE() { $('peBackdrop').classList.add('show'); }
+      function closePE() { $('peBackdrop').classList.remove('show'); }
+      $('peClose').addEventListener('click', closePE);
+      $('peBackdrop').addEventListener('click', (e) => { if (e.target === $('peBackdrop')) closePE(); });
+      $('guidePeBtn').addEventListener('click', () => { closeGuide(); openPE(); });
+
       // ======== INIT ========
       // ustaw aria-selected na zakładkach
       tabs.forEach((t) => t.setAttribute('aria-selected', t.classList.contains('active') ? 'true' : 'false'));
       applyBackground();
-      resetTimer();
+      renderProgramList();
+      if (state.mode === 'program') showProgramList(); else resetTimer();
       renderStats();
       renderDailyStatus();
       scheduleReminder();
-      console.log('Kegel Timer v2.0 gotowe. Tryb:', state.mode);
+      console.log('Kegel Timer v3.0 gotowe. Tryb:', state.mode);
     })();
 
     // ======== SERVICE WORKER ========
