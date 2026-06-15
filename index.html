@@ -936,6 +936,19 @@
       <button class="pill" data-cue="none">🔕 Bez sygnału</button>
     </div>
 
+    <div class="field">
+      <div class="field-row"><label class="field-label" for="sVolume">Głośność dźwięku</label><span class="field-value" id="vVolume">60%</span></div>
+      <input type="range" id="sVolume" min="0" max="100" value="60" step="5">
+    </div>
+
+    <div class="section-title">Siła wibracji</div>
+    <div class="section-hint">Reguluje długość impulsów — mocniej = wyraźniej czuć (działa, gdy wibracja jest włączona).</div>
+    <div class="pill-row">
+      <button class="pill third" data-vibe="low">Słaba</button>
+      <button class="pill third" data-vibe="med">Średnia</button>
+      <button class="pill third" data-vibe="high">Mocna</button>
+    </div>
+
     <div class="section-title">Cel dzienny</div>
     <div class="field">
       <div class="field-row">
@@ -1236,6 +1249,7 @@
         kQuickEnabled: true, kQuickReps: 10, kQuickTense: 1, kQuickRelax: 1,
         sTense: 3, sHold: 2, sRelax: 5, sReps: 10,
         cue: 'both',
+        volume: 60, vibeLevel: 'med',
         dailyGoal: 3,
         reminderEnabled: false, reminderTime: '20:00',
         bg: 'calm', customBg: null
@@ -1663,11 +1677,13 @@
         $('sSRelax').value = c.sRelax;   $('vSRelax').textContent = formatSec(c.sRelax);
         $('sSReps').value = c.sReps;     $('vSReps').textContent = c.sReps;
         $('sGoal').value = c.dailyGoal;  $('vGoal').textContent = c.dailyGoal;
+        $('sVolume').value = c.volume ?? 60; $('vVolume').textContent = (c.volume ?? 60) + '%';
         els.sReminderTime.value = c.reminderTime || '20:00';
         // pills
         const theme = document.documentElement.dataset.theme || 'dark';
         document.querySelectorAll('[data-theme]').forEach((b) => b.classList.toggle('active', b.dataset.theme === theme));
         document.querySelectorAll('[data-cue]').forEach((b) => b.classList.toggle('active', b.dataset.cue === c.cue));
+        document.querySelectorAll('[data-vibe]').forEach((b) => b.classList.toggle('active', b.dataset.vibe === (c.vibeLevel || 'med')));
         document.querySelectorAll('[data-quick]').forEach((b) => b.classList.toggle('active', b.dataset.quick === (c.kQuickEnabled ? 'on' : 'off')));
         document.querySelectorAll('[data-reminder]').forEach((b) => b.classList.toggle('active', b.dataset.reminder === (c.reminderEnabled ? 'on' : 'off')));
         document.querySelectorAll('[data-bg]').forEach((b) => b.classList.toggle('active', b.dataset.bg === c.bg));
@@ -1713,6 +1729,12 @@
       bindSlider('sKSeries','vKSeries','kSeries',false);
       bindSlider('sSReps',  'vSReps',  'sReps',  false);
       bindSlider('sGoal',   'vGoal',   'dailyGoal', false);
+      // Głośność — własna obsługa (suffix %), próbka dźwięku po puszczeniu suwaka
+      $('sVolume').addEventListener('input', () => {
+        state.config.volume = parseInt($('sVolume').value, 10);
+        $('vVolume').textContent = state.config.volume + '%';
+      });
+      $('sVolume').addEventListener('change', () => { ensureAudio(); playGong(523); });
 
       // ======== PILLS ========
       document.querySelectorAll('[data-level]').forEach((btn) => btn.addEventListener('click', () => {
@@ -1727,6 +1749,11 @@
         // mała próbka sygnału
         if (state.config.cue === 'vibration' || state.config.cue === 'both') vibrate([60]);
         if (state.config.cue === 'sound' || state.config.cue === 'both') { ensureAudio(); playGong(523); }
+      }));
+      document.querySelectorAll('[data-vibe]').forEach((btn) => btn.addEventListener('click', () => {
+        state.config.vibeLevel = btn.dataset.vibe;
+        document.querySelectorAll('[data-vibe]').forEach((b) => b.classList.toggle('active', b === btn));
+        vibrate([120]); // próbka siły
       }));
       document.querySelectorAll('[data-quick]').forEach((btn) => btn.addEventListener('click', () => {
         state.config.kQuickEnabled = btn.dataset.quick === 'on';
@@ -1795,18 +1822,29 @@
       }
       function playGong(freq) {
         if (!state.audioCtx) return;
+        const vol = Math.max(0, Math.min(100, state.config.volume ?? 60)) / 100;
+        const peak = vol * 0.4; // 0..0.4
+        if (peak <= 0) return;  // wyciszone
         const ctx = state.audioCtx;
         const osc = ctx.createOscillator(), gain = ctx.createGain();
         osc.type = 'sine'; osc.frequency.value = freq;
         const now = ctx.currentTime;
         gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(0.25, now + 0.01);
+        gain.gain.linearRampToValueAtTime(peak, now + 0.01);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
         osc.connect(gain).connect(ctx.destination);
         osc.start(now); osc.stop(now + 0.6);
       }
       function vibrate(pattern) {
-        try { if (navigator.vibrate) navigator.vibrate(pattern); } catch {}
+        try {
+          if (!navigator.vibrate) return;
+          const f = { low: 0.5, med: 1, high: 1.7 }[state.config.vibeLevel] || 1;
+          // skaluj tylko impulsy wibracji (parzyste indeksy), przerwy (nieparzyste) bez zmian
+          const scaled = Array.isArray(pattern)
+            ? pattern.map((x, i) => (i % 2 === 0 ? Math.max(10, Math.round(x * f)) : x))
+            : pattern;
+          navigator.vibrate(scaled);
+        } catch {}
       }
       function cue(phase) {
         const c = state.config.cue;
@@ -2366,7 +2404,7 @@
       renderStats();
       renderDailyStatus();
       scheduleReminder();
-      console.log('Kegel Timer v3.3 (AI Coach) gotowe. Tryb:', state.mode);
+      console.log('Kegel Timer v3.4 (AI Coach + głośność/wibracja) gotowe. Tryb:', state.mode);
     })();
 
     // ======== SERVICE WORKER ========
