@@ -794,6 +794,34 @@
       font-size: 0.8rem; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; transition: background .25s ease;
     }
     .coach-btn:hover, .coach-btn:active { background: var(--accent-bright); }
+    .coach-btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+    .coach-btn.secondary:hover, .coach-btn.secondary:active { background: var(--accent-dim); color: var(--accent); }
+    .coach-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 11px; }
+    .coach-actions .coach-btn { margin-top: 0; }
+    .coach-ai { font-size: 0.85rem; color: var(--text); line-height: 1.5; margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: rgba(147,168,232,0.10); border: 1px solid var(--accent-dim); }
+    .coach-ai.loading { color: var(--muted); font-style: italic; }
+    .coach-ai .ai-label { display: block; font-size: 0.62rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+
+    /* ====== AI COACH CHAT ====== */
+    .coach-chat { background: var(--drawer-bg); border: 1px solid var(--accent-dim); border-radius: 18px; width: 100%; max-width: 440px; height: 82vh; max-height: 620px; display: flex; flex-direction: column; overflow: hidden; transform: scale(0.97); transition: transform .3s ease; }
+    .modal-backdrop.show .coach-chat { transform: scale(1); }
+    .coach-chat-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 18px; border-bottom: 1px solid var(--accent-dim); }
+    .coach-chat-head .t { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; color: var(--text); font-weight: 600; line-height: 1.1; }
+    .coach-chat-head .s { font-size: 0.62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); margin-top: 2px; }
+    .coach-msgs { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .cmsg { max-width: 86%; padding: 10px 13px; border-radius: 14px; font-size: 0.9rem; line-height: 1.55; white-space: pre-wrap; }
+    .cmsg.bot { align-self: flex-start; background: rgba(147,168,232,0.12); border: 1px solid var(--accent-dim); color: var(--text); }
+    .cmsg.me { align-self: flex-end; background: var(--accent); color: var(--bg-base); }
+    .cmsg.loading { align-self: flex-start; color: var(--muted); font-style: italic; }
+    .coach-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 6px; }
+    .coach-chip { font-size: 0.72rem; color: var(--accent); border: 1px solid var(--accent-dim); background: transparent; border-radius: 999px; padding: 6px 11px; cursor: pointer; font-family: 'Jost', sans-serif; }
+    .coach-chip:hover { border-color: var(--accent); }
+    .coach-input-row { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--accent-dim); align-items: center; }
+    .coach-input-row input { flex: 1; background: transparent; border: 1px solid var(--accent-dim); border-radius: 999px; padding: 11px 14px; color: var(--text); font-family: 'Jost', sans-serif; font-size: 0.9rem; outline: none; min-width: 0; }
+    .coach-input-row input:focus { border-color: var(--accent); }
+    .coach-send { background: var(--accent); color: var(--bg-base); border: none; width: 42px; height: 42px; min-width: 42px; border-radius: 50%; cursor: pointer; display: grid; place-items: center; font-size: 1rem; flex-shrink: 0; }
+    .coach-send:disabled { opacity: .4; cursor: not-allowed; }
+    .coach-disclaimer { font-size: 0.64rem; color: var(--muted); text-align: center; padding: 0 16px 10px; font-style: italic; }
     .prog-card.recommended { border-color: var(--accent); }
     .prog-rec-tag { font-size: 0.58rem; letter-spacing: .1em; text-transform: uppercase; color: var(--bg-base); background: var(--accent); border-radius: 999px; padding: 2px 8px; margin-left: 8px; vertical-align: middle; white-space: nowrap; }
 
@@ -1162,6 +1190,31 @@
       <div class="modal-close-row">
         <button class="btn btn-primary" id="peClose">Rozumiem</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ====== AI COACH CHAT ====== -->
+  <div class="modal-backdrop" id="coachBackdrop">
+    <div class="coach-chat" role="dialog" aria-modal="true" aria-label="AI Coach">
+      <div class="coach-chat-head">
+        <div>
+          <div class="t">🧠 AI Coach</div>
+          <div class="s">trener Kegla</div>
+        </div>
+        <button class="drawer-close" id="coachClose" aria-label="Zamknij">✕</button>
+      </div>
+      <div class="coach-msgs" id="coachMsgs"></div>
+      <div class="coach-chips" id="coachChips">
+        <button class="coach-chip">Jak oddychać przy napięciu?</button>
+        <button class="coach-chip">Co na przedwczesny wytrysk?</button>
+        <button class="coach-chip">Czy nie robię za dużo?</button>
+        <button class="coach-chip">Po co reverse kegel?</button>
+      </div>
+      <div class="coach-input-row">
+        <input type="text" id="coachField" placeholder="Zapytaj coacha..." autocomplete="off" lang="pl">
+        <button class="coach-send" id="coachSend" aria-label="Wyślij">➤</button>
+      </div>
+      <div class="coach-disclaimer">Wskazówki edukacyjne, nie porada medyczna. Ból / nietrzymanie → lekarz.</div>
     </div>
   </div>
 
@@ -1972,7 +2025,7 @@
 
       // ESC zamyka panele; Spacja = Start/Pauza (gdy fokus poza polami)
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') { closeDrawer(); closeStats(); closeGuide(); closePE(); }
+        if (e.key === 'Escape') { closeDrawer(); closeStats(); closeGuide(); closePE(); closeCoachChat(); }
         if (e.key === ' ') {
           const tag = (document.activeElement && document.activeElement.tagName) || '';
           if (tag === 'INPUT' || tag === 'TEXTAREA') return;
@@ -2113,7 +2166,11 @@
           '<div class="coach-greet">' + cg.g + '</div>' +
           '<div class="coach-lvl">' + cg.lvlLine + '</div>' +
           '<div class="coach-rec">Na dziś polecam: <b>' + rec.icon + ' ' + rec.name + '</b> · ' + rec.focus.split('·')[0].trim() + '</div>' +
-          '<button class="coach-btn" id="coachStart">Trening na dziś →</button>' +
+          '<div class="coach-ai loading" id="coachAiTip"><span class="ai-label">Coach AI</span>Analizuję Twój postęp…</div>' +
+          '<div class="coach-actions">' +
+            '<button class="coach-btn" id="coachStart">Trening na dziś →</button>' +
+            '<button class="coach-btn secondary" id="coachAsk">💬 Zapytaj coacha</button>' +
+          '</div>' +
           '</div>';
         const intro = '<p class="program-intro">Albo wybierz sam — sesje dla średniozaawansowanych, aplikacja poprowadzi Cię krok po kroku.</p>';
         const cards = PROGRAMS.map((p) => {
@@ -2136,6 +2193,9 @@
         host.innerHTML = coach + intro + cards + week;
         const cs = $('coachStart');
         if (cs) cs.addEventListener('click', () => selectProgram(rec.id));
+        const ca = $('coachAsk');
+        if (ca) ca.addEventListener('click', openCoachChat);
+        fillCoachTip();
         host.querySelectorAll('[data-prog]').forEach((card) => card.addEventListener('click', (e) => {
           if (e.target.closest('[data-peinfo]')) { openPE(); return; }
           selectProgram(card.dataset.prog);
@@ -2208,6 +2268,95 @@
       $('peBackdrop').addEventListener('click', (e) => { if (e.target === $('peBackdrop')) closePE(); });
       $('guidePeBtn').addEventListener('click', () => { closeGuide(); openPE(); });
 
+      // ======== AI COACH (LLM) ========
+      const COACH_URL = 'https://txqjjwanyfcpezgqbwou.supabase.co/functions/v1/kegel-coach';
+      const COACH_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4cWpqd2FueWZjcGV6Z3Fid291Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3OTc2NTksImV4cCI6MjA5MTM3MzY1OX0.Dy1N3rHMUZCAnTSKayRa7GNzSlWOe4PSi6_1BVOUHyU';
+      function escapeHtml(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+      function coachContext() {
+        const s = state.stats;
+        const last14 = [];
+        for (let i = 13; i >= 0; i--) { const dt = new Date(); dt.setDate(dt.getDate() - i); last14.push(s.daily[isoOf(dt)] || 0); }
+        const rec = recommendProgram();
+        return {
+          streak: streakOf(s), total: s.total, today: s.daily[todayISO()] || 0,
+          goal: state.config.dailyGoal, level: coachLevel(),
+          recommended: rec ? rec.name : '', last14
+        };
+      }
+      async function callCoach(payload) {
+        const res = await fetch(COACH_URL, {
+          method: 'POST',
+          headers: { apikey: COACH_ANON, Authorization: 'Bearer ' + COACH_ANON, 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      }
+      // Proaktywna wskazówka — cache 1×/dzień (1 zapytanie dziennie)
+      async function fillCoachTip() {
+        if (!$('coachAiTip')) return;
+        const key = 'kegel_coach_tip_' + todayISO();
+        let tip = '';
+        try { tip = localStorage.getItem(key) || ''; } catch {}
+        if (!tip) {
+          try {
+            const r = await callCoach({ mode: 'coach_tip', context: coachContext() });
+            tip = (r && r.tip || '').trim();
+            if (tip) { try { localStorage.setItem(key, tip); } catch {} }
+          } catch { /* offline — zostaw fallback */ }
+        }
+        const cur = $('coachAiTip');
+        if (!cur) return;
+        cur.classList.remove('loading');
+        cur.innerHTML = '<span class="ai-label">Coach AI</span>' + (tip
+          ? escapeHtml(tip)
+          : 'Cześć! Dotknij „Zapytaj coacha", jeśli chcesz o coś spytać.');
+      }
+
+      // ===== Czat coacha =====
+      const coachChat = { msgs: [], loading: false, greeted: false };
+      function renderCoachMsgs() {
+        const box = $('coachMsgs');
+        if (!box) return;
+        let html = coachChat.msgs.map((m) => '<div class="cmsg ' + (m.role === 'user' ? 'me' : 'bot') + '">' + escapeHtml(m.content) + '</div>').join('');
+        if (coachChat.loading) html += '<div class="cmsg loading">Coach pisze…</div>';
+        box.innerHTML = html;
+        box.scrollTop = box.scrollHeight;
+      }
+      async function sendCoachMsg(text) {
+        const field = $('coachField');
+        const t = (typeof text === 'string' ? text : (field ? field.value : '')).trim();
+        if (!t || coachChat.loading) return;
+        coachChat.msgs.push({ role: 'user', content: t });
+        if (field) field.value = '';
+        const chips = $('coachChips'); if (chips) chips.style.display = 'none';
+        coachChat.loading = true; renderCoachMsgs();
+        try {
+          const r = await callCoach({ mode: 'chat', context: coachContext(), messages: coachChat.msgs.slice(-12) });
+          coachChat.msgs.push({ role: 'assistant', content: (r && r.response) ? r.response : 'Hmm, spróbuj jeszcze raz.' });
+        } catch {
+          coachChat.msgs.push({ role: 'assistant', content: 'Brak połączenia z coachem. Sprawdź internet i spróbuj ponownie.' });
+        }
+        coachChat.loading = false; renderCoachMsgs();
+      }
+      function openCoachChat() {
+        if (!coachChat.greeted) {
+          const cg = coachGreeting();
+          coachChat.msgs.push({ role: 'assistant', content: cg.g + ' Jestem Twoim coachem — pytaj o technikę, kontrolę wytrysku albo motywację.' });
+          coachChat.greeted = true;
+        }
+        renderCoachMsgs();
+        const chips = $('coachChips'); if (chips) chips.style.display = coachChat.msgs.length > 1 ? 'none' : '';
+        $('coachBackdrop').classList.add('show');
+        setTimeout(() => { const f = $('coachField'); if (f) f.focus(); }, 320);
+      }
+      function closeCoachChat() { $('coachBackdrop').classList.remove('show'); }
+      $('coachClose').addEventListener('click', closeCoachChat);
+      $('coachBackdrop').addEventListener('click', (e) => { if (e.target === $('coachBackdrop')) closeCoachChat(); });
+      $('coachSend').addEventListener('click', () => sendCoachMsg());
+      $('coachField').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendCoachMsg(); } });
+      document.querySelectorAll('#coachChips .coach-chip').forEach((c) => c.addEventListener('click', () => sendCoachMsg(c.textContent)));
+
       // ======== INIT ========
       // ustaw aria-selected na zakładkach
       tabs.forEach((t) => t.setAttribute('aria-selected', t.classList.contains('active') ? 'true' : 'false'));
@@ -2217,7 +2366,7 @@
       renderStats();
       renderDailyStatus();
       scheduleReminder();
-      console.log('Kegel Timer v3.1 gotowe. Tryb:', state.mode);
+      console.log('Kegel Timer v3.3 (AI Coach) gotowe. Tryb:', state.mode);
     })();
 
     // ======== SERVICE WORKER ========

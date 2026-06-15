@@ -1,0 +1,5 @@
+project_id = "txqjjwanyfcpezgqbwou"
+
+[functions.kegel-coach]
+enabled = true
+verify_jwt = false
