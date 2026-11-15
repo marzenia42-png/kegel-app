@@ -160,6 +160,7 @@ nav.tabs button.on .e{opacity:1}
     <div class="prog"><i id="dayProg" style="width:0"></i></div>
     <p class="muted" id="dayHint" style="font-size:13px;margin-top:8px"></p>
   </div>
+  <div class="card" id="sumCard"><div class="row sb"><b>Twoje podsumowanie</b><span class="pill" id="sumTag">dziś</span></div><div id="sumBody" style="margin-top:8px;font-size:14.5px"></div></div>
   <div id="dayTasks"></div>
   <div class="grid2">
     <div class="card stat"><b id="stStreak">0</b><span>dni z rzędu</span></div>
@@ -537,12 +538,17 @@ function showScan(){const s=SCAN[SC.i];sayKey('scan'+SC.i,true);$('scPart').text
 
 /* ============ KONTROLA (STOP-START) ============ */
 const STAGES=[
- {n:'Etap 1 · Poznaj swoją skalę',w:'tyg. 1–3',goal:'Sesja solo 15 min. Pauza przy 7/10. 3 pauzy przed wytryskiem.',stop:7,pauses:3,desc:'Cel: nauczyć się czuć, gdzie jesteś na skali. Wolne tempo, sucha lub z lubrykantem — jak wygodniej. Liczy się świadomość, nie czas.'},
- {n:'Etap 2 · Wyżej i dłużej',w:'tyg. 4–6',goal:'Sesja 15–20 min. Pauza przy 8/10. 4 pauzy.',stop:8,pauses:4,desc:'Podchodzisz bliżej progu, ale nadal z zapasem. Z lubrykantem (bardziej podobne do zbliżenia). W pauzie oddech 4–6 + reverse kegel.'},
- {n:'Etap 3 · Bez zatrzymania',w:'tyg. 7–9',goal:'Zamiast stopu — zwolnij tempo, oddech i rozluźnienie. Kontrola przy 8/10, 4×.',stop:8,pauses:4,desc:'Uczysz się schodzić z pobudzenia bez przerywania: wolniejsze tempo, długi wydech, puszczenie dna miednicy. To jest umiejętność, której użyjesz z żoną.'},
- {n:'Etap 4 · We dwoje',w:'tyg. 10–12',goal:'Stop-start podczas zbliżenia — po rozmowie z żoną. Umówiony sygnał na pauzę.',stop:8,pauses:3,desc:'Zaczynacie od pozycji, w której ona jest na górze i to Ty możesz dać znak do zatrzymania lub zwolnienia. W pauzie: oddech, rozluźnienie, pocałunki, dotyk — przerwa nie musi być przerwą w bliskości.'}
+ {n:'Etap 1 · Poznaj swoją skalę',w:'start',goal:'Sesja solo 15 min. Pauza przy 7/10. 3 pauzy przed wytryskiem.',stop:7,pauses:3,desc:'Cel: nauczyć się czuć, gdzie jesteś na skali. Wolne tempo, sucha lub z lubrykantem — jak wygodniej. Liczy się świadomość, nie czas.'},
+ {n:'Etap 2 · Wyżej i dłużej',w:'po 3 udanych',goal:'Sesja 15–20 min. Pauza przy 8/10. 4 pauzy.',stop:8,pauses:4,desc:'Podchodzisz bliżej progu, ale nadal z zapasem. Z lubrykantem (bardziej podobne do zbliżenia). W pauzie oddech 4–6 + reverse kegel.'},
+ {n:'Etap 3 · Bez zatrzymania',w:'po 3 udanych',goal:'Zamiast stopu — zwolnij tempo, oddech i rozluźnienie. Kontrola przy 8/10, 4×.',stop:8,pauses:4,desc:'Uczysz się schodzić z pobudzenia bez przerywania: wolniejsze tempo, długi wydech, puszczenie dna miednicy. To jest umiejętność, której użyjesz z żoną.'},
+ {n:'Etap 4 · We dwoje',w:'po 3 udanych',goal:'Stop-start podczas zbliżenia — po rozmowie z żoną. Umówiony sygnał na pauzę.',stop:8,pauses:3,desc:'Zaczynacie od pozycji, w której ona jest na górze i to Ty możesz dać znak do zatrzymania lub zwolnienia. W pauzie: oddech, rozluźnienie, pocałunki, dotyk — przerwa nie musi być przerwą w bliskości.'}
 ];
-function stageIdx(){const w=weekNo();return w<=3?0:w<=6?1:w<=9?2:3}
+function stageIdx(){return Math.max(0,Math.min(3,S.ctrlStage|0))}
+function stageOk(x){return x.p>=x.goal&&x.c>=7}
+function stageProgress(){const i=stageIdx(),L=S.ctrl.filter(x=>x.stage===i+1);let n=0;for(let k=L.length-1;k>=0&&stageOk(L[k]);k--)n++;return {i,n:Math.min(n,3),L}}
+function stageCheck(){const {i,n,L}=stageProgress();if(n>=3&&i<3){S.ctrlStage=i+1;save();return 'Awans! Wchodzisz na '+STAGES[i+1].n+'. 3 udane sesje z rzędu — świetna robota.'}
+ const l2=L.slice(-2);if(i>0&&l2.length===2&&l2.every(x=>x.c<=4)){S.ctrlStage=i-1;save();return 'Wracamy na chwilę do: '+STAGES[i-1].n+'. To normalne — utrwalimy podstawy i pójdziemy dalej.'}
+ return n>0?'Do awansu: '+n+'/3 udane sesje (komplet pauz + kontrola ≥7).':'Do awansu potrzebujesz 3 udanych sesji z rzędu (komplet pauz + kontrola ≥7).'}
 let CS=null;
 function openCtrl(){const st=STAGES[stageIdx()];CS={st,sec:0,pauses:0,inPause:false,pauseSec:0,arousal:0,warm:120,t:null};$('csTitle').textContent=st.n;$('csGoal').textContent=st.goal;$('csPausesGoal').textContent=st.pauses;$('csPauses').textContent=0;$('csClock').textContent='0:00';$('csState').textContent='Najpierw 2 min oddechu — rozluźnij się.';$('csPauseBox').style.display='none';
  const sc=$('csScale');sc.innerHTML='';for(let i=1;i<=10;i++){const b=document.createElement('button');b.textContent=i;b.onclick=()=>setArousal(i);sc.appendChild(b)}
@@ -553,7 +559,7 @@ function setArousal(i){CS.arousal=i;$$('#csScale button').forEach((b,k)=>b.class
 function csPause(){if(CS.inPause)return;CS.inPause=true;CS.pauses++;CS.pauseSec=0;$('csPauses').textContent=CS.pauses;sayKey('pauza');$('csPauseBox').style.display='block';$('csState').textContent='Pauza '+CS.pauses;vib(400)}
 function csResume(){CS.inPause=false;$('csPauseBox').style.display='none';setArousal(3);$('csState').textContent=CS.pauses>=CS.st.pauses?'Cel pauz osiągnięty ✓ Możesz kończyć, kiedy chcesz.':'Wracasz. Wolne tempo.';if(CS.pauses>=CS.st.pauses)vib([100,60,100])}
 function csFinish(){clearInterval(CS.t);wakeOff();$('csSummary').innerHTML='Czas: <b>'+fmt(CS.sec)+'</b> · pauzy: <b>'+CS.pauses+'</b> / '+CS.st.pauses+(CS.pauses>=CS.st.pauses?' ✓':'');openSheet('ctrlsave')}
-function csSave(){S.ctrl.push({d:today(),min:Math.round(CS.sec/60*10)/10,p:CS.pauses,goal:CS.st.pauses,stage:stageIdx()+1,c:+$('csCtrl').value,a:+$('csAnx').value,n:$('csNote').value.trim()});day().ctrl=true;save();$('csNote').value='';toast('<svg class="i"><use href="#i-target"/></svg> Sesja zapisana. To jest prawdziwa praca — gratulacje.');closeAll();renderAll()}
+function csSave(){S.ctrl.push({d:today(),min:Math.round(CS.sec/60*10)/10,p:CS.pauses,goal:CS.st.pauses,stage:stageIdx()+1,c:+$('csCtrl').value,a:+$('csAnx').value,n:$('csNote').value.trim()});day().ctrl=true;save();$('csNote').value='';const m=stageCheck();toast('Sesja zapisana. '+m);closeAll();renderAll()}
 
 /* ============ TREŚCI ============ */
 const THOUGHTS=[
@@ -696,6 +702,27 @@ function openVid(id){const v=VIDS.find(x=>x.id===id);if(!v)return;$('infoTitle')
 /* ============ RENDER ============ */
 const SLOTNAME={am:['<svg class="i"><use href="#i-sunrise"/></svg>','Rano','program dnia'],mid:['<svg class="i"><use href="#i-sun"/></svg>','W ciągu dnia','Express · tryb kieszonkowy'],pm:['<svg class="i"><use href="#i-moon"/></svg>','Wieczorem','Reset · rozluźnienie']};
 function slotPrg(slot){if(slot==='mid')return 'express';if(slot==='pm')return 'reset';return WEEK[new Date().getDay()]}
+
+/* ============ PODSUMOWANIE DNIA (reaguje na wyniki) ============ */
+function avg(a){return a.length?a.reduce((x,y)=>x+y,0)/a.length:null}
+function renderSummary(){{const q=stageProgress();if(q.n>=3&&q.i<3)toast(stageCheck())}const t=today(),y=addDays(t,-1),dy=S.days[y]||{},dt=S.days[t]||{};const L=[];
+ const trY=['am','mid','pm'].filter(k=>dy[k]).length+(dy.legacy?1:0);
+ if(dayDone(y))L.push(['check','Wczoraj dzień zaliczony ('+trY+' sesje'+(dy.head||dy.ctrl?' + głowa':'')+'). Tak trzymaj.']);
+ else if(trY||dy.head)L.push(['activity','Wczoraj częściowo: '+trY+' sesje'+(dy.head?' + głowa':'')+'. Dziś domknij komplet: 2 sesje + głowa.']);
+ else if(Object.keys(S.days).length)L.push(['rotate','Wczoraj przerwa. Bez nadrabiania — dziś po prostu normalny plan.']);
+ const ws=addDays(t,-((new Date().getDay()+6)%7)),wd=doneInWeekOf(ws),left=7-((new Date().getDay()+6)%7);
+ const w=weekNo(),nextLvl=(w%2===1)?w+1:w+2;
+ L.push(['trend','Ten tydzień: '+wd+'/7 dni. '+(wd>=5?'Próg awansu poziomu osiągnięty ✓':'Do awansu poziomu brakuje '+Math.max(0,5-wd)+(5-wd<=left?' — da się w tym tygodniu.':' — w tym tygodniu już się nie uda, liczy się regularność.'))]);
+ const sp=stageProgress(),C=S.ctrl;
+ if(C.length){const last=C[C.length-1];L.push(['target','Ostatni stop-start ('+last.d+'): pauzy '+last.p+'/'+last.goal+', kontrola '+last.c+'/10. '+STAGES[sp.i].n.split('·')[0].trim()+' — do awansu '+sp.n+'/3.']);
+  const a3=avg(C.slice(-3).map(x=>x.c)),b3=avg(C.slice(-6,-3).map(x=>x.c));if(a3!=null&&b3!=null){const d=a3-b3;L.push(['chart',d>=0.5?'Kontrola rośnie: średnio '+a3.toFixed(1)+' vs '+b3.toFixed(1)+' wcześniej. Działa.':d<=-0.5?'Kontrola spadła ('+a3.toFixed(1)+' vs '+b3.toFixed(1)+'). Sprawdź sen i stres — i więcej oddechu przed sesją.':'Kontrola stabilna (~'+a3.toFixed(1)+'/10). Kolejny krok: dłuższe pauzy z oddechem.'])}
+  const anx=avg(C.slice(-3).map(x=>x.a));if(anx!=null&&anx>=7)L.push(['wind','Napięcie w sesjach wysokie ('+anx.toFixed(1)+'/10). Przed następną: 5 min oddechu 4–6 i skan ciała.']);
+  const ld=daysBetween(last.d,t);if(ld>=3)L.push(['bell','Stop-start był '+ld+' dni temu. Zaplanuj sesję dziś albo jutro.'])}
+ else L.push(['target','Stop-start jeszcze przed Tobą. Zrób pierwszą sesję w tym tygodniu — to najważniejsze ćwiczenie na kontrolę.']);
+ const lc=S.checkins[S.checkins.length-1];if(lc&&lc.s>=7)L.push(['leaf','W check-inie stres '+lc.s+'/10 — dziś priorytet: oddech i wieczorny Reset.']);
+ if(dayDone(t))L.unshift(['award','Dziś zaliczone ✓ Wszystko ponad to jest bonusem.']);
+ $('sumTag').textContent=dayDone(t)?'zaliczone':'dziś';
+ $('sumBody').innerHTML=L.map(([i,x])=>`<div class="row" style="align-items:flex-start;gap:10px;margin:6px 0"><svg class="i" style="color:var(--acc2);margin-top:2px"><use href="#i-${i}"/></svg><span>${esc(x)}</span></div>`).join('')}
 function renderToday(){
  const d=day();const w=weekNo();
  $('todayDate').textContent=new Date().toLocaleDateString('pl-PL',{weekday:'long',day:'numeric',month:'long'});
@@ -731,7 +758,7 @@ function renderProg(){const ks=Object.keys(S.days);$('pDays').textContent=ks.fil
 function chart(id,series){const el=$(id);if(!el)return;const W=320,H=170,P=14;let s='';for(let g=0;g<=10;g+=5){const y=H-P-(g/10)*(H-2*P);s+=`<line x1="${P}" x2="${W-P}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="1"/>`}
  const n=Math.max(...series.map(x=>x.v.length));if(n===0){el.innerHTML=s+`<text x="${W/2}" y="${H/2}" text-anchor="middle" fill="var(--muted)" font-size="13">Brak danych — pierwszy wpis pojawi się tutaj</text>`;return}
  series.forEach(se=>{const pts=se.v.map((v,i)=>[P+(n===1?(W-2*P)/2:i*(W-2*P)/(n-1)),H-P-(Math.max(0,Math.min(10,v))/10)*(H-2*P)]);if(!pts.length)return;s+=`<polyline fill="none" stroke="${se.c}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${pts.map(p=>p.join(',')).join(' ')}"/>`;pts.forEach(p=>s+=`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="${se.c}"/>`)});el.innerHTML=s}
-function renderAll(){checkLevel();renderToday();renderTrain();renderCtrl();renderProg();setReframes();save()}
+function renderAll(){checkLevel();renderToday();renderSummary();renderTrain();renderCtrl();renderProg();setReframes();save()}
 
 /* ============ NAV / SHEETS ============ */
 let stack=[];
@@ -839,7 +866,7 @@ function bind(){
 }
 
 /* ============ INIT ============ */
-load();if(!S.cfg.v4voice){S.cfg.v4voice=1;S.cfg.voiceMode='both';save()}bind();renderAll();renderLove();
+load();if(S.ctrlStage==null){S.ctrlStage=0;save()}if(!S.cfg.v4voice){S.cfg.v4voice=1;S.cfg.voiceMode='both';save()}bind();renderAll();renderLove();
 if(S.cfg.pin)showLock('unlock');
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 })();
