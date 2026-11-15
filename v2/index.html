@@ -479,7 +479,7 @@ let actx;function AC(){if(!actx){actx=new (window.AudioContext||window.webkitAud
 /* dzwonek: ton podstawowy + alikwoty, naturalne wybrzmienie */
 function bell(f,len,vol){if(!S.cfg.sound||S.cfg.voiceMode==='voice')return;try{const a=AC(),t=a.currentTime,out=a.createGain();out.gain.value=(S.cfg.vol/100)*(vol||.3);out.connect(a.destination);
  [[1,1,len],[2.0,.35,len*.6],[2.76,.18,len*.45],[5.4,.06,len*.25]].forEach(([m,amp,d])=>{const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=f*m;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(amp,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(out);o.start(t);o.stop(t+d+.05)})}catch(e){}}
-function beep(f,len){bell(f,(len||.6)*2.2)}
+function beep(f,len){if(!S.cfg.sound)return;try{const a=AC(),o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=f;const v=S.cfg.vol/100*.35;g.gain.setValueAtTime(0,a.currentTime);g.gain.linearRampToValueAtTime(v,a.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+(len||.6));o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+(len||.6))}catch(e){}}
 /* głos lektora (syntezator telefonu, po polsku) */
 let PLV=null;function plVoice(){if(PLV)return PLV;try{const v=speechSynthesis.getVoices();PLV=v.find(x=>/pl/i.test(x.lang)&&/female|zosia|ewa|paulina|google/i.test(x.name))||v.find(x=>/^pl/i.test(x.lang))||null}catch(e){}return PLV}
 try{speechSynthesis.onvoiceschanged=()=>{PLV=null;plVoice()}}catch(e){}
@@ -490,10 +490,10 @@ function cue(ph,t){if(ph==='tense'){bowlS('tense',.75);vib(400);if(t)sayKey(SAYK
 /* ============ NAGRANIA (dzwony misy + lektor) ============ */
 const AUD={};function aud(name){if(AUD[name])return AUD[name];AUD[name]=fetch('audio/'+name+'.mp3').then(r=>r.arrayBuffer()).then(b=>AC().decodeAudioData(b)).catch(()=>null);return AUD[name]}
 async function playS(name,vol){try{const a=AC(),buf=await aud(name);if(!buf)return false;const src=a.createBufferSource(),g=a.createGain();src.buffer=buf;g.gain.value=vol*(S.cfg.vol/100);src.connect(g).connect(a.destination);src.start();return true}catch(e){return false}}
-function bowlS(name,vol){if(!S.cfg.sound||S.cfg.voiceMode==='voice')return;playS('b_'+name,vol||.8)}
+function bowlS(name){if(!S.cfg.sound||S.cfg.voiceMode==='voice')return;const B={tense:[660,.5],relax:[440,.7],rest:[330,.9],in:[392,.6],out:[293.7,.8]};if(name==='end'){beep(523,.4);setTimeout(()=>beep(784,.8),350);return}const b=B[name];if(b)beep(b[0],b[1])}
 function sayKey(k,force){if(!S.cfg.sound)return;if(!force&&S.cfg.voiceMode==='bells')return;duck();playS((S.cfg.voiceSex||'k')+'_'+k,1).then(ok=>{if(!ok&&TXT[k])say(TXT[k],force)})}
 const TXT={napnij:'Napnij',napnij_trzymaj:'Napnij i trzymaj',hamulec:'Hamulec',pusc_w_dol:'Puść w dół',wdech:'Wdech',pusc:'Puść',pusc_calkiem:'Puść całkiem',pusc_wydech:'Puść, wydech',wroc:'Wróć',wydech:'Wydech',zatrzymaj:'Zatrzymaj',przerwa:'Przerwa',koniec:'Koniec. Dobra robota.',pauza:'Pauza. Długi wydech.'};
-function preloadAudio(){const v=S.cfg.voiceSex||'k';['b_tense','b_relax','b_rest','b_end','b_in','b_out'].concat(['napnij','napnij_trzymaj','hamulec','pusc_w_dol','wdech','pusc','pusc_calkiem','pusc_wydech','wroc','wydech','przerwa','koniec','start'].map(k=>v+'_'+k)).forEach(aud)}
+function preloadAudio(){const v=S.cfg.voiceSex||'k';[].concat(['napnij','napnij_trzymaj','hamulec','pusc_w_dol','wdech','pusc','pusc_calkiem','pusc_wydech','wroc','wydech','przerwa','koniec','start'].map(k=>v+'_'+k)).forEach(aud)}
 /* ============ PODKŁAD MUZYCZNY (generowany na żywo, bez plików) ============ */
 let MU=null;
 function noiseBuf(a,sec,pink){const b=a.createBuffer(1,a.sampleRate*sec,a.sampleRate),d=b.getChannelData(0);let b0=0,b1=0,b2=0;for(let i=0;i<d.length;i++){const w=Math.random()*2-1;if(pink){b0=.997*b0+w*.029591;b1=.985*b1+w*.032534;b2=.95*b2+w*.048056;d[i]=(b0+b1+b2+w*.1848)*.25}else d[i]=w*.4}return b}
@@ -839,7 +839,7 @@ function bind(){
 }
 
 /* ============ INIT ============ */
-load();bind();renderAll();renderLove();
+load();if(!S.cfg.v3voice){S.cfg.v3voice=1;S.cfg.voiceMode='bells';save()}bind();renderAll();renderLove();
 if(S.cfg.pin)showLock('unlock');
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 })();
