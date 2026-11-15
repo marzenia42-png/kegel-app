@@ -380,6 +380,10 @@ nav.tabs button.on .e{opacity:1}
     <div class="row sb card"><span>Dźwięk</span><button class="pill" id="setSound"></button></div>
     <div class="row sb card"><span>Wibracje</span><button class="pill" id="setVib"></button></div>
     <div class="card"><div class="lbl" style="margin:0"><span>Głośność</span><b id="setVolV"></b></div><input type="range" min="0" max="100" id="setVol"></div>
+    <div class="card"><div class="lbl" style="margin:0 0 8px"><span>Komendy</span></div><div class="seg" id="setVoice"><button data-x="bells">Dzwonki</button><button data-x="voice">Głos</button><button data-x="both">Dzwonki + głos</button></div></div>
+    <div class="card"><div class="lbl" style="margin:0 0 8px"><span>Podkład muzyczny</span></div><div class="seg" id="setMusic"><button data-x="off">Bez</button><button data-x="pad">Ambient</button><button data-x="ocean">Fale</button><button data-x="rain">Deszcz</button></div>
+      <div class="lbl"><span>Głośność podkładu</span><b id="setMvolV"></b></div><input type="range" min="0" max="100" id="setMvol">
+      <button class="btn ghost sm" id="setPreview" style="margin-top:8px">▶ Odsłuchaj 10 s</button></div>
     <h3>Przypomnienia</h3>
     <div class="card">
       <div class="row sb"><span>Powiadomienia push</span><button class="pill" id="setPush"></button></div>
@@ -423,7 +427,7 @@ const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%6
 
 /* ============ STATE ============ */
 const KEY='kg2_state';
-const DEF={v:2,start:today(),level:1,lastLevelCheck:null,days:{},sessions:0,mindMin:0,checkins:[],ctrl:[],gestures:{},cfg:{sound:true,vib:true,vol:70,pin:null},chat:[]};
+const DEF={v:2,start:today(),level:1,lastLevelCheck:null,days:{},sessions:0,mindMin:0,checkins:[],ctrl:[],gestures:{},cfg:{sound:true,vib:true,vol:70,voiceMode:'both',music:'pad',mvol:40,pin:null},chat:[]};
 let S;
 function load(){
   try{S=Object.assign({},DEF,JSON.parse(localStorage.getItem(KEY)||'null')||{});S.cfg=Object.assign({},DEF.cfg,S.cfg||{})}catch(e){S=JSON.parse(JSON.stringify(DEF))}
@@ -469,16 +473,42 @@ function steps(p){const out=[];PRG[p].blocks.forEach(b=>{const [t,a,ten,rel]=b;i
 function dur(p){return steps(p).reduce((s,x)=>s+x.d,0)}
 
 /* ============ AUDIO / VIB ============ */
-let actx;function beep(f,len){if(!S.cfg.sound)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type='sine';o.frequency.value=f;const v=S.cfg.vol/100*.35;g.gain.setValueAtTime(0,actx.currentTime);g.gain.linearRampToValueAtTime(v,actx.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+(len||.6));o.connect(g).connect(actx.destination);o.start();o.stop(actx.currentTime+(len||.6))}catch(e){}}
+let actx;function AC(){if(!actx){actx=new (window.AudioContext||window.webkitAudioContext)()}if(actx.state==='suspended')actx.resume();return actx}
+/* dzwonek: ton podstawowy + alikwoty, naturalne wybrzmienie */
+function bell(f,len,vol){if(!S.cfg.sound||S.cfg.voiceMode==='voice')return;try{const a=AC(),t=a.currentTime,out=a.createGain();out.gain.value=(S.cfg.vol/100)*(vol||.3);out.connect(a.destination);
+ [[1,1,len],[2.0,.35,len*.6],[2.76,.18,len*.45],[5.4,.06,len*.25]].forEach(([m,amp,d])=>{const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=f*m;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(amp,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(out);o.start(t);o.stop(t+d+.05)})}catch(e){}}
+function beep(f,len){bell(f,(len||.6)*2.2)}
+/* głos lektora (syntezator telefonu, po polsku) */
+let PLV=null;function plVoice(){if(PLV)return PLV;try{const v=speechSynthesis.getVoices();PLV=v.find(x=>/pl/i.test(x.lang)&&/female|zosia|ewa|paulina|google/i.test(x.name))||v.find(x=>/^pl/i.test(x.lang))||null}catch(e){}return PLV}
+try{speechSynthesis.onvoiceschanged=()=>{PLV=null;plVoice()}}catch(e){}
+function say(t,force){if(!S.cfg.sound)return;if(!force&&S.cfg.voiceMode==='bells')return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='pl-PL';const v=plVoice();if(v)u.voice=v;u.rate=.92;u.pitch=1;u.volume=Math.min(1,S.cfg.vol/100+.2);duck();speechSynthesis.speak(u)}catch(e){}}
 function vib(p){if((S.cfg.vib||pocketOn)&&navigator.vibrate)try{navigator.vibrate(p)}catch(e){}}
-function cue(ph){if(ph==='tense'){beep(660,.5);vib(400)}else if(ph==='relax'){beep(440,.7);vib([120,90,120])}else if(ph==='rest'){beep(330,.9);vib([100,80,100,80,100])}else if(ph==='end'){beep(523,.4);setTimeout(()=>beep(784,.8),350);vib([200,100,200,100,400])}}
-let wake;async function wakeOn(){try{wake=await navigator.wakeLock.request('screen')}catch(e){}}function wakeOff(){try{wake&&wake.release()}catch(e){}wake=null}
+const SAY={tense:{quick:'Napnij',hold:'Napnij i trzymaj',stop:'Hamulec',reverse:'Puść w dół',breathe:'Wdech'},relax:{quick:'Puść',hold:'Puść całkiem',stop:'Puść, wydech',reverse:'Wróć',breathe:'Długi wydech'}};
+function cue(ph,t){if(ph==='tense'){bell(659.3,1.1,.32);vib(400);if(t)say(SAY.tense[t]||'Napnij')}else if(ph==='relax'){bell(440,1.6,.26);vib([120,90,120]);if(t)say(SAY.relax[t]||'Puść')}else if(ph==='rest'){bell(329.6,2.4,.24);vib([100,80,100,80,100]);say('Przerwa. Rozluźnij się.')}else if(ph==='end'){bell(523.3,1.4,.3);setTimeout(()=>bell(659.3,1.4,.28),260);setTimeout(()=>bell(784,2.4,.3),520);vib([200,100,200,100,400]);say('Koniec. Dobra robota.')}}
+/* ============ PODKŁAD MUZYCZNY (generowany na żywo, bez plików) ============ */
+let MU=null;
+function noiseBuf(a,sec,pink){const b=a.createBuffer(1,a.sampleRate*sec,a.sampleRate),d=b.getChannelData(0);let b0=0,b1=0,b2=0;for(let i=0;i<d.length;i++){const w=Math.random()*2-1;if(pink){b0=.997*b0+w*.029591;b1=.985*b1+w*.032534;b2=.95*b2+w*.048056;d[i]=(b0+b1+b2+w*.1848)*.25}else d[i]=w*.4}return b}
+function verb(a){const len=a.sampleRate*3.2,b=a.createBuffer(2,len,a.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6)}const cv=a.createConvolver();cv.buffer=b;return cv}
+const CHORDS=[[110,164.81,246.94,261.63],[87.31,130.81,220,261.63],[98,146.83,220,293.66],[82.41,123.47,196,246.94]];
+function musicStart(){const mode=S.cfg.music||'off';if(mode==='off'||!S.cfg.sound||MU)return;try{const a=AC(),t=a.currentTime,master=a.createGain();master.gain.setValueAtTime(0,t);master.gain.linearRampToValueAtTime((S.cfg.mvol??40)/100*.5,t+3);master.connect(a.destination);const nodes=[];MU={master,nodes,timers:[],base:(S.cfg.mvol??40)/100*.5};
+ if(mode==='pad'){const rv=verb(a),wet=a.createGain();wet.gain.value=.55;rv.connect(wet).connect(master);const lp=a.createBiquadFilter();lp.type='lowpass';lp.frequency.value=900;lp.Q.value=.4;lp.connect(master);lp.connect(rv);
+   const lfo=a.createOscillator(),lg=a.createGain();lfo.frequency.value=.05;lg.gain.value=350;lfo.connect(lg).connect(lp.frequency);lfo.start();nodes.push(lfo);
+   const voices=CHORDS[0].map((f,i)=>{const o1=a.createOscillator(),o2=a.createOscillator(),g=a.createGain();o1.type='triangle';o2.type='sine';o1.frequency.value=f;o2.frequency.value=f*1.004;g.gain.value=.11-i*.015;o1.connect(g);o2.connect(g);g.connect(lp);o1.start();o2.start();nodes.push(o1,o2);return [o1,o2]});
+   let ci=0;MU.timers.push(setInterval(()=>{ci=(ci+1)%CHORDS.length;const now=a.currentTime;voices.forEach(([o1,o2],i)=>{o1.frequency.setTargetAtTime(CHORDS[ci][i],now,2.5);o2.frequency.setTargetAtTime(CHORDS[ci][i]*1.004,now,2.5)})},14000))}
+ else{const src=a.createBufferSource();src.buffer=noiseBuf(a,8,mode==='ocean');src.loop=true;const f=a.createBiquadFilter();const g=a.createGain();
+   if(mode==='ocean'){f.type='lowpass';f.frequency.value=700;g.gain.value=.9;const lfo=a.createOscillator(),lg=a.createGain();lfo.frequency.value=.09;lg.gain.value=.55;lfo.connect(lg).connect(g.gain);lfo.start();nodes.push(lfo)}
+   else{f.type='bandpass';f.frequency.value=2600;f.Q.value=.5;g.gain.value=.55}
+   src.connect(f).connect(g).connect(master);src.start();nodes.push(src)}
+ }catch(e){MU=null}}
+function musicStop(){if(!MU)return;const m=MU;MU=null;try{const t=actx.currentTime;m.master.gain.cancelScheduledValues(t);m.master.gain.setValueAtTime(m.master.gain.value,t);m.master.gain.linearRampToValueAtTime(0,t+1.5);m.timers.forEach(clearInterval);setTimeout(()=>{m.nodes.forEach(n=>{try{n.stop()}catch(e){}});m.master.disconnect()},1700)}catch(e){}}
+function duck(){if(!MU)return;try{const t=actx.currentTime,g=MU.master.gain;g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(MU.base*.35,t+.2);g.linearRampToValueAtTime(MU.base,t+2.2)}catch(e){}}
+let wake;async function wakeOn(){musicStart();try{wake=await navigator.wakeLock.request('screen')}catch(e){}}function wakeOff(){musicStop();try{wake&&wake.release()}catch(e){}wake=null}
 
 /* ============ PLAYER ============ */
 let PL=null,pocketOn=false;
 function openPlayer(pid,slot){const st=steps(pid);PL={pid,slot,st,idx:-1,left:0,run:false,t:null};$('plTitle').textContent=PRG[pid].name;$('plPhase').textContent='Gotowy?';$('plTime').textContent=fmt(dur(pid));$('plSub').textContent='Poziom '+S.level+' · '+st.filter(s=>s.ph==='tense').length+' skurczów';$('plCue').textContent=PRG[pid].sub;$('plGo').textContent='▶ Start';$('plSteps').textContent='';setArc(1);openSheet('player')}
 function setArc(f){$('plArc').setAttribute('stroke-dashoffset',String(741.4*(1-f)))}
-function plNext(){PL.idx++;if(PL.idx>=PL.st.length){plEnd(true);return}const s=PL.st[PL.idx];PL.left=s.d;PL.cur=s;cue(s.ph);renderPl()}
+function plNext(){PL.idx++;if(PL.idx>=PL.st.length){plEnd(true);return}const s=PL.st[PL.idx];PL.left=s.d;PL.cur=s;cue(s.ph,s.ph==='rest'?null:s.t);renderPl()}
 function renderPl(){const s=PL.cur;const label=s.ph==='rest'?PHASE.rest[0]:PHASE[s.t][s.ph==='tense'?0:1];$('plPhase').textContent=label;$('plTime').textContent=PL.left;$('plSub').textContent=s.ph==='rest'?'':(s.i+' / '+s.n);$('plCue').textContent=s.ph==='rest'?CUES.rest:CUES[s.t];$('plArc').setAttribute('stroke',s.ph==='tense'?'var(--acc)':s.ph==='relax'?'var(--blue)':'var(--muted)');setArc(PL.left/s.d);const done=PL.st.slice(PL.idx).reduce((a,x)=>a+x.d,0);$('plSteps').textContent='Zostało '+fmt(done-(s.d-PL.left))}
 function plTick(){PL.left--;if(PL.left<=0){plNext()}else{renderPl()}}
 function plGo(){if(!PL)return;if(PL.run){PL.run=false;clearInterval(PL.t);$('plGo').textContent='▶ Wznów';wakeOff();return}PL.run=true;$('plGo').textContent='⏸ Pauza';wakeOn();if(PL.idx<0)plNext();PL.t=setInterval(plTick,1000)}
@@ -488,13 +518,13 @@ function setPocket(on){pocketOn=on;$('pocket').classList.toggle('on',on);if(on){
 
 /* ============ ODDECH / SKAN ============ */
 let BR=null;
-function openBreath(kind){const cfg=kind==='box'?{t:'Oddech pudełkowy',total:240,seq:[['Wdech',4,1],['Zatrzymaj',4,1],['Wydech',4,.6],['Zatrzymaj',4,.6]]}:{t:'Oddech 4–6',total:300,seq:[['Wdech',4,1],['Wydech',6,.6]]};BR={cfg,left:cfg.total,run:false,i:-1,pl:0,t:null};$('brTitle').textContent=cfg.t;$('brPhase').textContent='Gotowy';$('brLeft').textContent=fmt(cfg.total);$('brGo').textContent='▶ Start';$('orb').style.transform='scale(.6)';openSheet('breath')}
-function brStep(){BR.i=(BR.i+1)%BR.cfg.seq.length;const [n,s,sc]=BR.cfg.seq[BR.i];BR.pl=s;$('brPhase').textContent=n;const o=$('orb');o.style.transition='transform '+s+'s ease-in-out';o.style.transform='scale('+sc+')';if(n==='Wdech')vib(60)}
+function openBreath(kind){const cfg=kind==='box'?{t:'Oddech pudełkowy',total:240,seq:[['Wdech',4,1],['Zatrzymaj',4,1],['Wydech',4,.6],['Zatrzymaj',4,.6]]}:{t:'Oddech 4–6',total:300,seq:[['Wdech',4,1],['Wydech',6,.6]]};BR={cfg,left:cfg.total,run:false,i:-1,pl:0,t:null,cyc:0};$('brTitle').textContent=cfg.t;$('brPhase').textContent='Gotowy';$('brLeft').textContent=fmt(cfg.total);$('brGo').textContent='▶ Start';$('orb').style.transform='scale(.6)';openSheet('breath')}
+function brStep(){BR.i=(BR.i+1)%BR.cfg.seq.length;const [n,s,sc]=BR.cfg.seq[BR.i];BR.pl=s;$('brPhase').textContent=n;if(n==='Wdech')bell(392,1.8,.14);else if(n==='Wydech')bell(293.7,2.4,.12);if(BR.i<2&&BR.cyc++<2)say(n);const o=$('orb');o.style.transition='transform '+s+'s ease-in-out';o.style.transform='scale('+sc+')';if(n==='Wdech')vib(60)}
 function brGo(){if(BR.run){BR.run=false;clearInterval(BR.t);$('brGo').textContent='▶ Wznów';wakeOff();return}BR.run=true;wakeOn();$('brGo').textContent='⏸ Pauza';if(BR.i<0)brStep();BR.t=setInterval(()=>{BR.left--;BR.pl--;$('brLeft').textContent=fmt(BR.left);if(BR.left<=0){clearInterval(BR.t);wakeOff();cue('end');S.mindMin+=Math.round(BR.cfg.total/60);day().head=true;save();toast('<svg class="i"><use href="#i-feather"/></svg> Głowa na dziś zaliczona.');closeSheet();renderAll();return}if(BR.pl<=0)brStep()},1000)}
 const SCAN=[['Oddech',40,'Zamknij oczy. Kilka wolnych oddechów do brzucha. Wydech dłuższy niż wdech.'],['Stopy i łydki',35,'Poczuj stopy na podłodze. Przy wydechu puść napięcie w łydkach.'],['Uda i biodra',35,'Uda ciężkie i miękkie. Biodra opadają.'],['Dno miednicy',55,'Najważniejsze miejsce. Przy wdechu pozwól mu delikatnie opaść, przy wydechu — po prostu nic nie rób. Żadnego zaciskania.'],['Brzuch',35,'Brzuch miękki, swobodnie unosi się z oddechem.'],['Klatka i plecy',35,'Łopatki opadają, plecy rozluźnione.'],['Dłonie i ramiona',30,'Dłonie otwarte, ciężkie ramiona.'],['Szczęka i twarz',35,'Rozluźnij szczękę — zęby się nie stykają. Czoło gładkie.'],['Całe ciało',40,'Poczuj całe ciało naraz. Oceń napięcie 1–10. Zapamiętaj ten stan — do niego wracasz w pauzie stop-start.']];
 let SC=null;
-function scGo(){if(SC&&SC.run){SC.run=false;clearInterval(SC.t);$('scGo').textContent='▶ Wznów';return}if(!SC||SC.done){SC={i:0,left:SCAN[0][1],run:true};showScan()}SC.run=true;$('scGo').textContent='⏸ Pauza';wakeOn();SC.t=setInterval(()=>{SC.left--;$('scLeft').textContent=fmt(SC.left);if(SC.left<=0){SC.i++;if(SC.i>=SCAN.length){clearInterval(SC.t);SC.done=true;wakeOff();cue('end');S.mindMin+=6;day().head=true;save();toast('<svg class="i"><use href="#i-scan"/></svg> Skan zakończony. Głowa zaliczona.');closeSheet();renderAll();return}SC.left=SCAN[SC.i][1];showScan();vib(80)}},1000)}
-function showScan(){const s=SCAN[SC.i];$('scPart').textContent=s[0];$('scText').textContent=s[2];$('scLeft').textContent=fmt(SC.left)}
+function scGo(){if(SC&&SC.run){SC.run=false;clearInterval(SC.t);wakeOff();$('scGo').textContent='▶ Wznów';return}if(!SC||SC.done){SC={i:0,left:SCAN[0][1],run:true};showScan()}SC.run=true;$('scGo').textContent='⏸ Pauza';wakeOn();SC.t=setInterval(()=>{SC.left--;$('scLeft').textContent=fmt(SC.left);if(SC.left<=0){SC.i++;if(SC.i>=SCAN.length){clearInterval(SC.t);SC.done=true;wakeOff();cue('end');S.mindMin+=6;day().head=true;save();toast('<svg class="i"><use href="#i-scan"/></svg> Skan zakończony. Głowa zaliczona.');closeSheet();renderAll();return}SC.left=SCAN[SC.i][1];showScan();vib(80)}},1000)}
+function showScan(){const s=SCAN[SC.i];say(s[0]+'. '+s[2],true);$('scPart').textContent=s[0];$('scText').textContent=s[2];$('scLeft').textContent=fmt(SC.left)}
 
 /* ============ KONTROLA (STOP-START) ============ */
 const STAGES=[
@@ -511,7 +541,7 @@ function openCtrl(){const st=STAGES[stageIdx()];CS={st,sec:0,pauses:0,inPause:fa
 function csTick(){CS.sec++;$('csClock').textContent=fmt(CS.sec);if(CS.warm>0){CS.warm--;$('csState').textContent=CS.warm>0?('Oddech 4–6, rozluźnienie… '+fmt(CS.warm)):'Zaczynaj powoli. Oceniaj pobudzenie co chwilę.';if(CS.warm===0)vib(200)}
  if(CS.inPause){CS.pauseSec++;$('csPauseClock').textContent=fmt(CS.pauseSec);const ph=(CS.pauseSec%10)<4?'Wdech… 4':'Wydech… 6';$('csBreath').textContent=ph}}
 function setArousal(i){CS.arousal=i;$$('#csScale button').forEach((b,k)=>b.classList.toggle('on',k+1===i));if(i>=CS.st.stop&&!CS.inPause){beep(880,.4);vib([300,100,300]);$('csState').textContent='Jesteś przy progu — PAUZA teraz.'}else if(!CS.inPause){$('csState').textContent=i<=4?'Spokojnie. Dalej wolnym tempem.':'Uważaj — zbliżasz się. Próg: '+CS.st.stop+'/10.'}}
-function csPause(){if(CS.inPause)return;CS.inPause=true;CS.pauses++;CS.pauseSec=0;$('csPauses').textContent=CS.pauses;$('csPauseBox').style.display='block';$('csState').textContent='Pauza '+CS.pauses;vib(400)}
+function csPause(){if(CS.inPause)return;CS.inPause=true;CS.pauses++;CS.pauseSec=0;$('csPauses').textContent=CS.pauses;say('Pauza. Długi wydech. Puść dno miednicy.');$('csPauseBox').style.display='block';$('csState').textContent='Pauza '+CS.pauses;vib(400)}
 function csResume(){CS.inPause=false;$('csPauseBox').style.display='none';setArousal(3);$('csState').textContent=CS.pauses>=CS.st.pauses?'Cel pauz osiągnięty ✓ Możesz kończyć, kiedy chcesz.':'Wracasz. Wolne tempo.';if(CS.pauses>=CS.st.pauses)vib([100,60,100])}
 function csFinish(){clearInterval(CS.t);wakeOff();$('csSummary').innerHTML='Czas: <b>'+fmt(CS.sec)+'</b> · pauzy: <b>'+CS.pauses+'</b> / '+CS.st.pauses+(CS.pauses>=CS.st.pauses?' ✓':'');openSheet('ctrlsave')}
 function csSave(){S.ctrl.push({d:today(),min:Math.round(CS.sec/60*10)/10,p:CS.pauses,goal:CS.st.pauses,stage:stageIdx()+1,c:+$('csCtrl').value,a:+$('csAnx').value,n:$('csNote').value.trim()});day().ctrl=true;save();$('csNote').value='';toast('<svg class="i"><use href="#i-target"/></svg> Sesja zapisana. To jest prawdziwa praca — gratulacje.');closeAll();renderAll()}
@@ -736,7 +766,7 @@ async function pushDone(slot){if(!remCfg().on||!slot||slot==='extra')return;try{
 async function pushTest(){const m=$('remMsg');try{const sub=await getSub();if(!sub||!remCfg().on){m.textContent='Najpierw włącz przypomnienia.';return}const j=await pushApi({action:'test',endpoint:sub.endpoint});m.textContent=j.ok?'Wysłane — powinno przyjść za kilka sekund.':'Nie doszło. Wyłącz i włącz przypomnienia ponownie.'}catch(e){m.textContent='Brak połączenia.'}}
 
 /* ============ SETTINGS ============ */
-function renderSettings(){const R=remCfg();$('setPush').textContent=R.on?'Wł.':'Wył.';$('setPush').classList.toggle('on',R.on);$('remAm').value=R.am||'';$('remMid').value=R.mid||'';$('remPm').value=R.pm||'';$('setSound').textContent=S.cfg.sound?'Wł.':'Wył.';$('setSound').classList.toggle('on',S.cfg.sound);$('setVib').textContent=S.cfg.vib?'Wł.':'Wył.';$('setVib').classList.toggle('on',S.cfg.vib);$('setVol').value=S.cfg.vol;$('setVolV').textContent=S.cfg.vol+'%';const th=document.documentElement.dataset.theme;$('setTheme').textContent=th==='dark'?'Ciemny':'Jasny';$('setPin').textContent=S.cfg.pin?'Wł. (wyłącz)':'Wył. (ustaw)';$('setPin').classList.toggle('on',!!S.cfg.pin);$('setStart').textContent=S.start+' · tydzień '+weekNo()}
+function renderSettings(){$$('#setVoice button').forEach(b=>b.classList.toggle('on',b.dataset.x===S.cfg.voiceMode));$$('#setMusic button').forEach(b=>b.classList.toggle('on',b.dataset.x===S.cfg.music));$('setMvol').value=S.cfg.mvol??40;$('setMvolV').textContent=(S.cfg.mvol??40)+'%';const R=remCfg();$('setPush').textContent=R.on?'Wł.':'Wył.';$('setPush').classList.toggle('on',R.on);$('remAm').value=R.am||'';$('remMid').value=R.mid||'';$('remPm').value=R.pm||'';$('setSound').textContent=S.cfg.sound?'Wł.':'Wył.';$('setSound').classList.toggle('on',S.cfg.sound);$('setVib').textContent=S.cfg.vib?'Wł.':'Wył.';$('setVib').classList.toggle('on',S.cfg.vib);$('setVol').value=S.cfg.vol;$('setVolV').textContent=S.cfg.vol+'%';const th=document.documentElement.dataset.theme;$('setTheme').textContent=th==='dark'?'Ciemny':'Jasny';$('setPin').textContent=S.cfg.pin?'Wł. (wyłącz)':'Wył. (ustaw)';$('setPin').classList.toggle('on',!!S.cfg.pin);$('setStart').textContent=S.start+' · tydzień '+weekNo()}
 
 /* ============ EVENTS ============ */
 function bind(){
@@ -769,8 +799,12 @@ function bind(){
  $('setPush').onclick=()=>{remCfg().on?pushOff():pushOn()};
  $('remTest').onclick=pushTest;
  ['Am','Mid','Pm'].forEach(k=>$('rem'+k).onchange=()=>{const R=remCfg();R[k.toLowerCase()]=$('rem'+k).value;save();if(R.on)pushOn()});
+ $$('#setVoice button').forEach(b=>b.onclick=()=>{S.cfg.voiceMode=b.dataset.x;save();renderSettings();cue('tense','hold')});
+ $$('#setMusic button').forEach(b=>b.onclick=()=>{S.cfg.music=b.dataset.x;save();renderSettings();if(MU){musicStop();setTimeout(musicStart,1800)}});
+ $('setMvol').oninput=()=>{S.cfg.mvol=+$('setMvol').value;$('setMvolV').textContent=S.cfg.mvol+'%';if(MU){MU.base=S.cfg.mvol/100*.5;MU.master.gain.setTargetAtTime(MU.base,actx.currentTime,.1)}};$('setMvol').onchange=save;
+ $('setPreview').onclick=()=>{if(MU){musicStop();return}musicStart();setTimeout(()=>cue('tense','hold'),2500);setTimeout(()=>cue('relax','hold'),6000);setTimeout(musicStop,10000)};
  $('setSound').onclick=()=>{S.cfg.sound=!S.cfg.sound;save();renderSettings()};$('setVib').onclick=()=>{S.cfg.vib=!S.cfg.vib;save();renderSettings();vib(150)};
- $('setVol').oninput=()=>{S.cfg.vol=+$('setVol').value;$('setVolV').textContent=S.cfg.vol+'%'};$('setVol').onchange=()=>{save();beep(660,.4)};
+ $('setVol').oninput=()=>{S.cfg.vol=+$('setVol').value;$('setVolV').textContent=S.cfg.vol+'%'};$('setVol').onchange=()=>{save();cue('tense')};
  $('setTheme').onclick=()=>{const t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('kg2_theme',t)}catch(e){}renderSettings()};
  $('setPin').onclick=()=>{if(S.cfg.pin){S.cfg.pin=null;save();renderSettings();toast('PIN wyłączony')}else showLock('set')};
  $('setRestart').onclick=()=>{if(confirm('Zacząć plan 12 tygodni od dziś? Historia zostaje, licznik tygodni i poziom wracają do 1.')){S.start=today();S.level=1;S.lastLevelCheck=null;save();renderAll();renderSettings()}};
