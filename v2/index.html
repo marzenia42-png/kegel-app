@@ -186,6 +186,7 @@ nav.tabs button.on .e{opacity:1}
   <div class="top"><h1>Trening</h1><button class="icbtn" id="pocketInfo" aria-label="Tryb kieszonkowy"><svg class="i"><use href="#i-eyeoff"/></svg></button></div>
   <div class="tip">Plan 12 tygodni podnosi trudność sam, co 2 tygodnie — o ile w poprzednim tygodniu zaliczysz min. 5 dni. Czasy poniżej są już dopasowane do Twojego poziomu.</div>
   <div id="prgList"></div>
+  <h2>Filmy instruktażowe</h2><p class="muted" style="font-size:13px">Fizjoterapeutki dna miednicy pokazują technikę. Obejrzyj raz pierwszy film, zanim zaczniesz.</p><div id="vidList"></div>
   <h2>Technika — 3 zasady</h2>
   <div class="card">
     <ul class="list">
@@ -210,6 +211,7 @@ nav.tabs button.on .e{opacity:1}
   <div class="tip">Lęk i napięcie przyspieszają wytrysk najbardziej. Spokojny układ nerwowy = więcej kontroli. 5 minut dziennie.</div>
   <button class="prg" data-breath="calm"><div class="ic"><svg class="i"><use href="#i-wind"/></svg></div><div><b>Oddech 4–6 · 5 min</b><small class="muted">Wdech 4 s nosem, wydech 6 s. Główne narzędzie kontroli — ten sam oddech stosujesz w łóżku.</small></div></button>
   <button class="prg" data-breath="box"><div class="ic"><svg class="i"><use href="#i-square"/></svg></div><div><b>Oddech pudełkowy · 4 min</b><small class="muted">4–4–4–4. Na stres w ciągu dnia, przed ważną rozmową.</small></div></button>
+  <button class="prg" data-vid="4syPT8gMDDA"><div class="ic"><svg class="i"><use href="#i-scan"/></svg></div><div><b>Film: medytacja rozluźnienia</b><small class="muted">Prowadzone wyciszenie dna miednicy (EN, napisy PL).</small></div></button>
   <button class="prg" data-open="scan"><div class="ic"><svg class="i"><use href="#i-scan"/></svg></div><div><b>Skan ciała · 6 min</b><small class="muted">Rozluźnianie od stóp do szczęki, ze szczególnym puszczeniem dna miednicy.</small></div></button>
   <button class="prg" data-open="arousal"><div class="ic"><svg class="i"><use href="#i-sliders"/></svg></div><div><b>Skala pobudzenia 1–10</b><small class="muted">Nauka rozpoznawania, gdzie jesteś — podstawa stop-start.</small></div></button>
   <h2>Przestaw myślenie</h2>
@@ -380,7 +382,7 @@ nav.tabs button.on .e{opacity:1}
     <div class="row sb card"><span>Dźwięk</span><button class="pill" id="setSound"></button></div>
     <div class="row sb card"><span>Wibracje</span><button class="pill" id="setVib"></button></div>
     <div class="card"><div class="lbl" style="margin:0"><span>Głośność</span><b id="setVolV"></b></div><input type="range" min="0" max="100" id="setVol"></div>
-    <div class="card"><div class="lbl" style="margin:0 0 8px"><span>Komendy</span></div><div class="seg" id="setVoice"><button data-x="bells">Dzwonki</button><button data-x="voice">Głos</button><button data-x="both">Dzwonki + głos</button></div></div>
+    <div class="card"><div class="lbl" style="margin:0 0 8px"><span>Komendy</span></div><div class="seg" id="setSex" style="margin-bottom:6px"><button data-x="k">Głos kobiecy</button><button data-x="m">Głos męski</button></div><div class="seg" id="setVoice"><button data-x="bells">Dzwonki</button><button data-x="voice">Głos</button><button data-x="both">Dzwonki + głos</button></div></div>
     <div class="card"><div class="lbl" style="margin:0 0 8px"><span>Podkład muzyczny</span></div><div class="seg" id="setMusic"><button data-x="off">Bez</button><button data-x="pad">Ambient</button><button data-x="ocean">Fale</button><button data-x="rain">Deszcz</button></div>
       <div class="lbl"><span>Głośność podkładu</span><b id="setMvolV"></b></div><input type="range" min="0" max="100" id="setMvol">
       <button class="btn ghost sm" id="setPreview" style="margin-top:8px">▶ Odsłuchaj 10 s</button></div>
@@ -427,7 +429,7 @@ const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%6
 
 /* ============ STATE ============ */
 const KEY='kg2_state';
-const DEF={v:2,start:today(),level:1,lastLevelCheck:null,days:{},sessions:0,mindMin:0,checkins:[],ctrl:[],gestures:{},cfg:{sound:true,vib:true,vol:70,voiceMode:'both',music:'pad',mvol:40,pin:null},chat:[]};
+const DEF={v:2,start:today(),level:1,lastLevelCheck:null,days:{},sessions:0,mindMin:0,checkins:[],ctrl:[],gestures:{},cfg:{sound:true,vib:true,vol:70,voiceMode:'both',voiceSex:'k',music:'pad',mvol:40,pin:null},chat:[]};
 let S;
 function load(){
   try{S=Object.assign({},DEF,JSON.parse(localStorage.getItem(KEY)||'null')||{});S.cfg=Object.assign({},DEF.cfg,S.cfg||{})}catch(e){S=JSON.parse(JSON.stringify(DEF))}
@@ -483,8 +485,15 @@ let PLV=null;function plVoice(){if(PLV)return PLV;try{const v=speechSynthesis.ge
 try{speechSynthesis.onvoiceschanged=()=>{PLV=null;plVoice()}}catch(e){}
 function say(t,force){if(!S.cfg.sound)return;if(!force&&S.cfg.voiceMode==='bells')return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='pl-PL';const v=plVoice();if(v)u.voice=v;u.rate=.92;u.pitch=1;u.volume=Math.min(1,S.cfg.vol/100+.2);duck();speechSynthesis.speak(u)}catch(e){}}
 function vib(p){if((S.cfg.vib||pocketOn)&&navigator.vibrate)try{navigator.vibrate(p)}catch(e){}}
-const SAY={tense:{quick:'Napnij',hold:'Napnij i trzymaj',stop:'Hamulec',reverse:'Puść w dół',breathe:'Wdech'},relax:{quick:'Puść',hold:'Puść całkiem',stop:'Puść, wydech',reverse:'Wróć',breathe:'Długi wydech'}};
-function cue(ph,t){if(ph==='tense'){bell(659.3,1.1,.32);vib(400);if(t)say(SAY.tense[t]||'Napnij')}else if(ph==='relax'){bell(440,1.6,.26);vib([120,90,120]);if(t)say(SAY.relax[t]||'Puść')}else if(ph==='rest'){bell(329.6,2.4,.24);vib([100,80,100,80,100]);say('Przerwa. Rozluźnij się.')}else if(ph==='end'){bell(523.3,1.4,.3);setTimeout(()=>bell(659.3,1.4,.28),260);setTimeout(()=>bell(784,2.4,.3),520);vib([200,100,200,100,400]);say('Koniec. Dobra robota.')}}
+const SAYK={tense:{quick:'napnij',hold:'napnij_trzymaj',stop:'hamulec',reverse:'pusc_w_dol',breathe:'wdech'},relax:{quick:'pusc',hold:'pusc_calkiem',stop:'pusc_wydech',reverse:'wroc',breathe:'wydech'}};
+function cue(ph,t){if(ph==='tense'){bowlS('tense',.75);vib(400);if(t)sayKey(SAYK.tense[t]||'napnij')}else if(ph==='relax'){bowlS('relax',.7);vib([120,90,120]);if(t)sayKey(SAYK.relax[t]||'pusc')}else if(ph==='rest'){bowlS('rest',.7);vib([100,80,100,80,100]);sayKey('przerwa')}else if(ph==='end'){bowlS('end',.8);vib([200,100,200,100,400]);setTimeout(()=>sayKey('koniec'),900)}}
+/* ============ NAGRANIA (dzwony misy + lektor) ============ */
+const AUD={};function aud(name){if(AUD[name])return AUD[name];AUD[name]=fetch('audio/'+name+'.mp3').then(r=>r.arrayBuffer()).then(b=>AC().decodeAudioData(b)).catch(()=>null);return AUD[name]}
+async function playS(name,vol){try{const a=AC(),buf=await aud(name);if(!buf)return false;const src=a.createBufferSource(),g=a.createGain();src.buffer=buf;g.gain.value=vol*(S.cfg.vol/100);src.connect(g).connect(a.destination);src.start();return true}catch(e){return false}}
+function bowlS(name,vol){if(!S.cfg.sound||S.cfg.voiceMode==='voice')return;playS('b_'+name,vol||.8)}
+function sayKey(k,force){if(!S.cfg.sound)return;if(!force&&S.cfg.voiceMode==='bells')return;duck();playS((S.cfg.voiceSex||'k')+'_'+k,1).then(ok=>{if(!ok&&TXT[k])say(TXT[k],force)})}
+const TXT={napnij:'Napnij',napnij_trzymaj:'Napnij i trzymaj',hamulec:'Hamulec',pusc_w_dol:'Puść w dół',wdech:'Wdech',pusc:'Puść',pusc_calkiem:'Puść całkiem',pusc_wydech:'Puść, wydech',wroc:'Wróć',wydech:'Wydech',zatrzymaj:'Zatrzymaj',przerwa:'Przerwa',koniec:'Koniec. Dobra robota.',pauza:'Pauza. Długi wydech.'};
+function preloadAudio(){const v=S.cfg.voiceSex||'k';['b_tense','b_relax','b_rest','b_end','b_in','b_out'].concat(['napnij','napnij_trzymaj','hamulec','pusc_w_dol','wdech','pusc','pusc_calkiem','pusc_wydech','wroc','wydech','przerwa','koniec','start'].map(k=>v+'_'+k)).forEach(aud)}
 /* ============ PODKŁAD MUZYCZNY (generowany na żywo, bez plików) ============ */
 let MU=null;
 function noiseBuf(a,sec,pink){const b=a.createBuffer(1,a.sampleRate*sec,a.sampleRate),d=b.getChannelData(0);let b0=0,b1=0,b2=0;for(let i=0;i<d.length;i++){const w=Math.random()*2-1;if(pink){b0=.997*b0+w*.029591;b1=.985*b1+w*.032534;b2=.95*b2+w*.048056;d[i]=(b0+b1+b2+w*.1848)*.25}else d[i]=w*.4}return b}
@@ -506,12 +515,12 @@ let wake;async function wakeOn(){musicStart();try{wake=await navigator.wakeLock.
 
 /* ============ PLAYER ============ */
 let PL=null,pocketOn=false;
-function openPlayer(pid,slot){const st=steps(pid);PL={pid,slot,st,idx:-1,left:0,run:false,t:null};$('plTitle').textContent=PRG[pid].name;$('plPhase').textContent='Gotowy?';$('plTime').textContent=fmt(dur(pid));$('plSub').textContent='Poziom '+S.level+' · '+st.filter(s=>s.ph==='tense').length+' skurczów';$('plCue').textContent=PRG[pid].sub;$('plGo').textContent='▶ Start';$('plSteps').textContent='';setArc(1);openSheet('player')}
+function openPlayer(pid,slot){const st=steps(pid);PL={pid,slot,st,idx:-1,left:0,run:false,t:null};$('plTitle').textContent=PRG[pid].name;$('plPhase').textContent='Gotowy?';$('plTime').textContent=fmt(dur(pid));$('plSub').textContent='Poziom '+S.level+' · '+st.filter(s=>s.ph==='tense').length+' skurczów';$('plCue').innerHTML=esc(PRG[pid].sub)+(VIDS.find(v=>v.p.includes(pid))?'<br><button class="pill" data-vid="'+VIDS.find(v=>v.p.includes(pid)).id+'" style="margin-top:10px">▶ Zobacz technikę na filmie</button>':'');$('plGo').textContent='▶ Start';$('plSteps').textContent='';setArc(1);openSheet('player')}
 function setArc(f){$('plArc').setAttribute('stroke-dashoffset',String(741.4*(1-f)))}
 function plNext(){PL.idx++;if(PL.idx>=PL.st.length){plEnd(true);return}const s=PL.st[PL.idx];PL.left=s.d;PL.cur=s;cue(s.ph,s.ph==='rest'?null:s.t);renderPl()}
 function renderPl(){const s=PL.cur;const label=s.ph==='rest'?PHASE.rest[0]:PHASE[s.t][s.ph==='tense'?0:1];$('plPhase').textContent=label;$('plTime').textContent=PL.left;$('plSub').textContent=s.ph==='rest'?'':(s.i+' / '+s.n);$('plCue').textContent=s.ph==='rest'?CUES.rest:CUES[s.t];$('plArc').setAttribute('stroke',s.ph==='tense'?'var(--acc)':s.ph==='relax'?'var(--blue)':'var(--muted)');setArc(PL.left/s.d);const done=PL.st.slice(PL.idx).reduce((a,x)=>a+x.d,0);$('plSteps').textContent='Zostało '+fmt(done-(s.d-PL.left))}
 function plTick(){PL.left--;if(PL.left<=0){plNext()}else{renderPl()}}
-function plGo(){if(!PL)return;if(PL.run){PL.run=false;clearInterval(PL.t);$('plGo').textContent='▶ Wznów';wakeOff();return}PL.run=true;$('plGo').textContent='⏸ Pauza';wakeOn();if(PL.idx<0)plNext();PL.t=setInterval(plTick,1000)}
+function plGo(){if(!PL)return;if(PL.run){PL.run=false;clearInterval(PL.t);$('plGo').textContent='▶ Wznów';wakeOff();return}PL.run=true;$('plGo').textContent='⏸ Pauza';wakeOn();if(PL.idx<0){sayKey('start');setTimeout(()=>{if(PL&&PL.run&&PL.idx<0)plNext()},3200);PL.t=setInterval(()=>{if(PL.idx>=0)plTick()},1000);return}PL.t=setInterval(plTick,1000)}
 function plEnd(full){if(!PL)return;clearInterval(PL.t);wakeOff();if(full){cue('end');S.sessions++;const d=day();const slot=PL.slot||freeSlot();d[slot]=true;save();pushDone(slot);toast('<svg class="i"><use href="#i-check"/></svg> '+PRG[PL.pid].name+' zaliczony. Dobra robota.');}setPocket(false);PL=null;closeSheet();renderAll()}
 function freeSlot(){const d=day();const h=new Date().getHours();const pref=h<11?'am':h<17?'mid':'pm';if(!d[pref])return pref;return ['am','mid','pm'].find(k=>!d[k])||'extra'}
 function setPocket(on){pocketOn=on;$('pocket').classList.toggle('on',on);if(on){toast('<svg class="i"><use href="#i-eyeoff"/></svg> Tryb kieszonkowy: długa wibracja = napnij, dwie krótkie = puść')}}
@@ -519,12 +528,12 @@ function setPocket(on){pocketOn=on;$('pocket').classList.toggle('on',on);if(on){
 /* ============ ODDECH / SKAN ============ */
 let BR=null;
 function openBreath(kind){const cfg=kind==='box'?{t:'Oddech pudełkowy',total:240,seq:[['Wdech',4,1],['Zatrzymaj',4,1],['Wydech',4,.6],['Zatrzymaj',4,.6]]}:{t:'Oddech 4–6',total:300,seq:[['Wdech',4,1],['Wydech',6,.6]]};BR={cfg,left:cfg.total,run:false,i:-1,pl:0,t:null,cyc:0};$('brTitle').textContent=cfg.t;$('brPhase').textContent='Gotowy';$('brLeft').textContent=fmt(cfg.total);$('brGo').textContent='▶ Start';$('orb').style.transform='scale(.6)';openSheet('breath')}
-function brStep(){BR.i=(BR.i+1)%BR.cfg.seq.length;const [n,s,sc]=BR.cfg.seq[BR.i];BR.pl=s;$('brPhase').textContent=n;if(n==='Wdech')bell(392,1.8,.14);else if(n==='Wydech')bell(293.7,2.4,.12);if(BR.i<2&&BR.cyc++<2)say(n);const o=$('orb');o.style.transition='transform '+s+'s ease-in-out';o.style.transform='scale('+sc+')';if(n==='Wdech')vib(60)}
+function brStep(){BR.i=(BR.i+1)%BR.cfg.seq.length;const [n,s,sc]=BR.cfg.seq[BR.i];BR.pl=s;$('brPhase').textContent=n;if(n==='Wdech')bowlS('in',.45);else if(n==='Wydech')bowlS('out',.45);if(BR.cyc++<3)sayKey(n==='Wdech'?'wdech':n==='Wydech'?'wydech':'zatrzymaj');const o=$('orb');o.style.transition='transform '+s+'s ease-in-out';o.style.transform='scale('+sc+')';if(n==='Wdech')vib(60)}
 function brGo(){if(BR.run){BR.run=false;clearInterval(BR.t);$('brGo').textContent='▶ Wznów';wakeOff();return}BR.run=true;wakeOn();$('brGo').textContent='⏸ Pauza';if(BR.i<0)brStep();BR.t=setInterval(()=>{BR.left--;BR.pl--;$('brLeft').textContent=fmt(BR.left);if(BR.left<=0){clearInterval(BR.t);wakeOff();cue('end');S.mindMin+=Math.round(BR.cfg.total/60);day().head=true;save();toast('<svg class="i"><use href="#i-feather"/></svg> Głowa na dziś zaliczona.');closeSheet();renderAll();return}if(BR.pl<=0)brStep()},1000)}
 const SCAN=[['Oddech',40,'Zamknij oczy. Kilka wolnych oddechów do brzucha. Wydech dłuższy niż wdech.'],['Stopy i łydki',35,'Poczuj stopy na podłodze. Przy wydechu puść napięcie w łydkach.'],['Uda i biodra',35,'Uda ciężkie i miękkie. Biodra opadają.'],['Dno miednicy',55,'Najważniejsze miejsce. Przy wdechu pozwól mu delikatnie opaść, przy wydechu — po prostu nic nie rób. Żadnego zaciskania.'],['Brzuch',35,'Brzuch miękki, swobodnie unosi się z oddechem.'],['Klatka i plecy',35,'Łopatki opadają, plecy rozluźnione.'],['Dłonie i ramiona',30,'Dłonie otwarte, ciężkie ramiona.'],['Szczęka i twarz',35,'Rozluźnij szczękę — zęby się nie stykają. Czoło gładkie.'],['Całe ciało',40,'Poczuj całe ciało naraz. Oceń napięcie 1–10. Zapamiętaj ten stan — do niego wracasz w pauzie stop-start.']];
 let SC=null;
 function scGo(){if(SC&&SC.run){SC.run=false;clearInterval(SC.t);wakeOff();$('scGo').textContent='▶ Wznów';return}if(!SC||SC.done){SC={i:0,left:SCAN[0][1],run:true};showScan()}SC.run=true;$('scGo').textContent='⏸ Pauza';wakeOn();SC.t=setInterval(()=>{SC.left--;$('scLeft').textContent=fmt(SC.left);if(SC.left<=0){SC.i++;if(SC.i>=SCAN.length){clearInterval(SC.t);SC.done=true;wakeOff();cue('end');S.mindMin+=6;day().head=true;save();toast('<svg class="i"><use href="#i-scan"/></svg> Skan zakończony. Głowa zaliczona.');closeSheet();renderAll();return}SC.left=SCAN[SC.i][1];showScan();vib(80)}},1000)}
-function showScan(){const s=SCAN[SC.i];say(s[0]+'. '+s[2],true);$('scPart').textContent=s[0];$('scText').textContent=s[2];$('scLeft').textContent=fmt(SC.left)}
+function showScan(){const s=SCAN[SC.i];sayKey('scan'+SC.i,true);$('scPart').textContent=s[0];$('scText').textContent=s[2];$('scLeft').textContent=fmt(SC.left)}
 
 /* ============ KONTROLA (STOP-START) ============ */
 const STAGES=[
@@ -541,7 +550,7 @@ function openCtrl(){const st=STAGES[stageIdx()];CS={st,sec:0,pauses:0,inPause:fa
 function csTick(){CS.sec++;$('csClock').textContent=fmt(CS.sec);if(CS.warm>0){CS.warm--;$('csState').textContent=CS.warm>0?('Oddech 4–6, rozluźnienie… '+fmt(CS.warm)):'Zaczynaj powoli. Oceniaj pobudzenie co chwilę.';if(CS.warm===0)vib(200)}
  if(CS.inPause){CS.pauseSec++;$('csPauseClock').textContent=fmt(CS.pauseSec);const ph=(CS.pauseSec%10)<4?'Wdech… 4':'Wydech… 6';$('csBreath').textContent=ph}}
 function setArousal(i){CS.arousal=i;$$('#csScale button').forEach((b,k)=>b.classList.toggle('on',k+1===i));if(i>=CS.st.stop&&!CS.inPause){beep(880,.4);vib([300,100,300]);$('csState').textContent='Jesteś przy progu — PAUZA teraz.'}else if(!CS.inPause){$('csState').textContent=i<=4?'Spokojnie. Dalej wolnym tempem.':'Uważaj — zbliżasz się. Próg: '+CS.st.stop+'/10.'}}
-function csPause(){if(CS.inPause)return;CS.inPause=true;CS.pauses++;CS.pauseSec=0;$('csPauses').textContent=CS.pauses;say('Pauza. Długi wydech. Puść dno miednicy.');$('csPauseBox').style.display='block';$('csState').textContent='Pauza '+CS.pauses;vib(400)}
+function csPause(){if(CS.inPause)return;CS.inPause=true;CS.pauses++;CS.pauseSec=0;$('csPauses').textContent=CS.pauses;sayKey('pauza');$('csPauseBox').style.display='block';$('csState').textContent='Pauza '+CS.pauses;vib(400)}
 function csResume(){CS.inPause=false;$('csPauseBox').style.display='none';setArousal(3);$('csState').textContent=CS.pauses>=CS.st.pauses?'Cel pauz osiągnięty ✓ Możesz kończyć, kiedy chcesz.':'Wracasz. Wolne tempo.';if(CS.pauses>=CS.st.pauses)vib([100,60,100])}
 function csFinish(){clearInterval(CS.t);wakeOff();$('csSummary').innerHTML='Czas: <b>'+fmt(CS.sec)+'</b> · pauzy: <b>'+CS.pauses+'</b> / '+CS.st.pauses+(CS.pauses>=CS.st.pauses?' ✓':'');openSheet('ctrlsave')}
 function csSave(){S.ctrl.push({d:today(),min:Math.round(CS.sec/60*10)/10,p:CS.pauses,goal:CS.st.pauses,stage:stageIdx()+1,c:+$('csCtrl').value,a:+$('csAnx').value,n:$('csNote').value.trim()});day().ctrl=true;save();$('csNote').value='';toast('<svg class="i"><use href="#i-target"/></svg> Sesja zapisana. To jest prawdziwa praca — gratulacje.');closeAll();renderAll()}
@@ -673,6 +682,17 @@ doctor:['Kiedy do lekarza',`<div class="tip warn">Pilnie: ból, krew w moczu lub
 <h3>Co zabrać</h3><ul class="list"><li>Eksport z aplikacji (Ustawienia → Eksport) — wykres check-inów i sesji.</li><li>Od kiedy trwa problem, czy zawsze, czy od jakiegoś czasu.</li><li>Leki i suplementy, które bierzesz.</li></ul><p class="muted">Seksuolog to normalny lekarz — wizyta jest dyskretna i rzeczowa.</p>`]
 };
 
+
+/* ============ FILMY ============ */
+const VIDS=[
+ {id:'MJ7EfGu03-0',t:'Kegel dla mężczyzn — podstawy krok po kroku',d:'Jak znaleźć mięsień i zrobić poprawny skurcz. Zacznij od tego.',a:'Michelle Kenway, fizjoterapeutka dna miednicy',p:['fundament','express']},
+ {id:'n6z88aU1dMw',t:'Szybkie i wolne skurcze — 2 najważniejsze ćwiczenia',d:'Technika „moc” (1 s) i „wytrzymałość” (do 10 s).',a:'Michelle Kenway',p:['moc','wytrz','kompletny']},
+ {id:'8meh5W_r7DA',t:'Ile powtórzeń — od początkującego do zaawansowanego',d:'Jak dawkować trening i kiedy podnosić poprzeczkę.',a:'Michelle Kenway',p:['kontrola']},
+ {id:'Fac5ihuQ1Ws',t:'Rozluźnianie dna miednicy dla mężczyzn',d:'Rozluźnianie i oddech — podstawa programu Reset i kontroli.',a:'Michelle Kenway',p:['reset']},
+ {id:'4syPT8gMDDA',t:'Medytacja: rozluźnienie dna miednicy',d:'Prowadzone wyciszenie ciała — uzupełnienie skanu ciała.',a:'Dr Bri, fizjoterapeutka',p:[]}
+];
+function vidCard(v){return `<button class="prg" data-vid="${v.id}"><div class="ic" style="overflow:hidden;padding:0;width:84px;height:56px;border-radius:12px"><img src="https://i.ytimg.com/vi/${v.id}/mqdefault.jpg" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div><div style="flex:1"><b>${v.t}</b><small class="muted">${v.d}</small></div></button>`}
+function openVid(id){const v=VIDS.find(x=>x.id===id);if(!v)return;$('infoTitle').textContent='Film';$('infoBody').innerHTML=`<div style="position:relative;padding-top:56.25%;border-radius:14px;overflow:hidden;background:#000"><iframe src="https://www.youtube-nocookie.com/embed/${v.id}?rel=0&cc_load_policy=1&hl=pl&cc_lang_pref=pl" title="${esc(v.t)}" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe></div><h3>${esc(v.t)}</h3><p>${esc(v.d)}</p><p class="muted" style="font-size:13px">${esc(v.a)} · film po angielsku</p><div class="tip">Napisy po polsku: w odtwarzaczu stuknij ⚙ → Napisy → Automatyczne tłumaczenie → polski.</div>`;openSheet('info')}
 /* ============ RENDER ============ */
 const SLOTNAME={am:['<svg class="i"><use href="#i-sunrise"/></svg>','Rano','program dnia'],mid:['<svg class="i"><use href="#i-sun"/></svg>','W ciągu dnia','Express · tryb kieszonkowy'],pm:['<svg class="i"><use href="#i-moon"/></svg>','Wieczorem','Reset · rozluźnienie']};
 function slotPrg(slot){if(slot==='mid')return 'express';if(slot==='pm')return 'reset';return WEEK[new Date().getDay()]}
@@ -693,7 +713,7 @@ function renderToday(){
  const gi=S.gestures.idx!=null&&S.gestures.day===today()?S.gestures.idx:((di*7)%GESTURES.length+GESTURES.length)%GESTURES.length;S.gestures.idx=gi;S.gestures.day=today();$('dailyGesture').textContent=GESTURES[gi];$('gestDone').textContent=d.gesture?'Zrobione ✓':'Oznacz jako zrobione';
  const sun=new Date().getDay()===0;const lastCi=S.checkins[S.checkins.length-1];$('checkinCard').style.display=(sun||(lastCi&&daysBetween(lastCi.d,today())>=7)||(!lastCi&&daysBetween(S.start,today())>=6))&&!(lastCi&&daysBetween(lastCi.d,today())<5)?'block':'none';
 }
-function renderTrain(){$('prgList').innerHTML=Object.keys(PRG).map(k=>{const p=PRG[k];return `<button class="prg" data-prg="${k}"><div class="ic">${p.icon}</div><div style="flex:1"><div class="row sb"><b>${p.name}</b><span class="pill">${fmt(dur(k))}</span></div><small class="muted">${p.sub}</small></div></button>`}).join('')}
+function renderTrain(){$('vidList').innerHTML=VIDS.map(vidCard).join('');$('prgList').innerHTML=Object.keys(PRG).map(k=>{const p=PRG[k];return `<button class="prg" data-prg="${k}"><div class="ic">${p.icon}</div><div style="flex:1"><div class="row sb"><b>${p.name}</b><span class="pill">${fmt(dur(k))}</span></div><small class="muted">${p.sub}</small></div></button>`}).join('')}
 function renderCtrl(){const i=stageIdx(),st=STAGES[i];$('ctrlStageName').textContent=st.n;$('ctrlStageWeeks').textContent=st.w;$('ctrlStageGoal').textContent=st.goal;
  $('stagesList').innerHTML=STAGES.map((s,k)=>`<details class="acc"${k===i?' open':''}><summary>${k<i?'✓ ':k===i?'▶ ':''}${s.n} <span class="muted" style="font-weight:400;font-size:13px">${s.w}</span></summary><div class="in"><p>${s.desc}</p><p class="muted">${s.goal}</p></div></details>`).join('');
  $('ctrl-bed').innerHTML=BEDHTML;
@@ -766,7 +786,7 @@ async function pushDone(slot){if(!remCfg().on||!slot||slot==='extra')return;try{
 async function pushTest(){const m=$('remMsg');try{const sub=await getSub();if(!sub||!remCfg().on){m.textContent='Najpierw włącz przypomnienia.';return}const j=await pushApi({action:'test',endpoint:sub.endpoint});m.textContent=j.ok?'Wysłane — powinno przyjść za kilka sekund.':'Nie doszło. Wyłącz i włącz przypomnienia ponownie.'}catch(e){m.textContent='Brak połączenia.'}}
 
 /* ============ SETTINGS ============ */
-function renderSettings(){$$('#setVoice button').forEach(b=>b.classList.toggle('on',b.dataset.x===S.cfg.voiceMode));$$('#setMusic button').forEach(b=>b.classList.toggle('on',b.dataset.x===S.cfg.music));$('setMvol').value=S.cfg.mvol??40;$('setMvolV').textContent=(S.cfg.mvol??40)+'%';const R=remCfg();$('setPush').textContent=R.on?'Wł.':'Wył.';$('setPush').classList.toggle('on',R.on);$('remAm').value=R.am||'';$('remMid').value=R.mid||'';$('remPm').value=R.pm||'';$('setSound').textContent=S.cfg.sound?'Wł.':'Wył.';$('setSound').classList.toggle('on',S.cfg.sound);$('setVib').textContent=S.cfg.vib?'Wł.':'Wył.';$('setVib').classList.toggle('on',S.cfg.vib);$('setVol').value=S.cfg.vol;$('setVolV').textContent=S.cfg.vol+'%';const th=document.documentElement.dataset.theme;$('setTheme').textContent=th==='dark'?'Ciemny':'Jasny';$('setPin').textContent=S.cfg.pin?'Wł. (wyłącz)':'Wył. (ustaw)';$('setPin').classList.toggle('on',!!S.cfg.pin);$('setStart').textContent=S.start+' · tydzień '+weekNo()}
+function renderSettings(){$$('#setSex button').forEach(b=>b.classList.toggle('on',b.dataset.x===(S.cfg.voiceSex||'k')));$$('#setVoice button').forEach(b=>b.classList.toggle('on',b.dataset.x===S.cfg.voiceMode));$$('#setMusic button').forEach(b=>b.classList.toggle('on',b.dataset.x===S.cfg.music));$('setMvol').value=S.cfg.mvol??40;$('setMvolV').textContent=(S.cfg.mvol??40)+'%';const R=remCfg();$('setPush').textContent=R.on?'Wł.':'Wył.';$('setPush').classList.toggle('on',R.on);$('remAm').value=R.am||'';$('remMid').value=R.mid||'';$('remPm').value=R.pm||'';$('setSound').textContent=S.cfg.sound?'Wł.':'Wył.';$('setSound').classList.toggle('on',S.cfg.sound);$('setVib').textContent=S.cfg.vib?'Wł.':'Wył.';$('setVib').classList.toggle('on',S.cfg.vib);$('setVol').value=S.cfg.vol;$('setVolV').textContent=S.cfg.vol+'%';const th=document.documentElement.dataset.theme;$('setTheme').textContent=th==='dark'?'Ciemny':'Jasny';$('setPin').textContent=S.cfg.pin?'Wł. (wyłącz)':'Wył. (ustaw)';$('setPin').classList.toggle('on',!!S.cfg.pin);$('setStart').textContent=S.start+' · tydzień '+weekNo()}
 
 /* ============ EVENTS ============ */
 function bind(){
@@ -775,6 +795,7 @@ function bind(){
   if(t.hasAttribute('data-close')){back();return}
   if(t.dataset.slot){openPlayer(slotPrg(t.dataset.slot),t.dataset.slot);return}
   if(t.dataset.prg){openPlayer(t.dataset.prg,null);return}
+  if(t.dataset.vid){openVid(t.dataset.vid);return}
   if(t.dataset.breath){openBreath(t.dataset.breath);return}
   if(t.dataset.ctrl){go('ctrl');return}
   if(t.dataset.open){const o=t.dataset.open;if(o==='coach'){renderChat();openSheet('coach')}else if(o==='arousal')openArousal();else if(o==='scan'){SC=null;$('scPart').textContent='Start';$('scText').textContent='9 części ciała, ok. 6 minut. Połóż się lub usiądź wygodnie.';$('scGo').textContent='▶ Start';openSheet('scan')}else if(o==='checkin')openSheet('checkin');else if(o==='settings'){renderSettings();openSheet('settings')}else if(INFO[o])openInfo(o);return}
@@ -799,6 +820,7 @@ function bind(){
  $('setPush').onclick=()=>{remCfg().on?pushOff():pushOn()};
  $('remTest').onclick=pushTest;
  ['Am','Mid','Pm'].forEach(k=>$('rem'+k).onchange=()=>{const R=remCfg();R[k.toLowerCase()]=$('rem'+k).value;save();if(R.on)pushOn()});
+ $$('#setSex button').forEach(b=>b.onclick=()=>{S.cfg.voiceSex=b.dataset.x;save();renderSettings();preloadAudio();sayKey('napnij_trzymaj',true)});
  $$('#setVoice button').forEach(b=>b.onclick=()=>{S.cfg.voiceMode=b.dataset.x;save();renderSettings();cue('tense','hold')});
  $$('#setMusic button').forEach(b=>b.onclick=()=>{S.cfg.music=b.dataset.x;save();renderSettings();if(MU){musicStop();setTimeout(musicStart,1800)}});
  $('setMvol').oninput=()=>{S.cfg.mvol=+$('setMvol').value;$('setMvolV').textContent=S.cfg.mvol+'%';if(MU){MU.base=S.cfg.mvol/100*.5;MU.master.gain.setTargetAtTime(MU.base,actx.currentTime,.1)}};$('setMvol').onchange=save;
@@ -812,6 +834,7 @@ function bind(){
  $('setImport').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);if(!j.days)throw 0;S=Object.assign({},DEF,j);S.cfg=Object.assign({},DEF.cfg,j.cfg||{});save();renderAll();renderSettings();toast('<svg class="i"><use href="#i-up"/></svg> Dane zaimportowane')}catch(x){toast('To nie jest plik z tej aplikacji')}};r.readAsText(f)};
  $('setWipe').onclick=()=>{if(confirm('Na pewno usunąć wszystkie dane? Tego nie da się cofnąć. Zrób najpierw eksport.')){localStorage.removeItem(KEY);location.reload()}};
  $('pinPad').innerHTML=['1','2','3','4','5','6','7','8','9','✕','0','⌫'].map(k=>`<button>${k}</button>`).join('');$$('#pinPad button').forEach(b=>b.onclick=()=>pinKey(b.textContent));
+ document.addEventListener('pointerdown',()=>{if(!window._pl){window._pl=1;preloadAudio()}},{once:true});
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderToday()}});
 }
 
