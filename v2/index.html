@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B1020">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<link rel="apple-touch-icon" href="../icon-192.png">
+<title>Kegel</title>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('kg2_theme')||'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0B1020;--bg2:#121A31;--card:rgba(255,255,255,.05);--card2:rgba(255,255,255,.08);--line:rgba(255,255,255,.09);
+  --text:#EEF1F8;--muted:#8C95AE;--acc:#E7B66B;--acc2:#F3D3A0;--accdim:rgba(231,182,107,.16);
+  --blue:#8FA6F0;--green:#79D2A6;--red:#F08F8F;--violet:#B79CF0;
+  --r:18px;--sh:0 10px 30px rgba(0,0,0,.35);
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+:root[data-theme=light]{--bg:#F4F1EA;--bg2:#FFFFFF;--card:rgba(20,24,40,.045);--card2:rgba(20,24,40,.08);--line:rgba(20,24,40,.10);--text:#1A2033;--muted:#646C82;--acc:#B9782A;--acc2:#8A5617;--accdim:rgba(185,120,42,.14);--sh:0 8px 24px rgba(20,24,40,.10)}
+html,body{height:100%;background:var(--bg);color:var(--text);font:15px/1.5 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+body{background:radial-gradient(1200px 600px at 80% -10%,rgba(231,182,107,.10),transparent 60%),radial-gradient(900px 500px at -10% 30%,rgba(143,166,240,.10),transparent 60%),var(--bg);background-attachment:fixed}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:600;letter-spacing:-.01em}
+h1{font-size:28px}h2{font-size:21px;margin:22px 0 10px}h3{font-size:16.5px;margin:14px 0 6px}
+p{margin:6px 0}small,.muted{color:var(--muted)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+.app{max-width:560px;margin:0 auto;padding:18px 16px calc(96px + var(--safe-b))}
+.top{display:flex;align-items:center;justify-content:space-between;margin:4px 2px 14px}
+.top .hello{font-size:13px;color:var(--muted)}
+.icbtn{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;font-size:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin:12px 0}
+.card.hero{background:linear-gradient(135deg,rgba(231,182,107,.20),rgba(143,166,240,.10));border-color:rgba(231,182,107,.30)}
+.row{display:flex;align-items:center;gap:12px}.row.sb{justify-content:space-between}.wrap{flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:var(--card2);border:1px solid var(--line);font-size:12.5px}
+.pill.on{background:var(--accdim);border-color:var(--acc);color:var(--acc2)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 16px;border-radius:14px;background:var(--acc);color:#1B1408;font-weight:600;font-size:15.5px;min-height:50px}
+.btn.ghost{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+.btn.sm{width:auto;min-height:40px;padding:9px 14px;font-size:14px}
+.stat b{display:block;font-family:Fraunces,serif;font-size:26px;line-height:1.1}
+.stat span{font-size:12px;color:var(--muted)}
+.prog{height:8px;background:var(--card2);border-radius:99px;overflow:hidden}.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:99px;transition:width .5s}
+.task{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:var(--card2);border:1px solid var(--line);margin:8px 0;width:100%;text-align:left}
+.task .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:var(--accdim);flex:0 0 auto}
+.task .t{flex:1}.task .t b{display:block;font-weight:600}.task .t small{font-size:12.5px}
+.task .ck{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:14px;flex:0 0 auto}
+.task.done{opacity:.65}.task.done .ck{background:var(--green);border-color:var(--green);color:#0B1020}
+.list{list-style:none}.list li{position:relative;padding:7px 0 7px 22px;border-bottom:1px solid var(--line)}.list li:last-child{border:0}
+.list li::before{content:"";position:absolute;left:4px;top:15px;width:7px;height:7px;border-radius:50%;background:var(--acc)}
+.tip{border-left:3px solid var(--acc);padding:10px 12px;background:var(--accdim);border-radius:0 12px 12px 0;margin:10px 0;font-size:14px}
+.warn{border-left-color:var(--red);background:rgba(240,143,143,.10)}
+.ev{font-size:11px;padding:2px 8px;border-radius:99px;margin-left:6px;vertical-align:2px}
+.ev.g{background:rgba(121,210,166,.15);color:var(--green)}.ev.m{background:rgba(231,182,107,.15);color:var(--acc)}.ev.s{background:rgba(140,149,174,.18);color:var(--muted)}
+details.acc{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:10px 0;overflow:hidden}
+details.acc summary{list-style:none;padding:14px 16px;font-weight:600;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+details.acc summary::-webkit-details-marker{display:none}
+details.acc summary::after{content:"+";font-size:20px;color:var(--acc);transition:transform .2s}
+details.acc[open] summary::after{transform:rotate(45deg)}
+details.acc .in{padding:0 16px 14px}
+.ex{display:grid;gap:6px;margin:10px 0}
+.ex .no::before{content:'✕  ';color:var(--red)}.ex .yes::before{content:'✓  ';color:var(--green)}
+.ex .no{padding:9px 12px;border-radius:12px;background:rgba(240,143,143,.10);font-size:14px}
+.ex .yes{padding:9px 12px;border-radius:12px;background:rgba(121,210,166,.12);font-size:14px}
+.ex .ctx{font-size:12.5px;color:var(--muted)}
+/* nav */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(11,16,32,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:6px 6px calc(6px + var(--safe-b))}
+:root[data-theme=light] nav.tabs{background:rgba(244,241,234,.92)}
+nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
+nav.tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:10.5px;color:var(--muted);border-radius:12px;min-height:52px}
+nav.tabs button .e{font-size:20px;line-height:1.2;filter:grayscale(.6);opacity:.75}
+nav.tabs button.on{color:var(--acc2)}nav.tabs button.on .e{filter:none;opacity:1}
+.view{display:none;animation:fade .25s ease}.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* segmented */
+.seg{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}.seg::-webkit-scrollbar{display:none}
+.seg button{flex:0 0 auto;padding:8px 13px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:13.5px;white-space:nowrap}
+.seg button.on{background:var(--acc);color:#1B1408;border-color:var(--acc);font-weight:600}
+/* program cards */
+.prg{display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:16px;background:var(--card);border:1px solid var(--line);margin:9px 0;width:100%;text-align:left}
+.prg .ic{font-size:26px;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--accdim);flex:0 0 auto}
+.prg b{font-size:15.5px}.prg small{display:block;font-size:12.5px;margin-top:2px}
+/* overlay sheets */
+.sheet{position:fixed;inset:0;z-index:60;background:var(--bg);display:none;flex-direction:column;overflow:auto}
+.sheet.on{display:flex}
+.sheet .hd{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg);border-bottom:1px solid var(--line);z-index:2}
+.sheet .bd{padding:16px;max-width:560px;margin:0 auto;width:100%;flex:1}
+/* player */
+.player{display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:6px}
+.ring{position:relative;width:260px;height:260px;margin:18px auto}
+.ring svg{transform:rotate(-90deg)}
+.ring .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring .ph{font-family:Fraunces,serif;font-size:28px}
+.ring .tm{font-size:54px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
+.ring .sub{font-size:13px;color:var(--muted)}
+.orb{width:180px;height:180px;border-radius:50%;margin:30px auto;background:radial-gradient(circle at 35% 30%,var(--acc2),var(--acc) 45%,rgba(231,182,107,.15) 70%);box-shadow:0 0 80px rgba(231,182,107,.35);transform:scale(.6);transition:transform 4s ease-in-out}
+.steps{font-size:13px;color:var(--muted);margin:4px 0 14px}
+.ctrls{display:flex;gap:10px;width:100%;max-width:380px}
+/* pocket */
+#pocket{position:fixed;inset:0;background:#000;z-index:90;display:none;align-items:flex-end;justify-content:center;color:#333;font-size:12px;padding-bottom:40px;user-select:none}
+#pocket.on{display:flex}
+/* slider */
+input[type=range]{width:100%;accent-color:var(--acc);height:28px}
+.lbl{display:flex;justify-content:space-between;font-size:13px;margin-top:10px}
+/* arousal */
+.scale{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:10px 0}
+.scale button{aspect-ratio:1;border-radius:10px;background:var(--card2);border:1px solid var(--line);font-weight:600;font-size:14px}
+.scale button.on{background:var(--acc);color:#1B1408}
+.scale button:nth-child(n+8){border-color:rgba(240,143,143,.5)}
+/* chart */
+.chart{width:100%;height:170px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.heat{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.heat div{aspect-ratio:1;border-radius:7px;background:var(--card2);font-size:10px;display:grid;place-items:center;color:var(--muted)}
+.heat div.l1{background:rgba(231,182,107,.35);color:var(--text)}.heat div.l2{background:var(--acc);color:#1B1408}
+/* chat */
+.msgs{display:flex;flex-direction:column;gap:8px;padding-bottom:10px}
+.msg{max-width:85%;padding:10px 13px;border-radius:16px;font-size:14.5px}
+.msg.u{align-self:flex-end;background:var(--acc);color:#1B1408;border-bottom-right-radius:4px}
+.msg.a{align-self:flex-start;background:var(--card2);border-bottom-left-radius:4px}
+.inrow{display:flex;gap:8px;position:sticky;bottom:0;background:var(--bg);padding:10px 0 calc(10px + var(--safe-b))}
+.inrow input,.field{flex:1;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);font:inherit;width:100%}
+textarea.field{min-height:80px;resize:vertical}
+/* lock */
+#lock{position:fixed;inset:0;z-index:100;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+#lock.on{display:flex}
+.pin{display:flex;gap:12px}.pin i{width:14px;height:14px;border-radius:50%;border:2px solid var(--acc)}.pin i.f{background:var(--acc)}
+.pad{display:grid;grid-template-columns:repeat(3,72px);gap:12px}.pad button{height:62px;border-radius:50%;background:var(--card2);font-size:22px}
+.toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-120%);background:var(--bg2);border:1px solid var(--acc);padding:12px 16px;border-radius:14px;z-index:120;transition:transform .3s;box-shadow:var(--sh);font-size:14px;max-width:92%}
+.toast.on{transform:translate(-50%,0)}
+.badge{font-size:11px;padding:3px 8px;border-radius:99px;background:var(--accdim);color:var(--acc2)}
+hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+.center{text-align:center}
+.mt0{margin-top:0}
+svg.i{width:1.15em;height:1.15em;vertical-align:-.2em;flex:0 0 auto}
+.icbtn svg.i,.task .ic svg.i,.prg .ic svg.i{width:22px;height:22px}
+.task .ic,.prg .ic{color:var(--acc2);background:var(--card2);border:1px solid var(--line)}
+nav.tabs button .e{filter:none!important;opacity:.7}nav.tabs button .e svg.i{width:22px;height:22px}
+nav.tabs button.on .e{opacity:1}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs><symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol><symbol id="i-sunrise" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6M4.9 10.9l1.4 1.4M2 18h2M20 18h2M17.7 12.3l1.4-1.4M22 22H2M16 18a4 4 0 0 0-8 0M8 6l4-4 4 4"/></symbol><symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></symbol><symbol id="i-activity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol><symbol id="i-wind" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2M9.6 4.6A2 2 0 1 1 11 8H2M12.6 19.4A2 2 0 1 0 14 16H2"/></symbol><symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol><symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z"/></symbol><symbol id="i-trend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 7l-8.5 8.5-5-5L2 17M16 7h6v6"/></symbol><symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15zM20 17v5H6.5A2.5 2.5 0 0 1 4 19.5"/></symbol><symbol id="i-msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol><symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></symbol><symbol id="i-eyeoff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17.9 17.9A10 10 0 0 1 12 20c-7 0-10-8-10-8a18 18 0 0 1 5.1-5.9M9.9 4.2A9 9 0 0 1 12 4c7 0 10 8 10 8a18 18 0 0 1-2.2 3.2M1 1l22 22"/></symbol><symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol><symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></symbol><symbol id="i-hourglass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4a2 2 0 0 0 .6-1.4V2"/></symbol><symbol id="i-rotate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></symbol><symbol id="i-timer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4M12 14l3-3"/><circle cx="12" cy="14" r="8"/></symbol><symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l10 5-10 5L2 7zM2 17l10 5 10-5M2 12l10 5 10-5"/></symbol><symbol id="i-square" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/></symbol><symbol id="i-scan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="9" r="2"/><path d="M8 17c0-2 1.8-3.5 4-3.5s4 1.5 4 3.5"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol><symbol id="i-leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10z"/><path d="M2 21c0-3 1.9-5.4 5.2-6.1"/></symbol><symbol id="i-steth" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v6a6 6 0 0 0 12 0V3"/><path d="M12 15v2a4 4 0 0 0 8 0v-3"/><circle cx="20" cy="12" r="2"/></symbol><symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></symbol><symbol id="i-feather" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.2 12.2a6 6 0 0 0-8.5-8.5L5 10.5V19h8.5z"/><path d="M16 8L2 22M17.5 15H9"/></symbol><symbol id="i-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1.1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3.3.4 1.3 1.6 2.8 3.5 2.8z"/></symbol><symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18M7 16v-4M12 16V8M17 16v-7"/></symbol><symbol id="i-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol><symbol id="i-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></symbol><symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol><symbol id="i-award" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13L17 22l-5-3-5 3 1.5-9"/></symbol><symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></symbol><symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></symbol><symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></symbol><symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></symbol></defs></svg>
+<div class="app">
+
+<!-- ================= DZIŚ ================= -->
+<section class="view on" id="v-today">
+  <div class="top">
+    <div><div class="hello" id="todayDate"></div><h1 class="mt0">Dziś</h1></div>
+    <div class="row" style="gap:8px"><button class="icbtn" data-v="more" aria-label="Wiedza"><svg class="i"><use href="#i-book"/></svg></button><button class="icbtn" data-open="coach" aria-label="Trener AI"><svg class="i"><use href="#i-msg"/></svg></button></div>
+  </div>
+  <div class="card hero">
+    <div class="row sb"><span class="badge" id="weekBadge">Tydzień 1 z 12</span><span class="muted" id="levelBadge">Poziom 1</span></div>
+    <h2 class="mt0" style="margin-top:10px" id="dayTitle">Plan dnia</h2>
+    <div class="prog"><i id="dayProg" style="width:0"></i></div>
+    <p class="muted" id="dayHint" style="font-size:13px;margin-top:8px"></p>
+  </div>
+  <div id="dayTasks"></div>
+  <div class="grid2">
+    <div class="card stat"><b id="stStreak">0</b><span>dni z rzędu</span></div>
+    <div class="card stat"><b id="stWeek">0/7</b><span>dni zaliczone w tym tyg.</span></div>
+  </div>
+  <div class="card">
+    <div class="row sb"><b><svg class="i"><use href="#i-bulb"/></svg> Myśl na dziś</b><span class="pill" id="tipCat">głowa</span></div>
+    <p id="dailyThought" style="margin-top:8px"></p>
+  </div>
+  <div class="card">
+    <div class="row sb"><b><svg class="i"><use href="#i-heart"/></svg> Gest dla żony na dziś</b><button class="pill" id="gestNext">inny</button></div>
+    <p id="dailyGesture" style="margin-top:8px"></p>
+    <button class="btn ghost sm" id="gestDone" style="margin-top:8px">Zrobione ✓</button>
+  </div>
+  <div class="card" id="checkinCard" style="display:none">
+    <b><svg class="i"><use href="#i-chart"/></svg> Niedzielny check-in (1 minuta)</b>
+    <p class="muted" style="font-size:13px">Jak minął tydzień? To jedyny sposób, żeby zobaczyć, czy plan działa.</p>
+    <button class="btn" data-open="checkin" style="margin-top:8px">Zrób check-in</button>
+  </div>
+</section>
+
+<!-- ================= TRENING ================= -->
+<section class="view" id="v-train">
+  <div class="top"><h1>Trening</h1><button class="icbtn" id="pocketInfo" aria-label="Tryb kieszonkowy"><svg class="i"><use href="#i-eyeoff"/></svg></button></div>
+  <div class="tip">Plan 12 tygodni podnosi trudność sam, co 2 tygodnie — o ile w poprzednim tygodniu zaliczysz min. 5 dni. Czasy poniżej są już dopasowane do Twojego poziomu.</div>
+  <div id="prgList"></div>
+  <h2>Technika — 3 zasady</h2>
+  <div class="card">
+    <ul class="list">
+      <li><b>Napinasz tylko dno miednicy</b> — jak przy wstrzymaniu moczu i gazów jednocześnie. Brzuch, pośladki i uda luźne.</li>
+      <li><b>Oddychasz normalnie</b> — nigdy nie wstrzymuj oddechu przy napięciu.</li>
+      <li><b>Rozluźnienie = połowa treningu</b> — pełne puszczenie mięśnia po każdym skurczu. Ono daje kontrolę.</li>
+    </ul>
+  </div>
+  <details class="acc"><summary>Jak znaleźć właściwe mięśnie</summary><div class="in">
+    <p>Usiądź wygodnie. Wyobraź sobie, że chcesz zatrzymać gazy i jednocześnie strumień moczu. Poczujesz uniesienie w kroczu i delikatne „wciągnięcie” u podstawy penisa. To ten mięsień.</p>
+    <p class="muted">Nie ćwicz regularnie przy oddawaniu moczu — to tylko test na początek.</p>
+  </div></details>
+  <details class="acc"><summary>Tryb kieszonkowy <svg class="i"><use href="#i-eyeoff"/></svg></summary><div class="in">
+    <p>Ekran gaśnie na czarno, a trening prowadzą same wibracje: <b>długa</b> = napnij, <b>dwie krótkie</b> = puść, <b>trzy</b> = przerwa. Telefon może leżeć w kieszeni. Wyjście: dwa stuknięcia w ekran.</p>
+    <p class="muted">Nie używaj podczas prowadzenia auta.</p>
+  </div></details>
+</section>
+
+<!-- ================= GŁOWA ================= -->
+<section class="view" id="v-head">
+  <div class="top"><h1>Głowa</h1></div>
+  <div class="tip">Lęk i napięcie przyspieszają wytrysk najbardziej. Spokojny układ nerwowy = więcej kontroli. 5 minut dziennie.</div>
+  <button class="prg" data-breath="calm"><div class="ic"><svg class="i"><use href="#i-wind"/></svg></div><div><b>Oddech 4–6 · 5 min</b><small class="muted">Wdech 4 s nosem, wydech 6 s. Główne narzędzie kontroli — ten sam oddech stosujesz w łóżku.</small></div></button>
+  <button class="prg" data-breath="box"><div class="ic"><svg class="i"><use href="#i-square"/></svg></div><div><b>Oddech pudełkowy · 4 min</b><small class="muted">4–4–4–4. Na stres w ciągu dnia, przed ważną rozmową.</small></div></button>
+  <button class="prg" data-open="scan"><div class="ic"><svg class="i"><use href="#i-scan"/></svg></div><div><b>Skan ciała · 6 min</b><small class="muted">Rozluźnianie od stóp do szczęki, ze szczególnym puszczeniem dna miednicy.</small></div></button>
+  <button class="prg" data-open="arousal"><div class="ic"><svg class="i"><use href="#i-sliders"/></svg></div><div><b>Skala pobudzenia 1–10</b><small class="muted">Nauka rozpoznawania, gdzie jesteś — podstawa stop-start.</small></div></button>
+  <h2>Przestaw myślenie</h2>
+  <div id="reframes"></div>
+  <details class="acc"><summary>Uważność na doznania (ćwiczenie 10 min, 3× w tyg.)</summary><div class="in">
+    <p>Badania łączą trening uważności ze start-stop. Chodzi o to, żeby <b>czuć</b> zamiast <b>kontrolować myślami</b>.</p>
+    <ol style="padding-left:18px">
+      <li>Usiądź, zamknij oczy, 5 spokojnych oddechów.</li>
+      <li>Przenoś uwagę po ciele: stopy, uda, brzuch, krocze, dłonie. Nazywaj doznania: ciepło, nacisk, mrowienie.</li>
+      <li>Gdy myśl odpływa — zauważ to bez oceniania i wróć do ciała.</li>
+      <li>Na koniec oceń napięcie 1–10.</li>
+    </ol>
+    <p class="muted">Ta sama umiejętność — zauważać doznanie bez paniki — działa później w łóżku.</p>
+  </div></details>
+</section>
+
+<!-- ================= KONTROLA ================= -->
+<section class="view" id="v-ctrl">
+  <div class="top"><h1>Kontrola</h1></div>
+  <div class="seg" id="ctrlSeg">
+    <button data-c="plan" class="on">Plan stop-start</button>
+    <button data-c="bed">W łóżku</button>
+    <button data-c="log">Dziennik</button>
+  </div>
+  <div id="ctrl-plan">
+    <div class="tip">Stop-start (metoda Semansa) uczy rozpoznawać moment tuż przed „punktem bez powrotu” i schodzić z pobudzenia. Ćwiczenie solo, 2–3× w tygodniu, 15–20 minut, bez pośpiechu.</div>
+    <div class="card hero">
+      <div class="row sb"><b id="ctrlStageName">Etap 1</b><span class="badge" id="ctrlStageWeeks"></span></div>
+      <p id="ctrlStageGoal" style="margin-top:6px"></p>
+      <button class="btn" id="ctrlStart" style="margin-top:12px">▶ Rozpocznij sesję</button>
+    </div>
+    <div id="stagesList"></div>
+    <details class="acc"><summary>Jak wygląda sesja (krok po kroku)</summary><div class="in">
+      <ol style="padding-left:18px">
+        <li>Spokojne miejsce, telefon na trybie samolotowym poza aplikacją.</li>
+        <li>2 minuty oddechu 4–6, rozluźnij dno miednicy.</li>
+        <li>Stymulacja w wolnym tempie. Co chwilę oceniasz pobudzenie w skali 1–10 (przycisk na ekranie).</li>
+        <li>Gdy dojdziesz do progu z etapu (np. 7/10) — <b>PAUZA</b>: przerwij, oddech 4–6, rozluźnij dno miednicy (reverse kegel), poczekaj aż spadnie do ok. 3–4/10.</li>
+        <li>Powtórz tyle razy, ile mówi etap. Dopiero potem możesz pozwolić sobie na wytrysk.</li>
+        <li>Zapisz wynik — to Twój wykres postępu.</li>
+      </ol>
+    </div></details>
+    <details class="acc"><summary>Ściskanie (Masters i Johnson) — kiedy pauza nie wystarcza</summary><div class="in">
+      <p>Gdy pobudzenie rośnie za szybko, przez kilka sekund uciśnij podstawę penisa (lub miejsce tuż pod żołędzią) kciukiem i palcami, aż napięcie opadnie. Potem oddech i dalej. Stosuj jako wsparcie, celem jest kontrola samym oddechem i rozluźnieniem.<span class="ev m">umiarkowane dowody</span></p>
+    </div></details>
+  </div>
+  <div id="ctrl-bed" style="display:none"></div>
+  <div id="ctrl-log" style="display:none">
+    <div class="card"><b>Postęp sesji stop-start</b><svg class="chart" id="ctrlChart" viewBox="0 0 320 170" preserveAspectRatio="none"></svg>
+      <div class="legend"><span><i style="background:var(--acc)"></i>czas sesji (min)</span><span><i style="background:var(--green)"></i>kontrola 1–10</span></div></div>
+    <div id="ctrlLog"></div>
+  </div>
+</section>
+
+<!-- ================= BLISKOŚĆ ================= -->
+<section class="view" id="v-love">
+  <div class="top"><h1>Bliskość</h1></div>
+  <div class="seg" id="loveSeg">
+    <button data-l="why" class="on">Pożądanie</button>
+    <button data-l="talk">Jak odpowiadać</button>
+    <button data-l="days">Codzienność</button>
+    <button data-l="ask">Pytania</button>
+    <button data-l="bed">Sypialnia</button>
+  </div>
+  <div id="love-why"></div><div id="love-talk" style="display:none"></div><div id="love-days" style="display:none"></div><div id="love-ask" style="display:none"></div><div id="love-bed" style="display:none"></div>
+</section>
+
+<!-- ================= POSTĘP ================= -->
+<section class="view" id="v-prog">
+  <div class="top"><h1>Postęp</h1><button class="icbtn" data-open="settings" aria-label="Ustawienia"><svg class="i"><use href="#i-gear"/></svg></button></div>
+  <div class="grid2">
+    <div class="card stat"><b id="pDays">0</b><span>dni zaliczonych</span></div>
+    <div class="card stat"><b id="pSess">0</b><span>sesji treningowych</span></div>
+    <div class="card stat"><b id="pBest">0</b><span>najdłuższa seria dni</span></div>
+    <div class="card stat"><b id="pMind">0</b><span>min pracy z głową</span></div>
+  </div>
+  <div class="card"><b>Ostatnie 5 tygodni</b><p class="muted" style="font-size:12.5px">jasne = trening, pełne = dzień zaliczony</p><div class="heat" id="heat" style="margin-top:8px"></div></div>
+  <div class="card"><div class="row sb"><b>Cotygodniowy check-in</b><button class="pill" data-open="checkin">+ dodaj</button></div>
+    <svg class="chart" id="ciChart" viewBox="0 0 320 170" preserveAspectRatio="none"></svg>
+    <div class="legend"><span><i style="background:var(--acc)"></i>kontrola</span><span><i style="background:var(--green)"></i>pewność</span><span><i style="background:var(--red)"></i>stres</span><span><i style="background:var(--violet)"></i>bliskość</span></div></div>
+  <div class="card"><b>Kamienie milowe</b><div id="milestones" class="row wrap" style="margin-top:10px;gap:8px"></div></div>
+  <div class="tip" id="docTip">Jeśli po 12 tygodniach regularnej pracy nie widzisz wyraźnej poprawy — to sygnał, żeby iść do urologa lub seksuologa. Najmocniejsze dowody mają metody od lekarza (leki, preparaty miejscowe). To normalna, rozsądna droga.</div>
+</section>
+
+<!-- ================= WIĘCEJ ================= -->
+<section class="view" id="v-more">
+  <div class="top"><h1>Wiedza</h1></div>
+  <button class="prg" data-open="coach"><div class="ic"><svg class="i"><use href="#i-msg"/></svg></div><div><b>Trener AI</b><small class="muted">Zapytaj o technikę, plan, motywację.</small></div></button>
+  <button class="prg" data-open="life"><div class="ic"><svg class="i"><use href="#i-leaf"/></svg></div><div><b>Styl życia</b><small class="muted">Sen, ruch, stres, suplementy — uczciwie, co działa.</small></div></button>
+  <button class="prg" data-open="science"><div class="ic"><svg class="i"><use href="#i-book"/></svg></div><div><b>Co mówią badania</b><small class="muted">Dlaczego ten plan ma 12 tygodni i 3 filary.</small></div></button>
+  <button class="prg" data-open="doctor"><div class="ic"><svg class="i"><use href="#i-steth"/></svg></div><div><b>Kiedy do lekarza</b><small class="muted">Sygnały i co zabrać na wizytę.</small></div></button>
+  <button class="prg" data-open="settings"><div class="ic"><svg class="i"><use href="#i-gear"/></svg></div><div><b>Ustawienia i dane</b><small class="muted">PIN, dźwięk, wibracje, eksport/import, motyw.</small></div></button>
+  <p class="muted center" style="font-size:12px;margin-top:20px">Aplikacja wspiera trening i nie zastępuje porady lekarza.<br>Dane są tylko na tym telefonie.</p>
+</section>
+</div>
+
+<nav class="tabs"><div class="in">
+  <button data-v="today" class="on"><span class="e"><svg class="i"><use href="#i-sun"/></svg></span>Dziś</button>
+  <button data-v="train"><span class="e"><svg class="i"><use href="#i-activity"/></svg></span>Trening</button>
+  <button data-v="head"><span class="e"><svg class="i"><use href="#i-feather"/></svg></span>Głowa</button>
+  <button data-v="ctrl"><span class="e"><svg class="i"><use href="#i-target"/></svg></span>Kontrola</button>
+  <button data-v="love"><span class="e"><svg class="i"><use href="#i-heart"/></svg></span>Bliskość</button>
+  <button data-v="prog"><span class="e"><svg class="i"><use href="#i-trend"/></svg></span>Postęp</button>
+</div></nav>
+
+<!-- ================= SHEETS ================= -->
+<div class="sheet" id="s-player"><div class="hd"><button class="icbtn" data-close aria-label="Zamknij">✕</button><b id="plTitle">Trening</b><button class="icbtn" id="plPocket" aria-label="Tryb kieszonkowy"><svg class="i"><use href="#i-eyeoff"/></svg></button></div>
+  <div class="bd player">
+    <div class="steps" id="plSteps"></div>
+    <div class="ring"><svg width="260" height="260"><circle cx="130" cy="130" r="118" stroke="var(--card2)" stroke-width="12" fill="none"/><circle id="plArc" cx="130" cy="130" r="118" stroke="var(--acc)" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="741.4" stroke-dashoffset="0"/></svg>
+      <div class="ctr"><div class="ph" id="plPhase">Gotowy?</div><div class="tm" id="plTime">0</div><div class="sub" id="plSub"></div></div></div>
+    <p class="muted" id="plCue" style="min-height:44px;max-width:340px"></p>
+    <div class="ctrls"><button class="btn ghost" id="plStop">Zakończ</button><button class="btn" id="plGo">▶ Start</button></div>
+  </div></div>
+
+<div class="sheet" id="s-breath"><div class="hd"><button class="icbtn" data-close>✕</button><b id="brTitle">Oddech</b><span style="width:40px"></span></div>
+  <div class="bd center"><div class="orb" id="orb"></div><div style="font-family:Fraunces,serif;font-size:30px" id="brPhase">Gotowy</div><div class="muted" id="brLeft">5:00</div>
+  <p class="muted" style="margin:14px auto;max-width:340px" id="brHint">Oddychaj przeponą: przy wdechu unosi się brzuch, nie klatka. Dno miednicy przy wydechu luźne.</p>
+  <button class="btn" id="brGo" style="max-width:320px;margin:0 auto">▶ Start</button></div></div>
+
+<div class="sheet" id="s-scan"><div class="hd"><button class="icbtn" data-close>✕</button><b>Skan ciała</b><span style="width:40px"></span></div>
+  <div class="bd center"><div class="ring" style="width:220px;height:220px"><div class="ctr"><div class="ph" id="scPart" style="font-size:24px">Start</div><div class="sub" id="scLeft"></div></div></div>
+  <p id="scText" style="max-width:360px;margin:0 auto 18px;min-height:90px"></p>
+  <button class="btn" id="scGo" style="max-width:320px;margin:0 auto">▶ Start</button></div></div>
+
+<div class="sheet" id="s-arousal"><div class="hd"><button class="icbtn" data-close>✕</button><b>Skala pobudzenia</b><span style="width:40px"></span></div>
+  <div class="bd" id="arousalBody"></div></div>
+
+<div class="sheet" id="s-ctrl"><div class="hd"><button class="icbtn" data-close>✕</button><b id="csTitle">Sesja stop-start</b><span style="width:40px"></span></div>
+  <div class="bd center">
+    <div class="steps" id="csGoal"></div>
+    <div style="font-size:56px;font-weight:600;font-variant-numeric:tabular-nums" id="csClock">0:00</div>
+    <div class="muted" id="csState">Najpierw 2 min oddechu — rozluźnij się.</div>
+    <p style="margin:12px 0 4px"><b>Pobudzenie teraz:</b></p>
+    <div class="scale" id="csScale"></div>
+    <div class="row" style="justify-content:center;gap:16px;margin:8px 0"><span class="pill">Pauzy: <b id="csPauses">0</b> / <span id="csPausesGoal">3</span></span></div>
+    <div id="csPauseBox" style="display:none" class="card hero"><div style="font-family:Fraunces,serif;font-size:24px" id="csBreath">Wydech…</div><p class="muted" style="font-size:13.5px">Przerwij. Wydech dłuższy niż wdech. Puść dno miednicy jak przy reverse kegel. Czekaj, aż pobudzenie spadnie do 3–4.</p><div style="font-size:30px;font-weight:600" id="csPauseClock">0:00</div><button class="btn" id="csResume" style="margin-top:8px">Spadło — wracam</button></div>
+    <div class="ctrls" style="margin:12px auto"><button class="btn ghost" id="csFinish">Zakończ i zapisz</button><button class="btn" id="csPause">⏸ PAUZA</button></div>
+  </div></div>
+
+<div class="sheet" id="s-ctrlsave"><div class="hd"><button class="icbtn" data-close>✕</button><b>Zapisz sesję</b><span style="width:40px"></span></div>
+  <div class="bd"><p id="csSummary"></p>
+    <div class="lbl"><span>Poczucie kontroli</span><b id="csCtrlV">5</b></div><input type="range" min="1" max="10" value="5" id="csCtrl">
+    <div class="lbl"><span>Napięcie / lęk w trakcie</span><b id="csAnxV">5</b></div><input type="range" min="1" max="10" value="5" id="csAnx">
+    <textarea class="field" id="csNote" placeholder="Notatka (opcjonalnie): co pomogło, co nie" style="margin-top:12px"></textarea>
+    <button class="btn" id="csSave" style="margin-top:12px">Zapisz</button></div></div>
+
+<div class="sheet" id="s-checkin"><div class="hd"><button class="icbtn" data-close>✕</button><b>Check-in tygodniowy</b><span style="width:40px"></span></div>
+  <div class="bd"><p class="muted">Oceń ostatnie 7 dni. Szczerze — to tylko dla Ciebie.</p>
+    <div class="lbl"><span>Kontrola wytrysku</span><b id="ci1v">5</b></div><input type="range" min="1" max="10" value="5" id="ci1">
+    <div class="lbl"><span>Pewność siebie w łóżku</span><b id="ci2v">5</b></div><input type="range" min="1" max="10" value="5" id="ci2">
+    <div class="lbl"><span>Stres i napięcie</span><b id="ci3v">5</b></div><input type="range" min="1" max="10" value="5" id="ci3">
+    <div class="lbl"><span>Bliskość z żoną</span><b id="ci4v">5</b></div><input type="range" min="1" max="10" value="5" id="ci4">
+    <textarea class="field" id="ciNote" placeholder="Co zadziałało w tym tygodniu? Co zmienić?" style="margin-top:12px"></textarea>
+    <button class="btn" id="ciSave" style="margin-top:12px">Zapisz check-in</button></div></div>
+
+<div class="sheet" id="s-coach"><div class="hd"><button class="icbtn" data-close>✕</button><b>Trener AI</b><span style="width:40px"></span></div>
+  <div class="bd" style="display:flex;flex-direction:column"><div class="msgs" id="coachMsgs"></div>
+    <div class="row wrap" id="coachQuick" style="gap:6px;margin-bottom:6px"></div>
+    <div class="inrow"><input id="coachIn" placeholder="Zapytaj trenera…" autocomplete="off"><button class="btn sm" id="coachSend"><svg class="i"><use href="#i-send"/></svg></button></div>
+    <p class="muted" style="font-size:11.5px">Trener AI to wsparcie, nie lekarz. Pytania wysyłane są do serwera trenera.</p></div></div>
+
+<div class="sheet" id="s-info"><div class="hd"><button class="icbtn" data-close>✕</button><b id="infoTitle"></b><span style="width:40px"></span></div><div class="bd" id="infoBody"></div></div>
+
+<div class="sheet" id="s-settings"><div class="hd"><button class="icbtn" data-close>✕</button><b>Ustawienia</b><span style="width:40px"></span></div>
+  <div class="bd">
+    <h3>Sygnały</h3>
+    <div class="row sb card"><span>Dźwięk</span><button class="pill" id="setSound"></button></div>
+    <div class="row sb card"><span>Wibracje</span><button class="pill" id="setVib"></button></div>
+    <div class="card"><div class="lbl" style="margin:0"><span>Głośność</span><b id="setVolV"></b></div><input type="range" min="0" max="100" id="setVol"></div>
+    <h3>Przypomnienia</h3>
+    <div class="card">
+      <div class="row sb"><span>Powiadomienia push</span><button class="pill" id="setPush"></button></div>
+      <div class="grid2" style="margin-top:12px;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+        <label class="muted" style="font-size:12px">Rano<input type="time" class="field" style="padding:10px 6px;min-width:0" id="remAm"></label>
+        <label class="muted" style="font-size:12px">W dzień<input type="time" class="field" style="padding:10px 6px;min-width:0" id="remMid"></label>
+        <label class="muted" style="font-size:12px">Wieczór<input type="time" class="field" style="padding:10px 6px;min-width:0" id="remPm"></label>
+      </div>
+      <p class="muted" style="font-size:12px;margin-top:8px">Puste pole = bez przypomnienia. Treść jest dyskretna („Kegel · 2 minuty dla siebie”). Gdy sesję już zrobiłeś, przypomnienie nie przyjdzie.</p>
+      <button class="btn ghost sm" id="remTest" style="margin-top:6px">Wyślij test</button>
+      <p class="muted" id="remMsg" style="font-size:12px;margin-top:6px"></p>
+    </div>
+    <h3>Wygląd</h3>
+    <div class="row sb card"><span>Motyw</span><button class="pill" id="setTheme"></button></div>
+    <h3>Prywatność</h3>
+    <div class="row sb card"><span>PIN przy otwieraniu</span><button class="pill" id="setPin"></button></div>
+    <h3>Plan</h3>
+    <div class="card"><p class="muted" style="font-size:13px">Start planu: <b id="setStart"></b></p><button class="btn ghost sm" id="setRestart" style="margin-top:8px">Zacznij plan 12 tyg. od dziś</button></div>
+    <h3>Dane</h3>
+    <div class="card"><p class="muted" style="font-size:13px">Dane są tylko w tym telefonie. Przed zmianą telefonu zrób eksport.</p>
+      <div class="row" style="margin-top:8px"><button class="btn ghost sm" id="setExport"><svg class="i"><use href="#i-down"/></svg> Eksport</button><label class="btn ghost sm" style="cursor:pointer"><svg class="i"><use href="#i-up"/></svg> Import<input type="file" id="setImport" accept="application/json" hidden></label></div></div>
+    <div class="card"><button class="btn ghost sm" id="setWipe" style="color:var(--red)">Usuń wszystkie dane</button></div>
+    <p class="muted center" style="font-size:12px">Kegel v2 · <a href="../index.html" style="color:var(--acc)">stara wersja</a></p>
+  </div></div>
+
+<div id="pocket">dotknij 2× aby wyjść</div>
+<div id="lock"><h2 class="mt0">Kegel</h2><div class="pin" id="pinDots"><i></i><i></i><i></i><i></i></div><div class="muted" id="pinMsg">Wpisz PIN</div><div class="pad" id="pinPad"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const iso=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+const today=()=>iso(new Date());
+const addDays=(s,n)=>{const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);return iso(d)};
+const daysBetween=(a,b)=>Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5);
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+
+/* ============ STATE ============ */
+const KEY='kg2_state';
+const DEF={v:2,start:today(),level:1,lastLevelCheck:null,days:{},sessions:0,mindMin:0,checkins:[],ctrl:[],gestures:{},cfg:{sound:true,vib:true,vol:70,pin:null},chat:[]};
+let S;
+function load(){
+  try{S=Object.assign({},DEF,JSON.parse(localStorage.getItem(KEY)||'null')||{});S.cfg=Object.assign({},DEF.cfg,S.cfg||{})}catch(e){S=JSON.parse(JSON.stringify(DEF))}
+  if(!localStorage.getItem(KEY)){ // migracja ze starej wersji
+    try{const old=JSON.parse(localStorage.getItem('kegel_stats')||'null');if(old&&old.daily){Object.keys(old.daily).forEach(d=>{if(old.daily[d]>0){S.days[d]=S.days[d]||{};S.days[d].legacy=old.daily[d]}});S.sessions=old.total||0}}catch(e){}
+  }
+  save();
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function day(d){d=d||today();return S.days[d]=S.days[d]||{}}
+
+/* ============ PLAN 12 TYG ============ */
+function weekNo(){return Math.min(12,Math.floor(Math.max(0,daysBetween(S.start,today()))/7)+1)}
+function dayDone(d){const x=S.days[d]||{};const tr=['am','mid','pm'].filter(k=>x[k]).length+(x.legacy?1:0);return tr>=2&&(x.head||x.ctrl)}
+function dayTrained(d){const x=S.days[d]||{};return !!(x.am||x.mid||x.pm||x.legacy||x.extra)}
+function doneInWeekOf(startD){let n=0;for(let i=0;i<7;i++)if(dayDone(addDays(startD,i)))n++;return n}
+function checkLevel(){ // co 2 tyg., jeśli poprzedni tydzień >=5/7
+  const w=weekNo();const key='w'+w;if(S.lastLevelCheck===key)return;
+  if(w>1&&(w-1)%2===0){const prevStart=addDays(S.start,(w-2)*7);if(doneInWeekOf(prevStart)>=5&&S.level<6){S.level++;toast('<svg class="i"><use href="#i-trend"/></svg> Poziom '+S.level+' — trening odrobinę mocniej. Tak trzymaj.')}
+  else if(doneInWeekOf(prevStart)<5){toast('Poziom zostaje — w zeszłym tygodniu było mniej niż 5 dni. Bez presji, wracamy do rytmu.')}}
+  S.lastLevelCheck=key;save();
+}
+function streak(){let n=0,d=today();if(!dayDone(d))d=addDays(d,-1);while(dayDone(d)){n++;d=addDays(d,-1)}return n}
+function bestStreak(){const ks=Object.keys(S.days).sort();let best=0,cur=0,prev=null;ks.forEach(k=>{if(dayDone(k)){cur=(prev&&daysBetween(prev,k)===1)?cur+1:1;best=Math.max(best,cur);prev=k}else{cur=0;prev=null}});return best}
+
+/* ============ PROGRAMY ============ */
+const PRG={
+ fundament:{icon:'<svg class="i"><use href="#i-shield"/></svg>',name:'Fundament',sub:'Siła + wytrzymałość · codzienna baza',blocks:[['quick',10,2,2],['rest',20],['hold',10,6,6],['rest',30],['hold',10,6,6]]},
+ moc:{icon:'<svg class="i"><use href="#i-zap"/></svg>',name:'Moc',sub:'Szybkie skurcze · refleks mięśnia',blocks:[['quick',20,2,2],['rest',25],['quick',20,2,2],['rest',25],['quick',15,2,2]]},
+ wytrz:{icon:'<svg class="i"><use href="#i-hourglass"/></svg>',name:'Wytrzymałość',sub:'Długie przytrzymania · włókna wolne',blocks:[['quick',8,2,2],['rest',20],['hold',10,8,8],['rest',30],['hold',8,10,10]]},
+ kontrola:{icon:'<svg class="i"><use href="#i-target"/></svg>',name:'Kontrola',sub:'Napnij–puść świadomie · trening „hamulca”',blocks:[['quick',10,2,2],['rest',20],['stop',12,5,10],['rest',20],['reverse',6,5,5]]},
+ reset:{icon:'<svg class="i"><use href="#i-rotate"/></svg>',name:'Reset',sub:'Rozluźnianie · reverse kegel + oddech · wieczór',blocks:[['reverse',8,5,5],['rest',12],['reverse',6,6,6],['rest',12],['breathe',6,4,6]]},
+ express:{icon:'<svg class="i"><use href="#i-timer"/></svg>',name:'Express',sub:'2–3 min · w ciągu dnia, w trybie kieszonkowym',blocks:[['quick',10,2,2],['rest',15],['hold',8,5,5]]},
+ kompletny:{icon:'<svg class="i"><use href="#i-flame"/></svg>',name:'Kompletny',sub:'Wszystko w jednym · sobota',blocks:[['quick',15,2,2],['rest',25],['hold',10,8,8],['rest',30],['stop',10,5,10],['rest',25],['reverse',6,5,5]]}
+};
+const WEEK=['wytrz','fundament','moc','wytrz','kontrola','fundament','kompletny']; // nd..sob
+const PHASE={quick:['Szybko napnij','Puść'],hold:['Napnij i trzymaj','Puść całkiem'],stop:['Napnij — „hamulec”','Puść i oddychaj'],reverse:['Puść w dół, wydłuż','Wróć do neutralnego'],breathe:['Wdech brzuchem','Długi wydech'],rest:['Przerwa','']};
+const CUES={quick:'Krótki, mocny skurcz. Brzuch i pośladki luźne.',hold:'Unieś i trzymaj dno miednicy. Oddychaj spokojnie, nie wstrzymuj powietrza.',stop:'Napnij jak „hamulec”, a potem w pełni puść na długim wydechu. Ten ruch powtórzysz w pauzie stop-start.',reverse:'Delikatnie „puść w dół”, jakbyś zaczynał oddawać mocz — bez parcia. To rozluźnia napięte dno.',breathe:'Wdech nosem do brzucha, długi wydech ustami. Dno miednicy opada przy wdechu.',rest:'Rozluźnij się całkowicie. Kilka spokojnych oddechów.'};
+function lvlMul(){return 1+(S.level-1)*0.12}
+function steps(p){const out=[];PRG[p].blocks.forEach(b=>{const [t,a,ten,rel]=b;if(t==='rest'){out.push({t,ph:'rest',d:a});return}
+ const mul=(t==='hold'||t==='stop')?lvlMul():1;const reps=t==='hold'?a+Math.floor((S.level-1)/2):a;
+ for(let i=0;i<reps;i++){out.push({t,ph:'tense',d:Math.round(ten*mul),i:i+1,n:reps});out.push({t,ph:'relax',d:rel,i:i+1,n:reps})}});return out}
+function dur(p){return steps(p).reduce((s,x)=>s+x.d,0)}
+
+/* ============ AUDIO / VIB ============ */
+let actx;function beep(f,len){if(!S.cfg.sound)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type='sine';o.frequency.value=f;const v=S.cfg.vol/100*.35;g.gain.setValueAtTime(0,actx.currentTime);g.gain.linearRampToValueAtTime(v,actx.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+(len||.6));o.connect(g).connect(actx.destination);o.start();o.stop(actx.currentTime+(len||.6))}catch(e){}}
+function vib(p){if((S.cfg.vib||pocketOn)&&navigator.vibrate)try{navigator.vibrate(p)}catch(e){}}
+function cue(ph){if(ph==='tense'){beep(660,.5);vib(400)}else if(ph==='relax'){beep(440,.7);vib([120,90,120])}else if(ph==='rest'){beep(330,.9);vib([100,80,100,80,100])}else if(ph==='end'){beep(523,.4);setTimeout(()=>beep(784,.8),350);vib([200,100,200,100,400])}}
+let wake;async function wakeOn(){try{wake=await navigator.wakeLock.request('screen')}catch(e){}}function wakeOff(){try{wake&&wake.release()}catch(e){}wake=null}
+
+/* ============ PLAYER ============ */
+let PL=null,pocketOn=false;
+function openPlayer(pid,slot){const st=steps(pid);PL={pid,slot,st,idx:-1,left:0,run:false,t:null};$('plTitle').textContent=PRG[pid].name;$('plPhase').textContent='Gotowy?';$('plTime').textContent=fmt(dur(pid));$('plSub').textContent='Poziom '+S.level+' · '+st.filter(s=>s.ph==='tense').length+' skurczów';$('plCue').textContent=PRG[pid].sub;$('plGo').textContent='▶ Start';$('plSteps').textContent='';setArc(1);openSheet('player')}
+function setArc(f){$('plArc').setAttribute('stroke-dashoffset',String(741.4*(1-f)))}
+function plNext(){PL.idx++;if(PL.idx>=PL.st.length){plEnd(true);return}const s=PL.st[PL.idx];PL.left=s.d;PL.cur=s;cue(s.ph);renderPl()}
+function renderPl(){const s=PL.cur;const label=s.ph==='rest'?PHASE.rest[0]:PHASE[s.t][s.ph==='tense'?0:1];$('plPhase').textContent=label;$('plTime').textContent=PL.left;$('plSub').textContent=s.ph==='rest'?'':(s.i+' / '+s.n);$('plCue').textContent=s.ph==='rest'?CUES.rest:CUES[s.t];$('plArc').setAttribute('stroke',s.ph==='tense'?'var(--acc)':s.ph==='relax'?'var(--blue)':'var(--muted)');setArc(PL.left/s.d);const done=PL.st.slice(PL.idx).reduce((a,x)=>a+x.d,0);$('plSteps').textContent='Zostało '+fmt(done-(s.d-PL.left))}
+function plTick(){PL.left--;if(PL.left<=0){plNext()}else{renderPl()}}
+function plGo(){if(!PL)return;if(PL.run){PL.run=false;clearInterval(PL.t);$('plGo').textContent='▶ Wznów';wakeOff();return}PL.run=true;$('plGo').textContent='⏸ Pauza';wakeOn();if(PL.idx<0)plNext();PL.t=setInterval(plTick,1000)}
+function plEnd(full){if(!PL)return;clearInterval(PL.t);wakeOff();if(full){cue('end');S.sessions++;const d=day();const slot=PL.slot||freeSlot();d[slot]=true;save();pushDone(slot);toast('<svg class="i"><use href="#i-check"/></svg> '+PRG[PL.pid].name+' zaliczony. Dobra robota.');}setPocket(false);PL=null;closeSheet();renderAll()}
+function freeSlot(){const d=day();const h=new Date().getHours();const pref=h<11?'am':h<17?'mid':'pm';if(!d[pref])return pref;return ['am','mid','pm'].find(k=>!d[k])||'extra'}
+function setPocket(on){pocketOn=on;$('pocket').classList.toggle('on',on);if(on){toast('<svg class="i"><use href="#i-eyeoff"/></svg> Tryb kieszonkowy: długa wibracja = napnij, dwie krótkie = puść')}}
+
+/* ============ ODDECH / SKAN ============ */
+let BR=null;
+function openBreath(kind){const cfg=kind==='box'?{t:'Oddech pudełkowy',total:240,seq:[['Wdech',4,1],['Zatrzymaj',4,1],['Wydech',4,.6],['Zatrzymaj',4,.6]]}:{t:'Oddech 4–6',total:300,seq:[['Wdech',4,1],['Wydech',6,.6]]};BR={cfg,left:cfg.total,run:false,i:-1,pl:0,t:null};$('brTitle').textContent=cfg.t;$('brPhase').textContent='Gotowy';$('brLeft').textContent=fmt(cfg.total);$('brGo').textContent='▶ Start';$('orb').style.transform='scale(.6)';openSheet('breath')}
+function brStep(){BR.i=(BR.i+1)%BR.cfg.seq.length;const [n,s,sc]=BR.cfg.seq[BR.i];BR.pl=s;$('brPhase').textContent=n;const o=$('orb');o.style.transition='transform '+s+'s ease-in-out';o.style.transform='scale('+sc+')';if(n==='Wdech')vib(60)}
+function brGo(){if(BR.run){BR.run=false;clearInterval(BR.t);$('brGo').textContent='▶ Wznów';wakeOff();return}BR.run=true;wakeOn();$('brGo').textContent='⏸ Pauza';if(BR.i<0)brStep();BR.t=setInterval(()=>{BR.left--;BR.pl--;$('brLeft').textContent=fmt(BR.left);if(BR.left<=0){clearInterval(BR.t);wakeOff();cue('end');S.mindMin+=Math.round(BR.cfg.total/60);day().head=true;save();toast('<svg class="i"><use href="#i-feather"/></svg> Głowa na dziś zaliczona.');closeSheet();renderAll();return}if(BR.pl<=0)brStep()},1000)}
+const SCAN=[['Oddech',40,'Zamknij oczy. Kilka wolnych oddechów do brzucha. Wydech dłuższy niż wdech.'],['Stopy i łydki',35,'Poczuj stopy na podłodze. Przy wydechu puść napięcie w łydkach.'],['Uda i biodra',35,'Uda ciężkie i miękkie. Biodra opadają.'],['Dno miednicy',55,'Najważniejsze miejsce. Przy wdechu pozwól mu delikatnie opaść, przy wydechu — po prostu nic nie rób. Żadnego zaciskania.'],['Brzuch',35,'Brzuch miękki, swobodnie unosi się z oddechem.'],['Klatka i plecy',35,'Łopatki opadają, plecy rozluźnione.'],['Dłonie i ramiona',30,'Dłonie otwarte, ciężkie ramiona.'],['Szczęka i twarz',35,'Rozluźnij szczękę — zęby się nie stykają. Czoło gładkie.'],['Całe ciało',40,'Poczuj całe ciało naraz. Oceń napięcie 1–10. Zapamiętaj ten stan — do niego wracasz w pauzie stop-start.']];
+let SC=null;
+function scGo(){if(SC&&SC.run){SC.run=false;clearInterval(SC.t);$('scGo').textContent='▶ Wznów';return}if(!SC||SC.done){SC={i:0,left:SCAN[0][1],run:true};showScan()}SC.run=true;$('scGo').textContent='⏸ Pauza';wakeOn();SC.t=setInterval(()=>{SC.left--;$('scLeft').textContent=fmt(SC.left);if(SC.left<=0){SC.i++;if(SC.i>=SCAN.length){clearInterval(SC.t);SC.done=true;wakeOff();cue('end');S.mindMin+=6;day().head=true;save();toast('<svg class="i"><use href="#i-scan"/></svg> Skan zakończony. Głowa zaliczona.');closeSheet();renderAll();return}SC.left=SCAN[SC.i][1];showScan();vib(80)}},1000)}
+function showScan(){const s=SCAN[SC.i];$('scPart').textContent=s[0];$('scText').textContent=s[2];$('scLeft').textContent=fmt(SC.left)}
+
+/* ============ KONTROLA (STOP-START) ============ */
+const STAGES=[
+ {n:'Etap 1 · Poznaj swoją skalę',w:'tyg. 1–3',goal:'Sesja solo 15 min. Pauza przy 7/10. 3 pauzy przed wytryskiem.',stop:7,pauses:3,desc:'Cel: nauczyć się czuć, gdzie jesteś na skali. Wolne tempo, sucha lub z lubrykantem — jak wygodniej. Liczy się świadomość, nie czas.'},
+ {n:'Etap 2 · Wyżej i dłużej',w:'tyg. 4–6',goal:'Sesja 15–20 min. Pauza przy 8/10. 4 pauzy.',stop:8,pauses:4,desc:'Podchodzisz bliżej progu, ale nadal z zapasem. Z lubrykantem (bardziej podobne do zbliżenia). W pauzie oddech 4–6 + reverse kegel.'},
+ {n:'Etap 3 · Bez zatrzymania',w:'tyg. 7–9',goal:'Zamiast stopu — zwolnij tempo, oddech i rozluźnienie. Kontrola przy 8/10, 4×.',stop:8,pauses:4,desc:'Uczysz się schodzić z pobudzenia bez przerywania: wolniejsze tempo, długi wydech, puszczenie dna miednicy. To jest umiejętność, której użyjesz z żoną.'},
+ {n:'Etap 4 · We dwoje',w:'tyg. 10–12',goal:'Stop-start podczas zbliżenia — po rozmowie z żoną. Umówiony sygnał na pauzę.',stop:8,pauses:3,desc:'Zaczynacie od pozycji, w której ona jest na górze i to Ty możesz dać znak do zatrzymania lub zwolnienia. W pauzie: oddech, rozluźnienie, pocałunki, dotyk — przerwa nie musi być przerwą w bliskości.'}
+];
+function stageIdx(){const w=weekNo();return w<=3?0:w<=6?1:w<=9?2:3}
+let CS=null;
+function openCtrl(){const st=STAGES[stageIdx()];CS={st,sec:0,pauses:0,inPause:false,pauseSec:0,arousal:0,warm:120,t:null};$('csTitle').textContent=st.n;$('csGoal').textContent=st.goal;$('csPausesGoal').textContent=st.pauses;$('csPauses').textContent=0;$('csClock').textContent='0:00';$('csState').textContent='Najpierw 2 min oddechu — rozluźnij się.';$('csPauseBox').style.display='none';
+ const sc=$('csScale');sc.innerHTML='';for(let i=1;i<=10;i++){const b=document.createElement('button');b.textContent=i;b.onclick=()=>setArousal(i);sc.appendChild(b)}
+ openSheet('ctrl');wakeOn();CS.t=setInterval(csTick,1000)}
+function csTick(){CS.sec++;$('csClock').textContent=fmt(CS.sec);if(CS.warm>0){CS.warm--;$('csState').textContent=CS.warm>0?('Oddech 4–6, rozluźnienie… '+fmt(CS.warm)):'Zaczynaj powoli. Oceniaj pobudzenie co chwilę.';if(CS.warm===0)vib(200)}
+ if(CS.inPause){CS.pauseSec++;$('csPauseClock').textContent=fmt(CS.pauseSec);const ph=(CS.pauseSec%10)<4?'Wdech… 4':'Wydech… 6';$('csBreath').textContent=ph}}
+function setArousal(i){CS.arousal=i;$$('#csScale button').forEach((b,k)=>b.classList.toggle('on',k+1===i));if(i>=CS.st.stop&&!CS.inPause){beep(880,.4);vib([300,100,300]);$('csState').textContent='Jesteś przy progu — PAUZA teraz.'}else if(!CS.inPause){$('csState').textContent=i<=4?'Spokojnie. Dalej wolnym tempem.':'Uważaj — zbliżasz się. Próg: '+CS.st.stop+'/10.'}}
+function csPause(){if(CS.inPause)return;CS.inPause=true;CS.pauses++;CS.pauseSec=0;$('csPauses').textContent=CS.pauses;$('csPauseBox').style.display='block';$('csState').textContent='Pauza '+CS.pauses;vib(400)}
+function csResume(){CS.inPause=false;$('csPauseBox').style.display='none';setArousal(3);$('csState').textContent=CS.pauses>=CS.st.pauses?'Cel pauz osiągnięty ✓ Możesz kończyć, kiedy chcesz.':'Wracasz. Wolne tempo.';if(CS.pauses>=CS.st.pauses)vib([100,60,100])}
+function csFinish(){clearInterval(CS.t);wakeOff();$('csSummary').innerHTML='Czas: <b>'+fmt(CS.sec)+'</b> · pauzy: <b>'+CS.pauses+'</b> / '+CS.st.pauses+(CS.pauses>=CS.st.pauses?' ✓':'');openSheet('ctrlsave')}
+function csSave(){S.ctrl.push({d:today(),min:Math.round(CS.sec/60*10)/10,p:CS.pauses,goal:CS.st.pauses,stage:stageIdx()+1,c:+$('csCtrl').value,a:+$('csAnx').value,n:$('csNote').value.trim()});day().ctrl=true;save();$('csNote').value='';toast('<svg class="i"><use href="#i-target"/></svg> Sesja zapisana. To jest prawdziwa praca — gratulacje.');closeAll();renderAll()}
+
+/* ============ TREŚCI ============ */
+const THOUGHTS=[
+ ['głowa','Kontrola nie bierze się z zaciskania zębów, tylko z rozluźnienia. Im spokojniejsze ciało, tym więcej czasu.'],
+ ['głowa','Myśl „byle nie za szybko” podkręca pobudzenie. Zamień ją na „czuję, co się dzieje”.'],
+ ['ciało','Mięsień dna miednicy rośnie jak każdy inny: regularność ważniejsza niż intensywność.'],
+ ['głowa','Seks to nie egzamin. Żona nie liczy sekund — liczy bliskość, uwagę i to, czy jest dla Ciebie ważna.'],
+ ['nauka','Pierwsze efekty treningu po 4–6 tygodniach, wyraźne po 8–12. Jesteś w trakcie, nie na końcu.'],
+ ['głowa','Długi wydech uspokaja układ nerwowy. To najszybszy hamulec, jaki masz.'],
+ ['związek','Pożądanie kobiety w długim związku często rodzi się z bliskości i odprężenia, a nie odwrotnie.'],
+ ['ciało','Rozluźnianie (reverse kegel) jest równie ważne jak napinanie. Napięte dno miednicy przyspiesza wytrysk.'],
+ ['głowa','Gdy pojawia się lęk, nazwij go w myślach: „to tylko napięcie”. Nazwane emocje słabną.'],
+ ['związek','Gra wstępna to nie przystawka. Dla wielu kobiet to danie główne — i zdejmuje presję z Ciebie.'],
+ ['nauka','W badaniu aplikacji łączącej trening ciała, techniki i głowę czas wydłużył się średnio dwukrotnie w 12 tygodni.'],
+ ['ciało','Sen 7–8 h i ruch to też trening kontroli — zmęczony, zestresowany organizm reaguje szybciej.'],
+ ['głowa','Po „gorszym” razie nie oceniaj siebie. Zapisz, co było inne (stres, zmęczenie, tempo) i wróć do planu.'],
+ ['związek','Rozmowa o tym, co Ci pomaga, zbliża bardziej niż udawanie, że problemu nie ma.']
+];
+const GESTURES=[
+ 'Wyślij jej w ciągu dnia wiadomość: konkretną rzecz, za którą ją dziś doceniasz.','Zrób coś z jej listy obowiązków bez pytania i bez oczekiwania podziękowań.','Przytul ją na 20 sekund — nie po to, żeby coś z tego wynikło. Tylko przytul.','Zapytaj o coś z jej dnia i słuchaj do końca, bez rad. Dopytaj raz.','Pochwal ją przy kimś (dzieci, znajomi) — konkretnie.','Zaplanuj wieczór we dwoje i zajmij się całą organizacją sam.','Odłóż telefon, gdy ona mówi. Patrz na nią.','Przypomnij jej wspólne dobre wspomnienie i zapytaj, co ona z niego pamięta.','Zrób jej kawę/herbatę tak, jak lubi, i zostań chwilę obok.','Dotknij jej przechodząc obok — ręka na plecach, pocałunek w czoło — bez podtekstu.','Powiedz, co Ci się w niej dziś podoba. Coś, czego dawno nie mówiłeś.','Zapytaj: „Czego teraz najbardziej potrzebujesz?” i zrób to.','Zaproponuj coś nowego razem: spacer w nowym miejscu, nowa restauracja, wspólna lekcja.','Wyręcz ją w czymś, co ją stresuje (telefon, sprawa do załatwienia).','Napisz krótki liścik i zostaw w miejscu, gdzie go znajdzie.','Spędź 15 minut na rozmowie bez tematów: dzieci, praca, rachunki.','Zadbaj o siebie: świeża koszula, zapach, ogolony. Atrakcyjność to też szacunek.','Zapytaj o jej marzenie lub plan i potraktuj to poważnie.','Pocałuj ją dłużej niż zwykle na powitanie — 6 sekund.','Zaśmiej się z nią — przypomnij coś zabawnego, puść piosenkę z waszej przeszłości.'
+];
+const REFRAMES=[
+ ['„Znowu za szybko. Jestem słaby.”','„To umiejętność, a ja jestem w trakcie treningu. Tydzień '+'X'+' z 12.”'],
+ ['„Muszę wytrzymać jak najdłużej.”','„Chcę być obecny i czuć. Czas przyjdzie z rozluźnieniem.”'],
+ ['„Ona będzie zawiedziona.”','„Ona chce bliskości i uwagi. Mogę jej dać przyjemność na wiele sposobów.”'],
+ ['„Muszę kontrolować każdą sekundę.”','„Oddycham, zwalniam, puszczam napięcie. Pauza to też bliskość.”'],
+ ['„Nie myśl o tym, nie myśl o tym…”','„Zauważam myśl, wracam do oddechu i do doznań.”']
+];
+function setReframes(){$('reframes').innerHTML=REFRAMES.map(r=>'<div class="ex"><div class="no">'+esc(r[0])+'</div><div class="yes">'+esc(r[1].replace('X',weekNo()))+'</div></div>').join('')}
+
+const BEDHTML=`
+<div class="tip">Wszystko poniżej działa razem: oddech + rozluźnienie + tempo + rozmowa. Ćwiczysz to solo w etapach 1–3, a stosujesz z żoną.</div>
+<details class="acc" open><summary><svg class="i"><use href="#i-wind"/></svg> Jak oddychać podczas seksu</summary><div class="in">
+<ul class="list">
+<li><b>Wolno i do brzucha.</b> Szybki, płytki oddech z klatki podkręca pobudzenie. Celuj w ok. 6 oddechów na minutę.</li>
+<li><b>Wydech dłuższy niż wdech</b> (np. 3 s wdech / 5–6 s wydech). Długi wydech działa jak hamulec układu nerwowego.</li>
+<li><b>Nie wstrzymuj oddechu</b> w kulminacyjnych momentach — wstrzymanie + napięte mięśnie przyspieszają wytrysk.</li>
+<li><b>Synchronizuj</b> — oddychajcie razem w wolnym rytmie. Zbliża i zwalnia.</li>
+<li><b>Rosnące pobudzenie (7/10)?</b> 2–3 długie wydechy + puszczenie dna miednicy, zanim podejmiesz decyzję o pauzie.</li>
+</ul></div></details>
+<details class="acc"><summary><svg class="i"><use href="#i-hourglass"/></svg> Co robić, żeby wytrzymać dłużej</summary><div class="in">
+<ul class="list">
+<li><b>Rozluźnione dno miednicy, nie zaciśnięte.</b> Ciągłe zaciskanie przyspiesza. Napinasz krótko tylko jako „hamulec”, potem puszczasz.</li>
+<li><b>Zmieniaj tempo i rytm</b> zanim dojdziesz do 8/10: wolniej, płycej, ruchy okrężne zamiast szybkich.</li>
+<li><b>Pozycje z mniejszą stymulacją:</b> ona na górze (Ty leżysz rozluźniony), na boku na łyżeczkę. Pozycje, w których mocno się napinasz (na rękach), przyspieszają.</li>
+<li><b>Pauza = bliskość.</b> Zatrzymanie to okazja do pocałunków, dotyku, patrzenia na siebie. Nie przepraszaj — to część gry.</li>
+<li><b>Najpierw jej przyjemność.</b> Długa gra wstępna, dotyk, ręce, usta — zdejmuje z Ciebie presję i dla wielu kobiet jest ważniejsza niż sama penetracja.</li>
+<li><b>Uwaga na doznaniach, nie w głowie.</b> Odwracanie myśli („myślę o pracy”) słabo działa i odbiera przyjemność. Lepiej: czuć i świadomie zwalniać.</li>
+<li><b>Druga runda.</b> Jeśli jest okazja, drugi raz po przerwie zwykle trwa dłużej.</li>
+<li><b>Prezerwatywa o grubszej ściance lub z lekkim środkiem znieczulającym</b> — pomoc doraźna; preparaty miejscowe na receptę omów z lekarzem.<span class="ev g">dobre dowody (leki)</span></li>
+</ul></div></details>
+<details class="acc"><summary><svg class="i"><use href="#i-msg"/></svg> Jak o tym porozmawiać z żoną</summary><div class="in">
+<p>Rozmowa zdejmuje większość presji. Najlepiej poza sypialnią, w spokojnym momencie.</p>
+<div class="ex"><div class="ctx">Na start</div><div class="yes">„Pracuję nad tym, żeby nasz seks był dla nas obojga lepszy i dłuższy. Robię ćwiczenia. Chciałbym, żebyś mi w tym trochę pomogła — bez presji.”</div></div>
+<div class="ex"><div class="ctx">Umówiony sygnał</div><div class="yes">„Jeśli dotknę Twojej ręki albo powiem «wolniej», to znaczy, że potrzebuję chwili. To nie koniec — po prostu zwolnimy.”</div></div>
+<div class="ex"><div class="ctx">O jej przyjemności</div><div class="yes">„Pokaż mi, co lubisz najbardziej. Chcę, żebyś Ty też miała dużo przyjemności — nie tylko podczas samego seksu.”</div></div>
+</div></details>
+<details class="acc"><summary><svg class="i"><use href="#i-activity"/></svg> Trening przedłużenia — Twój tydzień</summary><div class="in">
+<ul class="list">
+<li><b>Codziennie:</b> 3 krótkie sesje dna miednicy (zakładka Trening) + 5 min oddechu.</li>
+<li><b>2–3× w tygodniu:</b> sesja stop-start wg etapu (zakładka Kontrola → Plan).</li>
+<li><b>Wieczorem:</b> program Reset — rozluźnianie. Napięte dno miednicy = krótszy czas.</li>
+<li><b>1× w tygodniu:</b> check-in w zakładce Postęp.</li>
+<li><b>Od tygodnia 10:</b> etap 4 — techniki we dwoje, po rozmowie z żoną.</li>
+</ul></div></details>`;
+
+const LOVE={
+why:`<div class="tip">Zasada nr 1: pożądania nie da się wymusić ani „zmanipulować”. Można stworzyć warunki, w których się pojawia. Szacunek, jej tempo i jej „nie” są zawsze ważniejsze niż technika.</div>
+<h2>Jak działa pożądanie w długim związku</h2>
+<details class="acc" open><summary>Pożądanie spontaniczne vs. reaktywne</summary><div class="in"><p>Na początku związku pożądanie pojawia się „samo”. Po latach u wielu kobiet (i mężczyzn) działa inaczej: <b>pojawia się w odpowiedzi</b> na bliskość, dotyk, odprężenie i dobrą atmosferę — nie przed nimi. To normalne, nie znaczy, że „nie chce”.</p><p><b>Wniosek:</b> zamiast czekać na jej inicjatywę, buduj kontekst: spokój, czułość bez oczekiwań, czas tylko dla was.</p></div></details>
+<details class="acc"><summary>Hamulce i przyspieszacze</summary><div class="in"><p>Pożądanie ma „gaz” (to, co ją nakręca) i „hamulce” (to, co je gasi). Zwykle więcej daje <b>zdjęcie hamulców</b> niż dociskanie gazu.</p><p><b>Typowe hamulce:</b> zmęczenie, nadmiar obowiązków na jej głowie, napięcie i nierozwiązane konflikty, poczucie bycia niewidzianą, presja na seks, brak prywatności, telefon w łóżku.</p><p><b>Typowe przyspieszacze:</b> poczucie bycia docenioną i pożądaną, humor, nowość i wspólna przygoda, czułość w ciągu dnia, zadbany partner, rozmowa, czas bez dzieci i pracy.</p><p class="muted">Zapytaj ją wprost, co jest jej hamulcem, a co gazem — i zapisz to sobie.</p></div></details>
+<details class="acc"><summary>Nowość i wspólna przygoda</summary><div class="in"><p>Badania nad parami pokazują, że wspólne <b>nowe i ekscytujące</b> doświadczenia (nowe miejsce, wspólna nauka, małe wyzwanie) zwiększają bliskość i satysfakcję w związku bardziej niż „miłe, ale te same” wieczory.</p><p>Raz w tygodniu: coś, czego razem jeszcze nie robiliście — nawet drobnego.</p></div></details>
+<details class="acc"><summary>Zobacz ją — nie tylko jako mamę i wspólniczkę</summary><div class="in"><p>W małżeństwie z firmą i dziećmi łatwo widzieć w sobie nawzajem tylko role. Pożądanie potrzebuje odrobiny dystansu: widzieć ją, gdy jest w swoim żywiole, kompetentna, roześmiana, wśród ludzi. Powiedz jej, co wtedy widzisz.</p></div></details>
+<details class="acc"><summary>Ty jako mężczyzna, którego się pragnie</summary><div class="in"><ul class="list"><li>Spokój i pewność siebie, nie nachalność. Pewność to także umieć usłyszeć „nie dziś” bez fochów.</li><li>Dbałość o siebie: forma, zapach, ubranie, zdrowie.</li><li>Własne pasje i energia — ludzie pociągają ludzi, którzy żyją pełnią.</li><li>Słowność i odpowiedzialność — dla wielu kobiet nic nie jest tak atrakcyjne jak partner, na którym można polegać.</li><li>Inicjatywa w planowaniu wspólnego czasu, nie tylko w sypialni.</li></ul></div></details>`,
+talk:`<div class="tip">Badania nad parami (Gottman) pokazują: w szczęśliwych związkach partnerzy w większości przypadków <b>odpowiadają na „zaproszenia”</b> drugiej osoby — drobne komentarze, pytania, westchnienia. Ignorowanie ich najbardziej oddala. To jest codzienna gra wstępna.</div>
+<h2>Sytuacja → jak odpowiadać</h2>
+<div class="ex"><div class="ctx">Mówi: „Ale dziś miałam dzień…”</div><div class="no">„Ja też. Co na obiad?”</div><div class="yes">Odłóż telefon: „Opowiedz. Co się stało?” — i słuchaj, bez naprawiania.</div></div>
+<div class="ex"><div class="ctx">Opowiada o problemie</div><div class="no">„To zrób tak i tak.”</div><div class="yes">„Rozumiem, że Cię to wkurza. Chcesz, żebym pomógł coś wymyślić, czy żebym po prostu posłuchał?”</div></div>
+<div class="ex"><div class="ctx">„Spójrz, jaki ładny ptak / dom / zdjęcie”</div><div class="no">„Mhm.” (wzrok w telefonie)</div><div class="yes">Spójrz, zareaguj, dopytaj. 10 sekund uwagi = punkt dla bliskości.</div></div>
+<div class="ex"><div class="ctx">Ma pretensję</div><div class="no">„Przesadzasz.” / kontratak / milczenie</div><div class="yes">„Masz rację, że to było nie fair. Co mogę zrobić inaczej?” — przyznaj tę część, która jest prawdą.</div></div>
+<div class="ex"><div class="ctx">Jest zmęczona wieczorem</div><div class="no">Sugerowanie seksu „na odstresowanie”.</div><div class="yes">„Usiądź, ja ogarnę resztę.” Zero oczekiwań. Odprężenie często wraca później jako bliskość.</div></div>
+<div class="ex"><div class="ctx">Odmawia seksu</div><div class="no">Foch, wyrzut, liczenie, „znowu”.</div><div class="yes">„Jasne, rozumiem.” Przytul, bądź blisko. Brak presji to najsilniejszy sygnał bezpieczeństwa.</div></div>
+<div class="ex"><div class="ctx">Kupiła coś nowego / zmieniła fryzurę</div><div class="no">„Ile to kosztowało?”</div><div class="yes">„Wyglądasz świetnie. Ten kolor to Twój.” — konkretnie.</div></div>
+<div class="ex"><div class="ctx">Pyta „Kochasz mnie?”</div><div class="no">„No przecież wiesz.”</div><div class="yes">„Tak. I wiesz, za co najbardziej? …” — jedna konkretna rzecz.</div></div>
+<h2>4 rzeczy, które niszczą bliskość</h2>
+<ul class="list"><li><b>Krytyka jej osoby</b> („zawsze”, „nigdy”) zamiast mówienia o konkretnej sprawie.</li><li><b>Pogarda</b> — sarkazm, przewracanie oczami. Najsilniejszy zabójca związków.</li><li><b>Defensywa</b> — zamiast wziąć odpowiedzialność za swoją część.</li><li><b>Mur</b> — wycofanie, milczenie. Jeśli się gotujesz: „Daj mi 20 minut, wrócę do rozmowy” — i wróć.</li></ul>
+<h2>Proporcja 5 do 1</h2><p>W dobrych związkach na jedną trudną interakcję przypada ok. pięć dobrych: uśmiech, dotyk, docenienie, żart. Licz dziś swoje.</p>`,
+days:`<div class="tip">Pożądanie w sypialni budujesz poza sypialnią. Codzienne drobne rzeczy liczą się bardziej niż jednorazowe wielkie gesty.</div>
+<h2>Rytuały, które działają</h2>
+<ul class="list">
+<li><b>6-sekundowy pocałunek</b> na powitanie i pożegnanie — dłuższy niż „cmok”.</li>
+<li><b>20 minut rozmowy dziennie</b> bez telefonów i bez logistyki (dzieci, firma, rachunki).</li>
+<li><b>Randka raz w tygodniu</b> — Ty planujesz, Ty organizujesz. Może być spacer.</li>
+<li><b>Czułość bez oczekiwań</b> — przytulenie, masaż karku, który nie musi prowadzić do seksu.</li>
+<li><b>Docenianie na głos</b> — codziennie jedna konkretna rzecz.</li>
+<li><b>Odciążenie</b> — weź na siebie coś, co zwykle ona pamięta i ogarnia. Mniej obciążona głowa = więcej miejsca na pożądanie.</li>
+<li><b>Sypialnia bez telefonów</b> — przynajmniej kilka wieczorów w tygodniu.</li>
+<li><b>Niedzielne 10 minut</b> — „Co było dla Ciebie najlepsze w tym tygodniu? Czego potrzebujesz w następnym?”</li>
+</ul>
+<h2>Gest na dziś</h2><div class="card"><p id="loveGesture"></p><button class="btn ghost sm" id="loveGestNext" style="margin-top:8px">Pokaż inny</button></div>`,
+ask:`<div class="tip">Pytania na randkę lub wieczór. Wybierz 2–3, słuchaj, dopytuj. Odpowiadaj też sam — szczerze.</div><div id="askList"></div><button class="btn ghost" id="askMore">Wylosuj inne</button>`,
+bed:`<div class="tip">Dobry seks w długim związku to przede wszystkim komunikacja, czas i ciekawość, a nie „wyczyny”.</div>
+<ul class="list">
+<li><b>Zapytaj, co lubi</b> — i co lubiłaby spróbować. Zaproponuj, że Ty też powiesz.</li>
+<li><b>Wolniej i dłużej przed</b> — dotyk całego ciała, nie tylko stref intymnych. Pożądanie reaktywne potrzebuje czasu na „rozgrzanie”.</li>
+<li><b>Jej przyjemność jako cel</b> — wiele kobiet potrzebuje bezpośredniej stymulacji łechtaczki; sama penetracja często nie wystarcza. To normalne, nie Twoja porażka.</li>
+<li><b>Feedback w trakcie</b> — „tak lepiej?”, „wolniej czy mocniej?”. Krótko, ciepło.</li>
+<li><b>Po seksie zostań</b> — przytulenie i rozmowa po też budują pożądanie na następny raz.</li>
+<li><b>Nowość</b> — inne miejsce, pora, nastrój (muzyka, światło). Małe zmiany robią dużą różnicę.</li>
+<li><b>Bez oceniania</b> — gorszy raz to nie problem. Śmiech i luz są seksowne.</li>
+</ul>`
+};
+const QUESTIONS=['Kiedy ostatnio czułaś się przy mnie naprawdę doceniona?','Co sprawia, że po ciężkim dniu najszybciej się odprężasz?','Jakie wspomnienie z nas dwojga lubisz najbardziej?','Czego chciałabyś więcej w naszym zwykłym tygodniu?','Gdybyśmy mieli tylko weekend dla siebie — co byś chciała robić?','Co w Tobie jest, czego ludzie nie widzą na pierwszy rzut oka?','Jakie Twoje marzenie odłożyłaś na później?','Co sprawia, że czujesz się atrakcyjna?','Kiedy czujesz się ze mną najbardziej bezpiecznie?','Co mogę robić, żeby zdjąć Ci z głowy trochę obowiązków?','Jaki moment w tym roku był dla Ciebie najlepszy?','Czego nowego chciałabyś razem spróbować?','Jak wygląda dla Ciebie idealny wieczór we dwoje?','Co w naszym związku jest dla Ciebie najważniejsze?','Za co jesteś dziś wdzięczna?','Co Cię ostatnio rozśmieszyło?','O czym marzyłaś jako dziewczyna?','Jakiej rzeczy o mnie chciałabyś wiedzieć więcej?','Co sprawia, że czujesz się kochana — słowa, gesty, czas, dotyk, prezenty?','Gdzie chciałabyś pojechać tylko we dwoje?'];
+
+const INFO={
+life:['Styl życia',`<div class="tip">Ciało i układ nerwowy w lepszej formie = więcej kontroli. Te rzeczy nie zastąpią treningu, ale go wzmacniają.</div>
+<ul class="list"><li><b>Sen 7–8 h</b> — niewyspanie podnosi napięcie i reaktywność.</li><li><b>Ruch</b> — kardio 3×/tydz. i trening siłowy poprawiają krążenie i kontrolę ciała.</li><li><b>Stres</b> — codzienny oddech i wieczorny Reset.</li><li><b>Alkohol, nikotyna</b> — ograniczaj.</li><li><b>Mobilność bioder</b> — rozciąganie zginaczy bioder i przywodzicieli pomaga rozluźnić dno miednicy.</li></ul>
+<h3>Suplementy — uczciwie</h3><p>Dowody są słabe — traktuj jako wsparcie, nie lek. Sprawdź interakcje z lekami i niedobory w badaniach.</p><ul class="list"><li>Cynk, magnez, omega-3, ashwagandha — mogą pomóc pośrednio (niedobory, stres).<span class="ev s">słabe</span></li></ul>
+<div class="tip">Mocne dowody mają metody od lekarza: preparaty miejscowe (np. lidokaina/prylokaina) i leki (np. dapoksetyna). To decyzja z lekarzem.</div>`],
+science:['Co mówią badania',`<h3>Trening dna miednicy</h3><p>W badaniu 40 mężczyzn z przedwczesnym wytryskiem 12-tygodniowy trening wydłużył średni czas z ok. 32 s do prawie 2,5 min. W obserwacji długoterminowej ok. 64% utrzymało zadowalającą kontrolę po 2 latach i 56% po 3 latach.<span class="ev g">dobre</span></p>
+<h3>Aplikacja łącząca 3 filary</h3><p>Badanie CLIMACS (2026): aplikacja łącząca uważność, terapię behawioralną i ćwiczenia fizyczne — po 12 tygodniach czas wzrósł średnio z 61 do 125 s, 22% użytkowników nie miało już problemu. Poprawiła się też kontrola, mniej zamartwiania i mniejszy wpływ na związek.<span class="ev g">dobre</span></p>
+<h3>Stop-start i uważność</h3><p>Techniki behawioralne (stop-start, ściskanie) i trening uważności na doznania są standardem terapii seksuologicznej.<span class="ev m">umiarkowane</span></p>
+<h3>Dlatego ten plan</h3><ul class="list"><li>12 tygodni, bo tyle trwały programy w badaniach.</li><li>3 filary: ciało (Trening), technika (Kontrola), głowa (Głowa) — razem działają najlepiej.</li><li>Pomiar co tydzień — żeby widzieć efekt, a nie zgadywać.</li></ul>`],
+doctor:['Kiedy do lekarza',`<div class="tip warn">Pilnie: ból, krew w moczu lub nasieniu, nagłe zmiany, problemy z erekcją pojawiające się nagle.</div>
+<p>Idź do <b>urologa lub seksuologa</b>, gdy:</p><ul class="list"><li>po 12 tygodniach regularnego planu nie widzisz poprawy,</li><li>problem bardzo obciąża Ciebie lub związek,</li><li>pojawiają się trudności z erekcją,</li><li>chcesz rozważyć leczenie (preparaty miejscowe, leki).</li></ul>
+<h3>Co zabrać</h3><ul class="list"><li>Eksport z aplikacji (Ustawienia → Eksport) — wykres check-inów i sesji.</li><li>Od kiedy trwa problem, czy zawsze, czy od jakiegoś czasu.</li><li>Leki i suplementy, które bierzesz.</li></ul><p class="muted">Seksuolog to normalny lekarz — wizyta jest dyskretna i rzeczowa.</p>`]
+};
+
+/* ============ RENDER ============ */
+const SLOTNAME={am:['<svg class="i"><use href="#i-sunrise"/></svg>','Rano','program dnia'],mid:['<svg class="i"><use href="#i-sun"/></svg>','W ciągu dnia','Express · tryb kieszonkowy'],pm:['<svg class="i"><use href="#i-moon"/></svg>','Wieczorem','Reset · rozluźnienie']};
+function slotPrg(slot){if(slot==='mid')return 'express';if(slot==='pm')return 'reset';return WEEK[new Date().getDay()]}
+function renderToday(){
+ const d=day();const w=weekNo();
+ $('todayDate').textContent=new Date().toLocaleDateString('pl-PL',{weekday:'long',day:'numeric',month:'long'});
+ $('weekBadge').textContent='Tydzień '+w+' z 12';$('levelBadge').textContent='Poziom '+S.level+' · '+STAGES[stageIdx()].n.split('·')[0].trim();
+ const todayPrg=PRG[WEEK[new Date().getDay()]];$('dayTitle').textContent='Dziś: '+todayPrg.name;
+ const parts=[d.am,d.mid,d.pm,d.head].filter(Boolean).length;$('dayProg').style.width=(parts/4*100)+'%';
+ $('dayHint').textContent=dayDone(today())?'Dzień zaliczony ✓ Wszystko ponad to jest bonusem.':'Dzień zaliczasz: min. 2 sesje treningu + głowa (oddech, skan albo stop-start).';
+ let h='';['am','mid','pm'].forEach(k=>{const p=PRG[slotPrg(k)];h+=`<button class="task${d[k]?' done':''}" data-slot="${k}"><div class="ic">${SLOTNAME[k][0]}</div><div class="t"><b>${SLOTNAME[k][1]} · ${p.name}</b><small class="muted">${Math.round(dur(slotPrg(k))/60*10)/10} min · ${SLOTNAME[k][2]}</small></div><div class="ck">${d[k]?'✓':''}</div></button>`});
+ h+=`<button class="task${d.head?' done':''}" data-breath="calm"><div class="ic"><svg class="i"><use href="#i-feather"/></svg></div><div class="t"><b>Głowa · oddech 4–6</b><small class="muted">5 min · uspokaja układ nerwowy</small></div><div class="ck">${d.head?'✓':''}</div></button>`;
+ const st=STAGES[stageIdx()];const lastCtrl=S.ctrl.slice().reverse().find(x=>daysBetween(x.d,today())<=3);
+ h+=`<button class="task${lastCtrl?' done':''}" data-ctrl="1"><div class="ic"><svg class="i"><use href="#i-target"/></svg></div><div class="t"><b>Stop-start · ${st.n.split('·')[0].trim()}</b><small class="muted">2–3× w tygodniu · ${lastCtrl?'ostatnio '+lastCtrl.d:'zaplanuj w tym tygodniu'}</small></div><div class="ck">${lastCtrl?'✓':''}</div></button>`;
+ $('dayTasks').innerHTML=h;
+ $('stStreak').textContent=streak();const ws=addDays(today(),-((new Date().getDay()+6)%7));$('stWeek').textContent=doneInWeekOf(ws)+'/7';
+ const di=daysBetween('2026-01-01',today());const th=THOUGHTS[((di%THOUGHTS.length)+THOUGHTS.length)%THOUGHTS.length];$('dailyThought').textContent=th[1];$('tipCat').textContent=th[0];
+ const gi=S.gestures.idx!=null&&S.gestures.day===today()?S.gestures.idx:((di*7)%GESTURES.length+GESTURES.length)%GESTURES.length;S.gestures.idx=gi;S.gestures.day=today();$('dailyGesture').textContent=GESTURES[gi];$('gestDone').textContent=d.gesture?'Zrobione ✓':'Oznacz jako zrobione';
+ const sun=new Date().getDay()===0;const lastCi=S.checkins[S.checkins.length-1];$('checkinCard').style.display=(sun||(lastCi&&daysBetween(lastCi.d,today())>=7)||(!lastCi&&daysBetween(S.start,today())>=6))&&!(lastCi&&daysBetween(lastCi.d,today())<5)?'block':'none';
+}
+function renderTrain(){$('prgList').innerHTML=Object.keys(PRG).map(k=>{const p=PRG[k];return `<button class="prg" data-prg="${k}"><div class="ic">${p.icon}</div><div style="flex:1"><div class="row sb"><b>${p.name}</b><span class="pill">${fmt(dur(k))}</span></div><small class="muted">${p.sub}</small></div></button>`}).join('')}
+function renderCtrl(){const i=stageIdx(),st=STAGES[i];$('ctrlStageName').textContent=st.n;$('ctrlStageWeeks').textContent=st.w;$('ctrlStageGoal').textContent=st.goal;
+ $('stagesList').innerHTML=STAGES.map((s,k)=>`<details class="acc"${k===i?' open':''}><summary>${k<i?'✓ ':k===i?'▶ ':''}${s.n} <span class="muted" style="font-weight:400;font-size:13px">${s.w}</span></summary><div class="in"><p>${s.desc}</p><p class="muted">${s.goal}</p></div></details>`).join('');
+ $('ctrl-bed').innerHTML=BEDHTML;
+ const L=S.ctrl.slice(-12);$('ctrlLog').innerHTML=L.length?L.slice().reverse().map(x=>`<div class="card"><div class="row sb"><b>${x.d}</b><span class="pill">etap ${x.stage}</span></div><p class="muted" style="font-size:13.5px">${x.min} min · pauzy ${x.p}/${x.goal} · kontrola ${x.c}/10 · napięcie ${x.a}/10</p>${x.n?'<p style="font-size:13.5px">'+esc(x.n)+'</p>':''}</div>`).join(''):'<p class="muted center">Brak sesji. Pierwsza sesja = pierwszy punkt na wykresie.</p>';
+ chart('ctrlChart',[{v:L.map(x=>Math.min(10,x.min/2)),c:'var(--acc)'},{v:L.map(x=>x.c),c:'var(--green)'}]);}
+function renderLove(){$('love-why').innerHTML=LOVE.why;$('love-talk').innerHTML=LOVE.talk;$('love-days').innerHTML=LOVE.days;$('love-ask').innerHTML=LOVE.ask;$('love-bed').innerHTML=LOVE.bed;
+ const lg=$('loveGesture');if(lg){lg.textContent=GESTURES[S.gestures.idx||0];$('loveGestNext').onclick=()=>{S.gestures.idx=(S.gestures.idx+1)%GESTURES.length;save();lg.textContent=GESTURES[S.gestures.idx];renderToday()}}
+ drawAsk();$('askMore').onclick=drawAsk}
+function drawAsk(){const pick=QUESTIONS.slice().sort(()=>Math.random()-.5).slice(0,5);$('askList').innerHTML=pick.map(q=>`<div class="card"><svg class="i"><use href="#i-msg"/></svg> ${esc(q)}</div>`).join('')}
+function renderProg(){const ks=Object.keys(S.days);$('pDays').textContent=ks.filter(dayDone).length;$('pSess').textContent=S.sessions;$('pBest').textContent=bestStreak();$('pMind').textContent=S.mindMin;
+ const start=addDays(today(),-34-((new Date().getDay()+6)%7)+6);let h='';['P','W','Ś','C','P','S','N'].forEach(x=>h+=`<div style="background:none">${x}</div>`);const mon=addDays(today(),-((new Date().getDay()+6)%7)-28);for(let i=0;i<35;i++){const d=addDays(mon,i);const c=dayDone(d)?'l2':dayTrained(d)?'l1':'';h+=`<div class="${c}" title="${d}">${d===today()?'•':''}</div>`}$('heat').innerHTML=h;
+ const C=S.checkins.slice(-12);chart('ciChart',[{v:C.map(x=>x.c),c:'var(--acc)'},{v:C.map(x=>x.p),c:'var(--green)'},{v:C.map(x=>x.s),c:'var(--red)'},{v:C.map(x=>x.b),c:'var(--violet)'}]);
+ const ms=[['<svg class="i"><use href="#i-leaf"/></svg>','Pierwszy dzień',ks.some(dayDone)],['<svg class="i"><use href="#i-flame"/></svg>','7 dni z rzędu',bestStreak()>=7],['<svg class="i"><use href="#i-star"/></svg>','21 dni z rzędu',bestStreak()>=21],['<svg class="i"><use href="#i-target"/></svg>','Pierwszy stop-start',S.ctrl.length>0],['<svg class="i"><use href="#i-feather"/></svg>','100 min głowy',S.mindMin>=100],['<svg class="i"><use href="#i-trend"/></svg>','4 check-iny',S.checkins.length>=4],['<svg class="i"><use href="#i-award"/></svg>','Tydzień 12',weekNo()>=12],['<svg class="i"><use href="#i-award"/></svg>','Poziom 6',S.level>=6]];
+ $('milestones').innerHTML=ms.map(m=>`<span class="pill${m[2]?' on':''}" style="${m[2]?'':'opacity:.45'}">${m[0]} ${m[1]}</span>`).join('')}
+function chart(id,series){const el=$(id);if(!el)return;const W=320,H=170,P=14;let s='';for(let g=0;g<=10;g+=5){const y=H-P-(g/10)*(H-2*P);s+=`<line x1="${P}" x2="${W-P}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="1"/>`}
+ const n=Math.max(...series.map(x=>x.v.length));if(n===0){el.innerHTML=s+`<text x="${W/2}" y="${H/2}" text-anchor="middle" fill="var(--muted)" font-size="13">Brak danych — pierwszy wpis pojawi się tutaj</text>`;return}
+ series.forEach(se=>{const pts=se.v.map((v,i)=>[P+(n===1?(W-2*P)/2:i*(W-2*P)/(n-1)),H-P-(Math.max(0,Math.min(10,v))/10)*(H-2*P)]);if(!pts.length)return;s+=`<polyline fill="none" stroke="${se.c}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${pts.map(p=>p.join(',')).join(' ')}"/>`;pts.forEach(p=>s+=`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="${se.c}"/>`)});el.innerHTML=s}
+function renderAll(){checkLevel();renderToday();renderTrain();renderCtrl();renderProg();setReframes();save()}
+
+/* ============ NAV / SHEETS ============ */
+let stack=[];
+function openSheet(n){const el=$('s-'+n);if(!el)return;el.classList.add('on');stack.push(n);history.pushState({s:n},'')}
+function closeSheet(){const n=stack.pop();if(n){$('s-'+n).classList.remove('on')}}
+function closeAll(){while(stack.length)closeSheet()}
+window.addEventListener('popstate',()=>{const n=stack[stack.length-1];if(!n)return;if(n==='player'&&PL){plEnd(false);return}if(n==='ctrl'&&CS){clearInterval(CS.t);wakeOff()}if(n==='breath'&&BR){clearInterval(BR.t);wakeOff()}if(n==='scan'&&SC){clearInterval(SC.t);wakeOff();SC=null}stack.pop();$('s-'+n).classList.remove('on')});
+function back(){history.back()}
+function go(v){if(v==='more'){}$$('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));$$('nav.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));window.scrollTo(0,0)}
+function toast(t){const el=$('toast');el.innerHTML=t;el.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('on'),3200)}
+function openInfo(k){$('infoTitle').textContent=INFO[k][0];$('infoBody').innerHTML=INFO[k][1];openSheet('info')}
+function openArousal(){$('arousalBody').innerHTML=`<div class="tip">Ta skala to Twój „obrotomierz”. Cała metoda stop-start polega na tym, żeby wiedzieć, gdzie jesteś, zanim będzie za późno.</div>
+<div class="card"><b>1–3 · spokój</b><p class="muted">Przyjemność, pełna kontrola, oddech wolny.</p></div><div class="card"><b>4–6 · rozkręcanie</b><p class="muted">Wyraźne podniecenie, nadal swobodnie. Tu najlepiej przebywać jak najdłużej.</p></div><div class="card" style="border-color:rgba(231,182,107,.5)"><b>7–8 · strefa uwagi</b><p class="muted">Oddech przyspiesza, mięśnie się napinają. Tu zwalniasz, robisz długi wydech, puszczasz dno miednicy — albo pauza.</p></div><div class="card" style="border-color:rgba(240,143,143,.6)"><b>9 · krawędź</b><p class="muted">Bardzo blisko. Pauza natychmiast — za późno na same zwolnienie.</p></div><div class="card" style="border-color:var(--red)"><b>10 · punkt bez powrotu</b><p class="muted">Wytrysk już się zaczyna. Celem treningu jest nie dojść tu przypadkiem.</p></div>
+<h3>Ćwiczenie w ciągu dnia</h3><p>3× dziennie zatrzymaj się na 10 sekund i oceń swoje ogólne napięcie 1–10. To trenuje ten sam „czujnik”, którego używasz w łóżku.</p>`;openSheet('arousal')}
+
+/* ============ COACH ============ */
+const COACH_URL='https://txqjjwanyfcpezgqbwou.supabase.co/functions/v1/kegel-coach';
+const COACH_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4cWpqd2FueWZjcGV6Z3Fid291Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3OTc2NTksImV4cCI6MjA5MTM3MzY1OX0.Dy1N3rHMUZCAnTSKayRa7GNzSlWOe4PSi6_1BVOUHyU';
+function coachCtx(){const lc=S.checkins[S.checkins.length-1];return {passa:streak(),tydzien:weekNo(),poziom:S.level,etap_stop_start:stageIdx()+1,sesje:S.sessions,sesje_stop_start:S.ctrl.length,ostatni_checkin:lc?{kontrola:lc.c,pewnosc:lc.p,stres:lc.s,bliskosc:lc.b}:null,dzis:day()}}
+function renderChat(){$('coachMsgs').innerHTML=(S.chat.length?S.chat:[{role:'assistant',content:'Cześć. Jestem Twoim trenerem. Zapytaj o technikę, oddech, stop-start albo o to, jak utrzymać plan.'}]).map(m=>`<div class="msg ${m.role==='user'?'u':'a'}">${esc(m.content)}</div>`).join('');const b=$('s-coach');b.scrollTop=b.scrollHeight}
+async function coachSend(t){t=(t||$('coachIn').value).trim();if(!t)return;$('coachIn').value='';S.chat.push({role:'user',content:t});renderChat();S.chat.push({role:'assistant',content:'…'});renderChat();
+ try{const r=await fetch(COACH_URL,{method:'POST',headers:{apikey:COACH_ANON,Authorization:'Bearer '+COACH_ANON,'Content-Type':'application/json'},body:JSON.stringify({mode:'chat',context:coachCtx(),messages:S.chat.slice(0,-1).slice(-12)})});const j=await r.json();S.chat[S.chat.length-1].content=(j.reply||j.text||j.message||'Nie udało się — spróbuj za chwilę.')}catch(e){S.chat[S.chat.length-1].content='Brak połączenia z trenerem. Spróbuj później.'}
+ S.chat=S.chat.slice(-30);save();renderChat()}
+
+/* ============ PIN ============ */
+let pinBuf='',pinMode='unlock',pinFirst='';
+async function h(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('kg2:'+s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){return s}}
+function pinUI(){$$('#pinDots i').forEach((d,i)=>d.classList.toggle('f',i<pinBuf.length))}
+function showLock(mode){pinMode=mode;pinBuf='';pinUI();$('pinMsg').textContent=mode==='unlock'?'Wpisz PIN':mode==='set'?'Ustaw nowy PIN (4 cyfry)':'Powtórz PIN';$('lock').classList.add('on')}
+async function pinKey(k){if(k==='⌫'){pinBuf=pinBuf.slice(0,-1);pinUI();return}if(k==='✕'){if(pinMode!=='unlock')$('lock').classList.remove('on');return}if(pinBuf.length>=4)return;pinBuf+=k;pinUI();if(pinBuf.length<4)return;
+ if(pinMode==='unlock'){if(await h(pinBuf)===S.cfg.pin){$('lock').classList.remove('on')}else{$('pinMsg').textContent='Zły PIN';vib(200);pinBuf='';setTimeout(pinUI,200)}}
+ else if(pinMode==='set'){pinFirst=pinBuf;showLock('confirm')}
+ else{if(pinBuf===pinFirst){S.cfg.pin=await h(pinBuf);save();$('lock').classList.remove('on');toast('<svg class="i"><use href="#i-lock"/></svg> PIN ustawiony');renderSettings()}else{toast('PIN-y się różnią');showLock('set')}}}
+
+
+/* ============ PUSH ============ */
+const PUSH_URL='https://wgkcykehtbflyzpqetls.supabase.co/functions/v1/kegel-push';
+const VAPID='BOzL73RBQZEA5CEUNrNzV8UT7w6ISZECSSMeGVM450mcBvCV0UxSq4fWZsTibiZ-kGY1XbpEQfpglpRVxtiUOWs';
+function remCfg(){return S.cfg.rem=S.cfg.rem||{on:false,am:'07:30',mid:'13:00',pm:'21:30'}}
+function b64u(s){const p='='.repeat((4-s.length%4)%4);const b=atob((s+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(b,c=>c.charCodeAt(0))}
+async function pushApi(body){const r=await fetch(PUSH_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});return r.json()}
+async function getSub(){if(!('serviceWorker' in navigator)||!('PushManager' in window))return null;const reg=await navigator.serviceWorker.ready;return reg.pushManager.getSubscription()}
+async function pushOn(){const R=remCfg();const m=$('remMsg');
+ if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window)){m.textContent='Ta przeglądarka nie obsługuje push. Na Androidzie użyj Chrome i „Dodaj do ekranu głównego”.';return}
+ const perm=await Notification.requestPermission();if(perm!=='granted'){m.textContent='Brak zgody na powiadomienia — włącz je w ustawieniach przeglądarki dla tej strony.';return}
+ try{const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID)});
+  const j=await pushApi({action:'save',sub:sub.toJSON(),times:{am:R.am||null,mid:R.mid||null,pm:R.pm||null},tz:Intl.DateTimeFormat().resolvedOptions().timeZone});
+  if(!j.ok)throw 0;R.on=true;save();m.textContent='Przypomnienia włączone.';toast('Przypomnienia włączone')}catch(e){m.textContent='Nie udało się włączyć. Sprawdź internet i spróbuj ponownie.'}
+ renderSettings()}
+async function pushOff(){const R=remCfg();try{const sub=await getSub();if(sub){await pushApi({action:'delete',endpoint:sub.endpoint});await sub.unsubscribe()}}catch(e){}R.on=false;save();$('remMsg').textContent='Przypomnienia wyłączone.';renderSettings()}
+async function pushDone(slot){if(!remCfg().on||!slot||slot==='extra')return;try{const sub=await getSub();if(sub)pushApi({action:'done',endpoint:sub.endpoint,slot})}catch(e){}}
+async function pushTest(){const m=$('remMsg');try{const sub=await getSub();if(!sub||!remCfg().on){m.textContent='Najpierw włącz przypomnienia.';return}const j=await pushApi({action:'test',endpoint:sub.endpoint});m.textContent=j.ok?'Wysłane — powinno przyjść za kilka sekund.':'Nie doszło. Wyłącz i włącz przypomnienia ponownie.'}catch(e){m.textContent='Brak połączenia.'}}
+
+/* ============ SETTINGS ============ */
+function renderSettings(){const R=remCfg();$('setPush').textContent=R.on?'Wł.':'Wył.';$('setPush').classList.toggle('on',R.on);$('remAm').value=R.am||'';$('remMid').value=R.mid||'';$('remPm').value=R.pm||'';$('setSound').textContent=S.cfg.sound?'Wł.':'Wył.';$('setSound').classList.toggle('on',S.cfg.sound);$('setVib').textContent=S.cfg.vib?'Wł.':'Wył.';$('setVib').classList.toggle('on',S.cfg.vib);$('setVol').value=S.cfg.vol;$('setVolV').textContent=S.cfg.vol+'%';const th=document.documentElement.dataset.theme;$('setTheme').textContent=th==='dark'?'Ciemny':'Jasny';$('setPin').textContent=S.cfg.pin?'Wł. (wyłącz)':'Wył. (ustaw)';$('setPin').classList.toggle('on',!!S.cfg.pin);$('setStart').textContent=S.start+' · tydzień '+weekNo()}
+
+/* ============ EVENTS ============ */
+function bind(){
+ document.addEventListener('click',e=>{const t=e.target.closest('button,[data-close]');if(!t)return;
+  if(t.dataset.v){go(t.dataset.v);return}
+  if(t.hasAttribute('data-close')){back();return}
+  if(t.dataset.slot){openPlayer(slotPrg(t.dataset.slot),t.dataset.slot);return}
+  if(t.dataset.prg){openPlayer(t.dataset.prg,null);return}
+  if(t.dataset.breath){openBreath(t.dataset.breath);return}
+  if(t.dataset.ctrl){go('ctrl');return}
+  if(t.dataset.open){const o=t.dataset.open;if(o==='coach'){renderChat();openSheet('coach')}else if(o==='arousal')openArousal();else if(o==='scan'){SC=null;$('scPart').textContent='Start';$('scText').textContent='9 części ciała, ok. 6 minut. Połóż się lub usiądź wygodnie.';$('scGo').textContent='▶ Start';openSheet('scan')}else if(o==='checkin')openSheet('checkin');else if(o==='settings'){renderSettings();openSheet('settings')}else if(INFO[o])openInfo(o);return}
+ });
+ $('plGo').onclick=plGo;$('plStop').onclick=()=>{if(PL&&PL.idx>=0&&confirmEnd())plEnd(PL.idx>=PL.st.length*0.6);else back()};
+ function confirmEnd(){return true}
+ $('plPocket').onclick=()=>{if(!PL)return;setPocket(true);if(!PL.run)plGo()};
+ $('pocketInfo').onclick=()=>toast('<svg class="i"><use href="#i-eyeoff"/></svg> Tryb kieszonkowy włączysz w trakcie treningu ikoną okularów.');
+ let lastTap=0;$('pocket').addEventListener('click',()=>{const n=Date.now();if(n-lastTap<400)setPocket(false);lastTap=n});
+ $('brGo').onclick=brGo;$('scGo').onclick=scGo;
+ $('ctrlStart').onclick=openCtrl;$('csPause').onclick=csPause;$('csResume').onclick=csResume;$('csFinish').onclick=csFinish;$('csSave').onclick=csSave;
+ ['csCtrl','csAnx'].forEach(id=>$(id).oninput=()=>$(id+'V').textContent=$(id).value);
+ [1,2,3,4].forEach(i=>$('ci'+i).oninput=()=>$('ci'+i+'v').textContent=$('ci'+i).value);
+ $('ciSave').onclick=()=>{S.checkins.push({d:today(),c:+$('ci1').value,p:+$('ci2').value,s:+$('ci3').value,b:+$('ci4').value,n:$('ciNote').value.trim()});$('ciNote').value='';save();toast('<svg class="i"><use href="#i-chart"/></svg> Check-in zapisany.');back();renderAll()};
+ $$('#ctrlSeg button').forEach(b=>b.onclick=()=>{$$('#ctrlSeg button').forEach(x=>x.classList.toggle('on',x===b));['plan','bed','log'].forEach(k=>$('ctrl-'+k).style.display=k===b.dataset.c?'block':'none')});
+ $$('#loveSeg button').forEach(b=>b.onclick=()=>{$$('#loveSeg button').forEach(x=>x.classList.toggle('on',x===b));['why','talk','days','ask','bed'].forEach(k=>$('love-'+k).style.display=k===b.dataset.l?'block':'none')});
+ $('gestNext').onclick=()=>{S.gestures.idx=(S.gestures.idx+1)%GESTURES.length;save();renderToday()};
+ $('gestDone').onclick=()=>{day().gesture=!day().gesture;save();renderToday();if(day().gesture)toast('<svg class="i"><use href="#i-heart"/></svg> Zapisane. Małe rzeczy robią dużą różnicę.')};
+ $('coachSend').onclick=()=>coachSend();$('coachIn').addEventListener('keydown',e=>{if(e.key==='Enter')coachSend()});
+ $('coachQuick').innerHTML=['Jak oddychać podczas seksu?','Co robić w pauzie stop-start?','Nie mam motywacji','Czy dobrze napinam mięśnie?'].map(q=>`<button class="pill">${q}</button>`).join('');
+ $$('#coachQuick button').forEach(b=>b.onclick=()=>coachSend(b.textContent));
+ $('setPush').onclick=()=>{remCfg().on?pushOff():pushOn()};
+ $('remTest').onclick=pushTest;
+ ['Am','Mid','Pm'].forEach(k=>$('rem'+k).onchange=()=>{const R=remCfg();R[k.toLowerCase()]=$('rem'+k).value;save();if(R.on)pushOn()});
+ $('setSound').onclick=()=>{S.cfg.sound=!S.cfg.sound;save();renderSettings()};$('setVib').onclick=()=>{S.cfg.vib=!S.cfg.vib;save();renderSettings();vib(150)};
+ $('setVol').oninput=()=>{S.cfg.vol=+$('setVol').value;$('setVolV').textContent=S.cfg.vol+'%'};$('setVol').onchange=()=>{save();beep(660,.4)};
+ $('setTheme').onclick=()=>{const t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('kg2_theme',t)}catch(e){}renderSettings()};
+ $('setPin').onclick=()=>{if(S.cfg.pin){S.cfg.pin=null;save();renderSettings();toast('PIN wyłączony')}else showLock('set')};
+ $('setRestart').onclick=()=>{if(confirm('Zacząć plan 12 tygodni od dziś? Historia zostaje, licznik tygodni i poziom wracają do 1.')){S.start=today();S.level=1;S.lastLevelCheck=null;save();renderAll();renderSettings()}};
+ $('setExport').onclick=()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='kegel-dane-'+today()+'.json';a.click();toast('<svg class="i"><use href="#i-down"/></svg> Plik zapisany w Pobranych')};
+ $('setImport').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);if(!j.days)throw 0;S=Object.assign({},DEF,j);S.cfg=Object.assign({},DEF.cfg,j.cfg||{});save();renderAll();renderSettings();toast('<svg class="i"><use href="#i-up"/></svg> Dane zaimportowane')}catch(x){toast('To nie jest plik z tej aplikacji')}};r.readAsText(f)};
+ $('setWipe').onclick=()=>{if(confirm('Na pewno usunąć wszystkie dane? Tego nie da się cofnąć. Zrób najpierw eksport.')){localStorage.removeItem(KEY);location.reload()}};
+ $('pinPad').innerHTML=['1','2','3','4','5','6','7','8','9','✕','0','⌫'].map(k=>`<button>${k}</button>`).join('');$$('#pinPad button').forEach(b=>b.onclick=()=>pinKey(b.textContent));
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderToday()}});
+}
+
+/* ============ INIT ============ */
+load();bind();renderAll();renderLove();
+if(S.cfg.pin)showLock('unlock');
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+})();
+</script>
+</body>
+</html>
