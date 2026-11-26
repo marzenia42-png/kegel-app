@@ -406,6 +406,7 @@ nav.tabs button.on .e{opacity:1}
     <div class="row sb card"><span>PIN przy otwieraniu</span><button class="pill" id="setPin"></button></div>
     <h3>Plan</h3>
     <div class="card"><p class="muted" style="font-size:13px">Start planu: <b id="setStart"></b></p><button class="btn ghost sm" id="setRestart" style="margin-top:8px">Zacznij plan 12 tyg. od dziś</button></div>
+    <div class="row sb card"><span>Poziom trudności (1–8)</span><span><button class="pill" id="lvlDn">−</button> <b id="lvlV"></b> <button class="pill" id="lvlUp">+</button></span></div>
     <h3>Dane</h3>
     <div class="card"><p class="muted" style="font-size:13px">Dane są tylko w tym telefonie. Przed zmianą telefonu zrób eksport.</p>
       <div class="row" style="margin-top:8px"><button class="btn ghost sm" id="setExport"><svg class="i"><use href="#i-down"/></svg> Eksport</button><label class="btn ghost sm" style="cursor:pointer"><svg class="i"><use href="#i-up"/></svg> Import<input type="file" id="setImport" accept="application/json" hidden></label></div></div>
@@ -450,7 +451,7 @@ function dayTrained(d){const x=S.days[d]||{};return !!(x.am||x.mid||x.pm||x.lega
 function doneInWeekOf(startD){let n=0;for(let i=0;i<7;i++)if(dayDone(addDays(startD,i)))n++;return n}
 function checkLevel(){ // co 2 tyg., jeśli poprzedni tydzień >=5/7
   const w=weekNo();const key='w'+w;if(S.lastLevelCheck===key)return;
-  if(w>1&&(w-1)%2===0){const prevStart=addDays(S.start,(w-2)*7);if(doneInWeekOf(prevStart)>=5&&S.level<6){S.level++;toast('<svg class="i"><use href="#i-trend"/></svg> Poziom '+S.level+' — trening odrobinę mocniej. Tak trzymaj.')}
+  if(w>1){const prevStart=addDays(S.start,(w-2)*7);if(doneInWeekOf(prevStart)>=5&&S.level<8){S.level++;toast('<svg class="i"><use href="#i-trend"/></svg> Poziom '+S.level+' — trening odrobinę mocniej. Tak trzymaj.')}
   else if(doneInWeekOf(prevStart)<5){toast('Poziom zostaje — w zeszłym tygodniu było mniej niż 5 dni. Bez presji, wracamy do rytmu.')}}
   S.lastLevelCheck=key;save();
 }
@@ -459,21 +460,21 @@ function bestStreak(){const ks=Object.keys(S.days).sort();let best=0,cur=0,prev=
 
 /* ============ PROGRAMY ============ */
 const PRG={
- fundament:{icon:'<svg class="i"><use href="#i-shield"/></svg>',name:'Fundament',sub:'Siła + wytrzymałość · codzienna baza',blocks:[['quick',10,2,2],['rest',20],['hold',10,6,6],['rest',30],['hold',10,6,6]]},
- moc:{icon:'<svg class="i"><use href="#i-zap"/></svg>',name:'Moc',sub:'Szybkie skurcze · refleks mięśnia',blocks:[['quick',20,2,2],['rest',25],['quick',20,2,2],['rest',25],['quick',15,2,2]]},
- wytrz:{icon:'<svg class="i"><use href="#i-hourglass"/></svg>',name:'Wytrzymałość',sub:'Długie przytrzymania · włókna wolne',blocks:[['quick',8,2,2],['rest',20],['hold',10,8,8],['rest',30],['hold',8,10,10]]},
- kontrola:{icon:'<svg class="i"><use href="#i-target"/></svg>',name:'Kontrola',sub:'Napnij–puść świadomie · trening „hamulca”',blocks:[['quick',10,2,2],['rest',20],['stop',12,5,10],['rest',20],['reverse',6,5,5]]},
+ fundament:{icon:'<svg class="i"><use href="#i-shield"/></svg>',name:'Fundament',sub:'Siła + wytrzymałość · codzienna baza',blocks:[['quick',12,2,2],['rest',20],['hold',10,8,8],['rest',30],['hold',10,8,8],['rest',30],['quick',12,2,2]]},
+ moc:{icon:'<svg class="i"><use href="#i-zap"/></svg>',name:'Moc',sub:'Szybkie skurcze · refleks mięśnia',blocks:[['quick',25,2,2],['rest',25],['quick',25,2,2],['rest',25],['quick',20,1,2],['rest',20],['hold',6,8,8]]},
+ wytrz:{icon:'<svg class="i"><use href="#i-hourglass"/></svg>',name:'Wytrzymałość',sub:'Długie przytrzymania · włókna wolne',blocks:[['quick',10,2,2],['rest',20],['hold',10,10,10],['rest',30],['hold',8,12,12]]},
+ kontrola:{icon:'<svg class="i"><use href="#i-target"/></svg>',name:'Kontrola',sub:'Napnij–puść świadomie · trening „hamulca”',blocks:[['quick',12,2,2],['rest',20],['stop',15,6,10],['rest',20],['reverse',6,5,5]]},
  reset:{icon:'<svg class="i"><use href="#i-rotate"/></svg>',name:'Reset',sub:'Rozluźnianie · reverse kegel + oddech · wieczór',blocks:[['reverse',8,5,5],['rest',12],['reverse',6,6,6],['rest',12],['breathe',6,4,6]]},
- express:{icon:'<svg class="i"><use href="#i-timer"/></svg>',name:'Express',sub:'2–3 min · w ciągu dnia, w trybie kieszonkowym',blocks:[['quick',10,2,2],['rest',15],['hold',8,5,5]]},
- kompletny:{icon:'<svg class="i"><use href="#i-flame"/></svg>',name:'Kompletny',sub:'Wszystko w jednym · sobota',blocks:[['quick',15,2,2],['rest',25],['hold',10,8,8],['rest',30],['stop',10,5,10],['rest',25],['reverse',6,5,5]]}
+ express:{icon:'<svg class="i"><use href="#i-timer"/></svg>',name:'Express',sub:'2–3 min · w ciągu dnia, w trybie kieszonkowym',blocks:[['quick',12,2,2],['rest',15],['hold',10,6,6]]},
+ kompletny:{icon:'<svg class="i"><use href="#i-flame"/></svg>',name:'Kompletny',sub:'Wszystko w jednym · sobota',blocks:[['quick',15,2,2],['rest',25],['hold',10,10,10],['rest',30],['stop',12,6,10],['rest',25],['quick',15,2,2],['rest',20],['reverse',6,5,5]]}
 };
 const WEEK=['wytrz','fundament','moc','wytrz','kontrola','fundament','kompletny']; // nd..sob
 const PHASE={quick:['Szybko napnij','Puść'],hold:['Napnij i trzymaj','Puść całkiem'],stop:['Napnij — „hamulec”','Puść i oddychaj'],reverse:['Puść w dół, wydłuż','Wróć do neutralnego'],breathe:['Wdech brzuchem','Długi wydech'],rest:['Przerwa','']};
 const CUES={quick:'Krótki, mocny skurcz. Brzuch i pośladki luźne.',hold:'Unieś i trzymaj dno miednicy. Oddychaj spokojnie, nie wstrzymuj powietrza.',stop:'Napnij jak „hamulec”, a potem w pełni puść na długim wydechu. Ten ruch powtórzysz w pauzie stop-start.',reverse:'Delikatnie „puść w dół”, jakbyś zaczynał oddawać mocz — bez parcia. To rozluźnia napięte dno.',breathe:'Wdech nosem do brzucha, długi wydech ustami. Dno miednicy opada przy wdechu.',rest:'Rozluźnij się całkowicie. Kilka spokojnych oddechów.'};
-function lvlMul(){return 1+(S.level-1)*0.12}
+function lvlMul(){return 1+(S.level-1)*0.15}
 function steps(p){const out=[];PRG[p].blocks.forEach(b=>{const [t,a,ten,rel]=b;if(t==='rest'){out.push({t,ph:'rest',d:a});return}
- const mul=(t==='hold'||t==='stop')?lvlMul():1;const reps=t==='hold'?a+Math.floor((S.level-1)/2):a;
- for(let i=0;i<reps;i++){out.push({t,ph:'tense',d:Math.round(ten*mul),i:i+1,n:reps});out.push({t,ph:'relax',d:rel,i:i+1,n:reps})}});return out}
+ const mul=(t==='hold'||t==='stop')?lvlMul():1;const reps=t==='hold'?a+Math.floor((S.level-1)/2):(t==='quick'?a+(S.level-1):a);const tt=Math.min(15,Math.round(ten*mul));const rr=t==='hold'?Math.max(rel,tt):rel;
+ for(let i=0;i<reps;i++){out.push({t,ph:'tense',d:tt,i:i+1,n:reps});out.push({t,ph:'relax',d:rr,i:i+1,n:reps})}});return out}
 function dur(p){return steps(p).reduce((s,x)=>s+x.d,0)}
 
 /* ============ AUDIO / VIB ============ */
@@ -815,7 +816,7 @@ async function pushDone(slot){if(!remCfg().on||!slot||slot==='extra')return;try{
 async function pushTest(){const m=$('remMsg');try{const sub=await getSub();if(!sub||!remCfg().on){m.textContent='Najpierw włącz przypomnienia.';return}const j=await pushApi({action:'test',endpoint:sub.endpoint});m.textContent=j.ok?'Wysłane — powinno przyjść za kilka sekund.':'Nie doszło. Wyłącz i włącz przypomnienia ponownie.'}catch(e){m.textContent='Brak połączenia.'}}
 
 /* ============ SETTINGS ============ */
-function renderSettings(){$$('#setSex button').forEach(b=>b.classList.toggle('on',b.dataset.x===(S.cfg.voiceSex||'k')));$$('#setVoice button').forEach(b=>b.classList.toggle('on',b.dataset.x===S.cfg.voiceMode));$$('#setMusic button').forEach(b=>b.classList.toggle('on',b.dataset.x===S.cfg.music));$('setMvol').value=S.cfg.mvol??40;$('setMvolV').textContent=(S.cfg.mvol??40)+'%';const R=remCfg();$('setPush').textContent=R.on?'Wł.':'Wył.';$('setPush').classList.toggle('on',R.on);$('remAm').value=R.am||'';$('remMid').value=R.mid||'';$('remPm').value=R.pm||'';$('setSound').textContent=S.cfg.sound?'Wł.':'Wył.';$('setSound').classList.toggle('on',S.cfg.sound);$('setVib').textContent=S.cfg.vib?'Wł.':'Wył.';$('setVib').classList.toggle('on',S.cfg.vib);$('setVol').value=S.cfg.vol;$('setVolV').textContent=S.cfg.vol+'%';const th=document.documentElement.dataset.theme;$('setTheme').textContent=th==='dark'?'Ciemny':'Jasny';$('setPin').textContent=S.cfg.pin?'Wł. (wyłącz)':'Wył. (ustaw)';$('setPin').classList.toggle('on',!!S.cfg.pin);$('setStart').textContent=S.start+' · tydzień '+weekNo()}
+function renderSettings(){$$('#setSex button').forEach(b=>b.classList.toggle('on',b.dataset.x===(S.cfg.voiceSex||'k')));$$('#setVoice button').forEach(b=>b.classList.toggle('on',b.dataset.x===S.cfg.voiceMode));$$('#setMusic button').forEach(b=>b.classList.toggle('on',b.dataset.x===S.cfg.music));$('setMvol').value=S.cfg.mvol??40;$('setMvolV').textContent=(S.cfg.mvol??40)+'%';const R=remCfg();$('setPush').textContent=R.on?'Wł.':'Wył.';$('setPush').classList.toggle('on',R.on);$('remAm').value=R.am||'';$('remMid').value=R.mid||'';$('remPm').value=R.pm||'';$('setSound').textContent=S.cfg.sound?'Wł.':'Wył.';$('setSound').classList.toggle('on',S.cfg.sound);$('setVib').textContent=S.cfg.vib?'Wł.':'Wył.';$('setVib').classList.toggle('on',S.cfg.vib);$('setVol').value=S.cfg.vol;$('setVolV').textContent=S.cfg.vol+'%';const th=document.documentElement.dataset.theme;$('setTheme').textContent=th==='dark'?'Ciemny':'Jasny';$('setPin').textContent=S.cfg.pin?'Wł. (wyłącz)':'Wył. (ustaw)';$('setPin').classList.toggle('on',!!S.cfg.pin);$('setStart').textContent=S.start+' · tydzień '+weekNo();$('lvlV').textContent=S.level}
 
 /* ============ EVENTS ============ */
 function bind(){
@@ -854,6 +855,7 @@ function bind(){
  $$('#setMusic button').forEach(b=>b.onclick=()=>{S.cfg.music=b.dataset.x;save();renderSettings();if(MU){musicStop();setTimeout(musicStart,1800)}});
  $('setMvol').oninput=()=>{S.cfg.mvol=+$('setMvol').value;$('setMvolV').textContent=S.cfg.mvol+'%';if(MU){MU.base=S.cfg.mvol/100*.5;MU.master.gain.setTargetAtTime(MU.base,actx.currentTime,.1)}};$('setMvol').onchange=save;
  $('setPreview').onclick=()=>{if(MU){musicStop();return}musicStart();setTimeout(()=>cue('tense','hold'),2500);setTimeout(()=>cue('relax','hold'),6000);setTimeout(musicStop,10000)};
+ $('lvlUp').onclick=()=>{if(S.level<8){S.level++;save();renderAll();renderSettings()}};$('lvlDn').onclick=()=>{if(S.level>1){S.level--;save();renderAll();renderSettings()}};
  $('setSound').onclick=()=>{S.cfg.sound=!S.cfg.sound;save();renderSettings()};$('setVib').onclick=()=>{S.cfg.vib=!S.cfg.vib;save();renderSettings();vib(150)};
  $('setVol').oninput=()=>{S.cfg.vol=+$('setVol').value;$('setVolV').textContent=S.cfg.vol+'%'};$('setVol').onchange=()=>{save();cue('tense')};
  $('setTheme').onclick=()=>{const t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('kg2_theme',t)}catch(e){}renderSettings()};
